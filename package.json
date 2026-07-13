@@ -1,0 +1,35 @@
+{
+  "name": "hackos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HackOS — Complete Hackathon Management Platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "npm run dev -w @hackos/web",
+    "dev:api": "npm run dev -w @hackos/api",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "db:generate": "npm run prisma:generate -w @hackos/api",
+    "db:migrate": "npm run prisma:migrate -w @hackos/api",
+    "db:seed": "npm run prisma:seed -w @hackos/api",
+    "db:studio": "npm run prisma:studio -w @hackos/api",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.11.0"
+}
