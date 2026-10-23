@@ -21,6 +21,10 @@ export class RedisService implements OnModuleDestroy {
         maxRetriesPerRequest: 1,
         lazyConnect: true,
         enableOfflineQueue: false,
+        retryStrategy: () => null, // Do not spam reconnects if offline
+      });
+      this.client.on('error', (err) => {
+        this.logger.debug(`Redis offline: ${err.message}`);
       });
     } catch {
       this.client = null;

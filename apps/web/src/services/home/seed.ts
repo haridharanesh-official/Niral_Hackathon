@@ -12,39 +12,39 @@ import type {
 } from "@/types/home";
 
 export const homeEventSeed: HomeEvent = {
-  id: "hackos-2026",
-  name: "HackOS",
+  id: "niral-2026",
+  name: "NIRAL Hackathon 2026",
   logo: "/brand/hackos.svg",
   description:
-    "The HackOS IoT Innovation Hackathon is a research-driven platform for students, innovators, engineers, researchers, startups, and industry professionals.",
+    "NIRAL Hackathon 2026 is an innovation-driven IoT and emerging technologies platform for students, researchers, makers, and innovators.",
   tagline: "The Future of Innovation Starts Here",
-  venue: "Hybrid — Campus Innovation Hall + Online",
-  startsAt: "2026-08-15T09:00:00.000Z",
-  endsAt: "2026-08-17T18:00:00.000Z",
-  registrationDeadline: "2026-08-01T18:30:00.000Z",
-  capacity: 1000,
-  filled: 720,
-  registrationStatus: "open",
-  prizePool: 500000,
+  venue: "To be announced (Hybrid — Campus + Online)",
+  startsAt: "2026-12-03T00:00:00.000Z",
+  endsAt: "2026-12-04T23:59:59.000Z",
+  registrationDeadline: "TBA",
+  capacity: 0,
+  filled: 0,
+  registrationStatus: "closed",
+  prizePool: 0,
 };
 
 export const homeStatisticsSeed: HomeStatistics = {
-  participants: 2500,
-  teams: 600,
-  mentors: 42,
-  judges: 18,
-  sponsors: 15,
-  countries: 5,
-  prizePool: 500000,
-  visitors: 4820,
-  currentlyOnline: 312,
-  liveTeams: 148,
-  projectsStarted: 96,
-  mentorSessions: 41,
-  questionsAnswered: 287,
-  componentsIssued: 620,
-  announcementsToday: 7,
-  activeVolunteers: 28,
+  participants: 0,
+  teams: 0,
+  mentors: 0,
+  judges: 0,
+  sponsors: 0,
+  countries: 0,
+  prizePool: 0,
+  visitors: 0,
+  currentlyOnline: 0,
+  liveTeams: 0,
+  projectsStarted: 0,
+  mentorSessions: 0,
+  questionsAnswered: 0,
+  componentsIssued: 0,
+  announcementsToday: 0,
+  activeVolunteers: 0,
 };
 
 export const homeLeaderboardSeed: LeaderboardEntry[] = [
@@ -296,95 +296,9 @@ export const homeFaqSeed: FaqItem[] = [
   },
 ];
 
-export const homeSponsorsSeed: SponsorItem[] = [
-  {
-    id: "s1",
-    name: "NVIDIA Jetson",
-    category: "Platinum",
-    website: "https://developer.nvidia.com/embedded-computing",
-    description: "Edge AI compute for vision and robotics tracks.",
-    careers: "Internships in embedded AI",
-    challenges: "Edge Vision Challenge",
-  },
-  {
-    id: "s2",
-    name: "Arduino",
-    category: "Platinum",
-    website: "https://www.arduino.cc/",
-    description: "Prototyping hardware and education kits.",
-    careers: "Maker educator roles",
-    challenges: "Rapid Prototype Award",
-  },
-  {
-    id: "s3",
-    name: "Espressif",
-    category: "Gold",
-    website: "https://www.espressif.com/",
-    description: "ESP32 platforms for connected devices.",
-    careers: "Firmware engineering",
-    challenges: "Connectivity Challenge",
-  },
-  {
-    id: "s4",
-    name: "GitHub",
-    category: "Silver",
-    website: "https://github.com/",
-    description: "Repos, CI, and collaboration for every team.",
-    careers: "Student developer pack",
-    challenges: "Open Source Excellence",
-  },
-  {
-    id: "s5",
-    name: "Edge Impulse",
-    category: "Technology",
-    website: "https://www.edgeimpulse.com/",
-    description: "TinyML tooling for on-device intelligence.",
-    careers: "ML engineer pathways",
-    challenges: "TinyML Spotlight",
-  },
-  {
-    id: "s6",
-    name: "IoT Lab Community",
-    category: "Community",
-    website: "#contact",
-    description: "Campus makers supporting hardware desks.",
-    careers: "Volunteer leadership",
-    challenges: "Community Impact Badge",
-  },
-];
+export const homeSponsorsSeed: SponsorItem[] = [];
 
-export const homeTestimonialsSeed: TestimonialItem[] = [
-  {
-    id: "t1",
-    name: "Ananya Rao",
-    role: "Team Lead",
-    college: "NIT Innovation Campus",
-    quote:
-      "The mentorship completely changed how we approached product development.",
-    rating: 5,
-    initials: "AR",
-  },
-  {
-    id: "t2",
-    name: "Dev Patel",
-    role: "Participant",
-    college: "State Tech University",
-    quote:
-      "Live leaderboard pressure made us ship a working mesh before finals.",
-    rating: 5,
-    initials: "DP",
-  },
-  {
-    id: "t3",
-    name: "Priya Nair",
-    role: "Sponsor Liaison",
-    college: "Industry Partner",
-    quote:
-      "Judging scorecards were transparent — sponsors got audience data that mattered.",
-    rating: 5,
-    initials: "PN",
-  },
-];
+export const homeTestimonialsSeed: TestimonialItem[] = [];
 
 export function toRegistrationProgress(event: HomeEvent): RegistrationProgress {
   const percent = Math.min(

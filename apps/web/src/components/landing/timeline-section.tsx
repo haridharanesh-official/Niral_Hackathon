@@ -3,195 +3,98 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type Milestone = {
-  title: string;
-  date: string;
-  time: string;
-  venue: string;
-  description: string;
-  ics: {
-    uid: string;
-    start: string;
-    end: string;
-  };
-};
-
-const milestones: Milestone[] = [
-  {
-    title: "Registration Opens",
-    date: "Jul 20, 2026",
-    time: "09:00 IST",
-    venue: "Online · HackOS Portal",
-    description: "Accounts, track selection, and team invites go live.",
-    ics: {
-      uid: "reg-open@hackos",
-      start: "20260720T033000Z",
-      end: "20260720T043000Z",
-    },
-  },
-  {
-    title: "Workshops",
-    date: "Aug 8–10, 2026",
-    time: "10:00–17:00 IST",
-    venue: "IoT Lab + Hybrid Stream",
-    description: "Hardware, MQTT, edge AI, and pitch clinics.",
-    ics: {
-      uid: "workshops@hackos",
-      start: "20260808T043000Z",
-      end: "20260808T113000Z",
-    },
-  },
-  {
-    title: "Team Formation",
-    date: "Aug 12, 2026",
-    time: "18:00 IST",
-    venue: "Matching Lobby",
-    description: "Finalize 2–4 member teams and mentor preferences.",
-    ics: {
-      uid: "teams@hackos",
-      start: "20260812T123000Z",
-      end: "20260812T143000Z",
-    },
-  },
-  {
-    title: "Hackathon Begins",
-    date: "Aug 15, 2026",
-    time: "09:00 IST",
-    venue: "Campus Innovation Hall",
-    description: "Problem drop, kit desks open, leaderboard resets.",
-    ics: {
-      uid: "kickoff@hackos",
-      start: "20260815T033000Z",
-      end: "20260815T053000Z",
-    },
-  },
-  {
-    title: "Mentor Reviews",
-    date: "Aug 16, 2026",
-    time: "11:00–20:00 IST",
-    venue: "Mentor Desks A–D",
-    description: "Checkpoint demos and architecture reviews.",
-    ics: {
-      uid: "mentors@hackos",
-      start: "20260816T053000Z",
-      end: "20260816T143000Z",
-    },
-  },
-  {
-    title: "Prototype Submission",
-    date: "Aug 17, 2026",
-    time: "10:00 IST",
-    venue: "Submission Portal",
-    description: "Repo, video, and architecture lock for judging.",
-    ics: {
-      uid: "submit@hackos",
-      start: "20260817T043000Z",
-      end: "20260817T053000Z",
-    },
-  },
-  {
-    title: "Final Presentation",
-    date: "Aug 17, 2026",
-    time: "14:00 IST",
-    venue: "Main Arena",
-    description: "Live demos with transparent scorecards.",
-    ics: {
-      uid: "finals@hackos",
-      start: "20260817T083000Z",
-      end: "20260817T113000Z",
-    },
-  },
-  {
-    title: "Awards Ceremony",
-    date: "Aug 17, 2026",
-    time: "18:00 IST",
-    venue: "Main Arena Stage",
-    description: "Track winners, sponsor awards, and closing notes.",
-    ics: {
-      uid: "awards@hackos",
-      start: "20260817T123000Z",
-      end: "20260817T143000Z",
-    },
-  },
-];
-
-function downloadIcs(item: Milestone) {
-  const body = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//HackOS//Timeline//EN",
-    "BEGIN:VEVENT",
-    `UID:${item.ics.uid}`,
-    `DTSTAMP:${item.ics.start}`,
-    `DTSTART:${item.ics.start}`,
-    `DTEND:${item.ics.end}`,
-    `SUMMARY:HackOS — ${item.title}`,
-    `DESCRIPTION:${item.description.replace(/,/g, "\\,")}`,
-    `LOCATION:${item.venue.replace(/,/g, "\\,")}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-
-  const blob = new Blob([body], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `hackos-${item.title.toLowerCase().replace(/\s+/g, "-")}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+import { useAppContent } from "@/store/content-context";
 
 export function TimelineSection() {
   const reduceMotion = useReducedMotion();
+  const { content } = useAppContent();
+  const milestones = content?.timeline || [];
+
+  const downloadIcs = (item: (typeof milestones)[number]) => {
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//NIRAL 2026//Hackathon Portal//EN",
+      "BEGIN:VEVENT",
+      `SUMMARY:${item.title}`,
+      `DESCRIPTION:${item.description}`,
+      `LOCATION:${item.venue}`,
+      "DTSTART;VALUE=DATE:20261203",
+      "DTEND;VALUE=DATE:20261205",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${item.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <section id="timeline" className="scroll-mt-24 py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <h2 className="font-display text-3xl font-bold text-white">
-          Innovation Timeline
-        </h2>
-        <p className="mt-3 max-w-xl text-muted">
-          From registration to awards — your event journey with calendar reminders.
-        </p>
+    <section id="timeline" className="scroll-mt-24 py-16">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              December 3–4, 2026 · Asia/Kolkata
+            </span>
+            <h2 className="mt-1 font-sans text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
+              Event Timeline & Milestones
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
+              Official hackathon dates are confirmed for December 3–4, 2026. The detailed checkpoint and mentorship schedule is currently being finalized.
+            </p>
+          </div>
+          <div className="rounded-xl border border-sky-400/20 bg-sky-500/10 px-3.5 py-2 text-xs text-sky-200">
+            Detailed session timings to be announced
+          </div>
+        </div>
 
-        <ol className="relative mt-10 space-y-6 border-l border-sky-400/20 pl-8">
+        <div className="relative mt-10 pl-6 before:absolute before:bottom-0 before:left-[11px] before:top-2 before:w-[2px] before:bg-[var(--card-border)]">
           {milestones.map((item, index) => (
-            <motion.li
-              key={item.title}
-              initial={reduceMotion ? false : { opacity: 0, x: -10 }}
+            <motion.div
+              key={`${item.title}-${index}`}
+              initial={reduceMotion ? false : { opacity: 0, x: -14 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.04 }}
-              className="relative"
+              transition={{ delay: index * 0.05 }}
+              className="relative mb-8 last:mb-0"
             >
-              <span className="absolute -left-[2.4rem] top-1.5 h-3 w-3 rounded-full bg-sky-400 shadow-[0_0_16px_rgba(56,189,248,0.8)]" />
-              <div className="flex flex-col gap-3 rounded-3xl border border-white/8 bg-white/[0.03] p-5 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-violet-200">
-                    {item.date} · {item.time}
-                  </p>
-                  <h3 className="mt-1 font-display text-lg font-semibold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted">{item.description}</p>
-                  <p className="mt-2 font-mono text-[11px] text-sky-300/90">
-                    Venue · {item.venue}
-                  </p>
+              <div
+                className="absolute -left-[31px] top-2 h-3.5 w-3.5 rounded-full border-2 border-[var(--primary)] bg-white dark:bg-[#181513]"
+                aria-hidden
+              />
+              <div className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-sm transition hover:border-stone-400">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-sans text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+                      {item.date} · {item.time}
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">· {item.venue}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => downloadIcs(item)}
+                    className="h-7 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+                  >
+                    <CalendarPlus className="mr-1 h-3.5 w-3.5" /> .ics
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  onClick={() => downloadIcs(item)}
-                >
-                  <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
-                  Add reminder
-                </Button>
+                <h3 className="mt-2 font-sans text-lg font-bold text-[var(--foreground)]">
+                  {item.title}
+                </h3>
+                <p className="mt-1 text-sm text-[var(--muted)] leading-relaxed">
+                  {item.description}
+                </p>
               </div>
-            </motion.li>
+            </motion.div>
           ))}
-        </ol>
+        </div>
       </div>
     </section>
   );

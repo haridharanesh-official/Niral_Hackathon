@@ -137,7 +137,7 @@ export function MiniGamesSection() {
                   <div className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm">
                     <p className="text-sky-200">Difficulty · {game.difficulty}</p>
                     <p className="font-mono text-emerald-300">Reward · {game.reward}</p>
-                    <Link href={game.href} className="inline-flex" onClick={(e) => e.stopPropagation()}>
+                    <Link href={game.href} className="inline-flex" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                       <Button size="sm" className="cta-primary mt-1">
                         Play preview
                       </Button>

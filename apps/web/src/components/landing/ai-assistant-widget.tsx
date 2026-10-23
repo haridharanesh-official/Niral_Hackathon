@@ -53,7 +53,7 @@ export function AiAssistantWidget() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
-      text: "Hi — I’m the HackOS assistant. Ask about rules, schedule, hardware, or themes.",
+      text: "Hi — I’m the Niral Hackathon assistant. Ask about rules, schedule, hardware, or themes.",
     },
   ]);
 
@@ -142,7 +142,7 @@ export function AiAssistantWidget() {
             </button>
             <input
               className="field-input !rounded-xl !py-2 text-sm"
-              placeholder="Ask HackOS…"
+              placeholder="Ask Niral Hackathon…"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />

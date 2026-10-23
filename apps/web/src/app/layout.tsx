@@ -10,7 +10,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hackos.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://niralhackathon.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     template: `%s · ${APP_NAME}`,
   },
   description:
-    "Join HackOS — a student IoT hackathon and AI + IoT innovation challenge with live rankings, embedded systems tracks, mentors, and workshops.",
+    "Join Niral Hackathon — a student IoT hackathon and AI + IoT innovation challenge with live rankings, embedded systems tracks, mentors, and workshops.",
   keywords: [
     "IoT Hackathon",
     "Innovation Challenge",
     "Student Hackathon",
     "Embedded Systems Competition",
     "AI + IoT Event",
-    "HackOS",
+    "Niral Hackathon",
   ],
   alternates: {
     canonical: "/",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     title: `${APP_NAME} — ${APP_TAGLINE}`,
     description:
-      "Register for HackOS: IoT, AI, robotics, and embedded systems hackathon with live leaderboards and mentors.",
+      "Register for Niral Hackathon: IoT, AI, robotics, and embedded systems hackathon with live leaderboards and mentors.",
     siteName: APP_NAME,
   },
   twitter: {
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
 const eventJsonLd = {
   "@context": "https://schema.org",
   "@type": "Event",
-  name: "HackOS IoT Innovation Hackathon",
+  name: "Niral Hackathon — IoT Innovation Challenge",
   description:
     "Research-driven IoT + AI hackathon for students, innovators, and industry professionals.",
   startDate: "2026-08-15T09:00:00+05:30",
@@ -79,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased" data-theme="dark">
+    <html lang="en" className="h-full antialiased" data-theme="light">
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <script
           type="application/ld+json"

@@ -9,18 +9,19 @@ export interface ButtonProps
 
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
-    "cta-primary bg-gradient-to-r from-sky-500 to-violet-500 text-white shadow-[0_0_28px_rgba(56,189,248,0.35)]",
+    "cta-primary bg-[var(--primary)] text-white hover:bg-[var(--primary-strong)] shadow-[0_2px_10px_rgba(140,59,35,0.22)] border border-transparent",
   secondary:
-    "glass text-foreground hover:border-sky-400/40 hover:bg-sky-500/10",
-  ghost: "bg-transparent text-muted hover:text-foreground hover:bg-white/5",
+    "border border-[var(--card-border)] bg-white dark:bg-[#231F1C] text-[var(--foreground)] hover:border-stone-400 hover:bg-[#FAF8F5] dark:hover:bg-[#2B2622] shadow-sm",
+  ghost:
+    "bg-transparent text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-black/5 dark:hover:bg-white/5",
   outline:
-    "border border-sky-400/30 bg-transparent text-sky-300 hover:bg-sky-500/10",
+    "border border-[var(--card-border)] bg-transparent text-[var(--foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]",
 };
 
 const sizes: Record<NonNullable<ButtonProps["size"]>, string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-5 text-sm",
-  lg: "h-12 px-6 text-base",
+  sm: "h-9 px-3.5 text-xs rounded-full",
+  md: "h-10 px-5 text-sm rounded-full",
+  lg: "h-12 px-7 text-base rounded-full",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -39,7 +40,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center gap-2 rounded-full font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
           variants[variant],
           sizes[size],
           className,

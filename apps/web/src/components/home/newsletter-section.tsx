@@ -35,8 +35,8 @@ export function ContactNewsletterSection() {
           <div className="mt-6 space-y-3 text-sm">
             <p>
               <span className="text-muted">Email · </span>
-              <a className="text-sky-300 hover:underline" href="mailto:hello@hackos.app">
-                hello@hackos.app
+              <a className="text-sky-300 hover:underline" href="mailto:hello@niralhackathon.com">
+                hello@niralhackathon.com
               </a>
             </p>
             <p>
@@ -134,7 +134,7 @@ export function ContactNewsletterSection() {
                 onChange={(e) => setConsent(e.target.checked)}
                 disabled={pending}
               />
-              I consent to receive HackOS updates and understand I can unsubscribe anytime.
+              I consent to receive Niral Hackathon updates and understand I can unsubscribe anytime.
             </label>
             <Button
               type="submit"

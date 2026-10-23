@@ -22,6 +22,22 @@ enum UserRole {
   ADMIN
 }
 
+enum EventStatus {
+  DRAFT
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  UPCOMING
+  LIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum EventMode {
+  OFFLINE
+  ONLINE
+  HYBRID
+}
+
 enum TeamStatus {
   FORMING
   ACTIVE
@@ -31,9 +47,61 @@ enum TeamStatus {
 
 enum SubmissionStatus {
   DRAFT
+  IN_PROGRESS
+  VALIDATION
+  READY_FOR_SUBMISSION
   SUBMITTED
+  LOCKED
   UNDER_REVIEW
+  REVIEWED
+  RESULTS_PUBLISHED
   SCORED
+}
+
+enum DeliverableCategory {
+  DOCUMENTS
+  SOURCE_CODE
+  IMAGES
+  VIDEOS
+  HARDWARE
+  RESEARCH
+  PRESENTATION
+  DEPLOYMENT
+}
+
+enum FileValidationStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
+enum ComplianceDeclaration {
+  ORIGINAL_WORK
+  EVENT_RULES
+  REQUIRED_DOCUMENTS
+  TEAM_VERIFIED
+  IP_DECLARATION
+  DEMO_VIDEO
+}
+
+enum EvaluationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum JudgeAssignmentStatus {
+  WAITING
+  IN_PROGRESS
+  REVIEWED
+  DEFERRED
+}
+
+enum JudgeBookmarkLabel {
+  OUTSTANDING_INNOVATION
+  REQUIRES_FOLLOW_UP
+  POTENTIAL_AWARD
+  NEEDS_CLARIFICATION
 }
 
 enum QuizDifficulty {
@@ -53,6 +121,48 @@ enum QuizCategory {
   CYBERSECURITY
 }
 
+enum EnrollmentStatus {
+  PENDING
+  CONFIRMED
+  WITHDRAWN
+}
+
+enum ParticipationMode {
+  ONLINE
+  ONSITE
+  HYBRID
+}
+
+enum TeamVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum RecruitmentStatus {
+  OPEN
+  CLOSED
+}
+
+enum JoinRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  ARCHIVED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -61,27 +171,127 @@ model User {
   name          String
   image         String?
   role          UserRole  @default(PARTICIPANT)
+  accountStatus AccountStatus @default(PENDING)
+  lastLoginAt   DateTime?
   bio           String?
   college       String?
   department    String?
+  profile       Json?
+  profileCompletedAt DateTime?
+  notificationPrefs Json?
   xp            Int       @default(0)
   twoFactorEnabled Boolean @default(false)
   twoFactorSecret  String?
+  twoFactorBackupCodes String? @db.Text
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
+  profileRecord UserProfile?
   teamMemberships TeamMember[]
   ledTeams      Team[]    @relation("TeamLeader")
   notifications Notification[]
   quizAttempts  QuizAttempt[]
   achievements  UserAchievement[]
   auditLogs     AuditLog[]
+  enrollments   EventEnrollment[]
+  joinRequests  TeamJoinRequest[]
+  sentInvitations TeamInvitation[] @relation("InvitationSender")
+  assignedTasks ProjectTask[] @relation("TaskAssignee")
+  reportedTasks ProjectTask[] @relation("TaskReporter")
+  reviewedTasks ProjectTask[] @relation("TaskReviewer")
+  taskComments  TaskComment[]
+  taskHistory   TaskHistory[]
+  ledSprints    Sprint[] @relation("SprintLead")
+  ownedRisks    ProjectRisk[] @relation("RiskOwner")
+  reportedIssues ProjectIssue[] @relation("IssueReporter")
+  assignedIssues ProjectIssue[] @relation("IssueAssignee")
+  sprintReviews SprintReview[]
+  sprintRetrospectives SprintRetrospective[]
+  createdWhiteboards Whiteboard[] @relation("WhiteboardCreator")
+  createdDocuments TeamDocument[] @relation("DocumentCreator")
+  timelineEvents TimelineEvent[]
+  uploadedSubmissionFiles SubmissionFile[] @relation("SubmissionFileUploader")
+  submissionVersions SubmissionVersion[] @relation("SubmissionVersionAuthor")
+  submissionCompliance SubmissionCompliance[] @relation("ComplianceAcceptor")
+  judgeAssignments     JudgeAssignment[]    @relation("JudgeAssignments")
+  judgeScores          JudgeScore[]         @relation("JudgeEvaluations")
+  judgeNotes           JudgeNote[]          @relation("JudgeNotes")
 
   @@index([role])
   @@index([xp])
+  @@index([accountStatus])
   @@map("users")
+}
+
+model UserProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  firstName       String?
+  lastName        String?
+  displayName     String?
+  profilePhoto    String?
+  bio             String?  @db.Text
+  phoneNumber     String?
+  country         String?
+  state           String?
+  city            String?
+  institution     String?
+  department      String?
+  degree          String?
+  yearOfStudy     String?
+  company         String?
+  designation     String?
+  githubUrl       String?
+  linkedinUrl     String?
+  portfolioUrl    String?
+  preferredLanguage String?
+  timezone        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  description String
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RoleDefinition {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  description String
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions RolePermission[]
+
+  @@map("role_definitions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       RoleDefinition @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission     @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
 }
 
 model Account {
@@ -97,6 +307,8 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+  linkedAt          DateTime @default(now())
+  lastLoginAt       DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -105,12 +317,23 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(cuid())
+  sessionToken        String    @unique
+  userId              String
+  expires             DateTime
+  deviceName          String?
+  browser             String?
+  operatingSystem     String?
+  ipAddress           String?
+  approximateLocation String?
+  loginAt             DateTime  @default(now())
+  lastActivityAt      DateTime  @default(now())
+  revokedAt           DateTime?
+  userAgent           String?
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
   @@map("sessions")
 }
 
@@ -124,54 +347,505 @@ model VerificationToken {
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  startsAt    DateTime
-  endsAt      DateTime
-  location    String?
-  isActive    Boolean  @default(true)
-  settings    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                    String      @id @default(cuid())
+  name                  String
+  slug                  String      @unique
+  description           String?     @db.Text
+  publicDescription     String?     @db.Text
+  tagline               String?
+  organizerName         String?
+  officialEmail         String?
+  contactPhone          String?
+  websiteUrl            String?
+  timezone              String      @default("Asia/Kolkata")
+  startsAt              DateTime
+  endsAt                DateTime
+  hasExactTimes         Boolean     @default(false)
+  location              String?
+  venueName             String?
+  venueAddress          String?     @db.Text
+  eventMode             EventMode   @default(HYBRID)
+  registrationStartsAt  DateTime?
+  registrationEndsAt    DateTime?
+  registrationEnabled   Boolean     @default(false)
+  maxCapacity           Int?
+  minTeamSize           Int         @default(2)
+  maxTeamSize           Int         @default(4)
+  prizePool             Float?
+  status                EventStatus @default(DRAFT)
+  isPublished           Boolean     @default(false)
+  isActive              Boolean     @default(true)
+  logoUrl               String?
+  bannerUrl             String?
+  settings              Json?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
-  teams       Team[]
-  quizzes     Quiz[]
-  announcements Announcement[]
+  teams                 Team[]
+  quizzes               Quiz[]
+  announcements         Announcement[]
+  enrollments           EventEnrollment[]
+  judgeAssignments      JudgeAssignment[]
 
   @@map("events")
 }
 
-model Team {
-  id          String     @id @default(cuid())
-  name        String
-  slug        String     @unique
-  description String?
-  status      TeamStatus @default(FORMING)
-  inviteCode  String     @unique @default(cuid())
-  eventId     String?
-  leaderId    String?
-  mentorId    String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+model EventEnrollment {
+  id                   String            @id @default(cuid())
+  userId               String
+  eventId              String
+  registrationId       String            @unique
+  mode                 ParticipationMode @default(ONSITE)
+  eligibilityConfirmed Boolean           @default(false)
+  rulesAccepted        Boolean           @default(false)
+  status               EnrollmentStatus  @default(CONFIRMED)
+  confirmationStatus   String            @default("CONFIRMED")
+  registrationSource   String            @default("WEB")
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
-  event       Event?     @relation(fields: [eventId], references: [id])
-  leader      User?      @relation("TeamLeader", fields: [leaderId], references: [id])
-  members     TeamMember[]
-  submission  Submission?
-  sharedNotes SharedNote[]
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@map("event_enrollments")
+}
+
+model Team {
+  id                String            @id @default(cuid())
+  name              String
+  slug              String            @unique
+  description       String?
+  theme             String?
+  logoUrl           String?
+  visibility        TeamVisibility    @default(PUBLIC)
+  recruitmentStatus RecruitmentStatus @default(OPEN)
+  status            TeamStatus        @default(FORMING)
+  inviteCode        String            @unique @default(cuid())
+  maxMembers        Int               @default(4)
+  eventId           String?
+  leaderId          String?
+  mentorId          String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  event        Event?            @relation(fields: [eventId], references: [id])
+  leader       User?             @relation("TeamLeader", fields: [leaderId], references: [id])
+  members      TeamMember[]
+  submission   Submission?
+  sharedNotes  SharedNote[]
+  joinRequests TeamJoinRequest[]
+  invitations  TeamInvitation[]
+  projectTasks ProjectTask[]
+  sprints      Sprint[]
+  milestones   ProjectMilestone[]
+  deliverables Deliverable[]
+  risks        ProjectRisk[]
+  issues       ProjectIssue[]
+  whiteboards  Whiteboard[]
+  documents    TeamDocument[]
+  timelineEvents TimelineEvent[]
 
   @@index([status])
+  @@index([visibility, recruitmentStatus])
   @@map("teams")
 }
 
+enum TaskPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TaskType {
+  FEATURE
+  BUG
+  IMPROVEMENT
+  DOCUMENTATION
+  HARDWARE
+  RESEARCH
+  TESTING
+  MEETING
+}
+
+enum KanbanStatus {
+  BACKLOG
+  READY
+  IN_PROGRESS
+  CODE_REVIEW
+  TESTING
+  DOCUMENTATION
+  READY_FOR_SUBMISSION
+  COMPLETED
+}
+
+model ProjectTask {
+  id                 String       @id @default(cuid())
+  teamId             String
+  taskNumber         Int
+  title              String
+  description        String?      @db.Text
+  status             KanbanStatus @default(BACKLOG)
+  type               TaskType     @default(FEATURE)
+  priority           TaskPriority @default(MEDIUM)
+  assigneeId         String?
+  reporterId         String?
+  reviewerId         String?
+  sprintId           String?
+  milestoneId        String?
+  sprint             String?
+  milestone          String?
+  labels             String[]     @default([])
+  category           String?
+  progress           Int          @default(0)
+  isBlocked          Boolean      @default(false)
+  storyPoints        Int?
+  acceptanceCriteria String?      @db.Text
+  startDate          DateTime?
+  dueDate            DateTime?
+  estimatedEffort    String?
+  actualEffort       String?
+  position           Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  team        Team                @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sprintRef   Sprint?             @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  milestoneRef ProjectMilestone?  @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  assignee    User?               @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  reporter    User?               @relation("TaskReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  reviewer    User?               @relation("TaskReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  checklist   TaskChecklistItem[]
+  comments    TaskComment[]
+  attachments TaskAttachment[]
+  history     TaskHistory[]
+  dependsOn   TaskDependency[]    @relation("TaskDependsOn")
+  blockedBy   TaskDependency[]    @relation("TaskBlocks")
+  linkedIssues ProjectIssue[]
+
+  @@unique([teamId, taskNumber])
+  @@index([teamId, status])
+  @@index([teamId, priority])
+  @@index([teamId, sprintId])
+  @@index([teamId, milestoneId])
+  @@map("project_tasks")
+}
+
+model TaskChecklistItem {
+  id        String   @id @default(cuid())
+  taskId    String
+  title     String
+  completed Boolean  @default(false)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_checklist_items")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  body      String   @db.Text
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_comments")
+}
+
+model TaskAttachment {
+  id         String   @id @default(cuid())
+  taskId     String
+  fileName   String
+  fileUrl    String?
+  mimeType   String?
+  sizeBytes  Int?
+  version    Int      @default(1)
+  uploaderId String?
+  createdAt  DateTime @default(now())
+
+  task ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_attachments")
+}
+
+model TaskHistory {
+  id        String   @id @default(cuid())
+  taskId    String
+  actorId   String?
+  action    String
+  detail    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  task  ProjectTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([taskId, createdAt])
+  @@map("task_history")
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum DeliverableReviewStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATED
+  CLOSED
+}
+
+enum IssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model Sprint {
+  id                  String       @id @default(cuid())
+  teamId              String
+  name                String
+  description         String?      @db.Text
+  goal                String?      @db.Text
+  startDate           DateTime
+  endDate             DateTime
+  sprintLeadId        String?
+  capacityHours       Int?
+  memberIds           String[]     @default([])
+  plannedDeliverables String[]     @default([])
+  status              SprintStatus @default(PLANNED)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  team           Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sprintLead     User?                 @relation("SprintLead", fields: [sprintLeadId], references: [id], onDelete: SetNull)
+  tasks          ProjectTask[]
+  reviews        SprintReview[]
+  retrospectives SprintRetrospective[]
+
+  @@index([teamId, status])
+  @@map("sprints")
+}
+
+model ProjectMilestone {
+  id           String          @id @default(cuid())
+  teamId       String
+  title        String
+  description  String?         @db.Text
+  dueDate      DateTime?
+  progress     Int             @default(0)
+  status       MilestoneStatus @default(PENDING)
+  position     Int             @default(0)
+  ownerIds     String[]        @default([])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  team         Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  tasks        ProjectTask[]
+  deliverables Deliverable[]
+  linkedIssues ProjectIssue[]
+
+  @@index([teamId, position])
+  @@map("project_milestones")
+}
+
+model Deliverable {
+  id           String                  @id @default(cuid())
+  teamId       String
+  milestoneId  String?
+  title        String
+  format       String?
+  deadline     DateTime?
+  reviewStatus DeliverableReviewStatus @default(PENDING)
+  version      Int                     @default(1)
+  fileUrl      String?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  team      Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  milestone ProjectMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  @@index([teamId])
+  @@map("deliverables")
+}
+
+model TaskDependency {
+  id              String   @id @default(cuid())
+  taskId          String
+  dependsOnTaskId String
+  createdAt       DateTime @default(now())
+
+  task          ProjectTask @relation("TaskDependsOn", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask ProjectTask @relation("TaskBlocks", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+  @@map("task_dependencies")
+}
+
+model ProjectRisk {
+  id          String     @id @default(cuid())
+  teamId      String
+  title       String
+  description String?    @db.Text
+  category    String?
+  probability RiskLevel  @default(MEDIUM)
+  impact      RiskLevel  @default(MEDIUM)
+  ownerId     String?
+  mitigation  String?    @db.Text
+  status      RiskStatus @default(OPEN)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  owner User? @relation("RiskOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@map("project_risks")
+}
+
+model ProjectIssue {
+  id                String        @id @default(cuid())
+  teamId            String
+  title             String
+  description       String?       @db.Text
+  severity          IssueSeverity @default(MEDIUM)
+  status            IssueStatus   @default(OPEN)
+  reporterId        String?
+  assigneeId        String?
+  reproductionSteps String?       @db.Text
+  resolutionNotes   String?       @db.Text
+  linkedTaskId      String?
+  linkedMilestoneId String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  team            Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  reporter        User?             @relation("IssueReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  assignee        User?             @relation("IssueAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  linkedTask      ProjectTask?      @relation(fields: [linkedTaskId], references: [id], onDelete: SetNull)
+  linkedMilestone ProjectMilestone? @relation(fields: [linkedMilestoneId], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@map("project_issues")
+}
+
+model SprintReview {
+  id              String   @id @default(cuid())
+  sprintId        String
+  authorId        String?
+  plannedWork     String?  @db.Text
+  completedWork   String?  @db.Text
+  incompleteWork  String?  @db.Text
+  blockers        String?  @db.Text
+  lessonsLearned  String?  @db.Text
+  actionItems     String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  sprint Sprint @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  author User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("sprint_reviews")
+}
+
+model SprintRetrospective {
+  id           String   @id @default(cuid())
+  sprintId     String
+  authorId     String?
+  wentWell     String?  @db.Text
+  couldImprove String?  @db.Text
+  actionItems  String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  sprint Sprint @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  author User?  @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@map("sprint_retrospectives")
+}
+
+model TeamInvitation {
+  id              String           @id @default(cuid())
+  teamId          String
+  invitedEmail    String
+  invitationToken String           @unique
+  status          InvitationStatus @default(PENDING)
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  invitedById     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  team      Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation("InvitationSender", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@index([invitedEmail])
+  @@map("team_invitations")
+}
+
+model TeamJoinRequest {
+  id        String            @id @default(cuid())
+  teamId    String
+  userId    String
+  message   String?
+  status    JoinRequestStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_join_requests")
+}
+
 model TeamMember {
-  id       String   @id @default(cuid())
-  teamId   String
-  userId   String
-  role     String   @default("MEMBER")
-  joinedAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  teamId           String
+  userId           String
+  role             String   @default("MEMBER")
+  invitationStatus String   @default("ACCEPTED")
+  joinedAt         DateTime @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -181,57 +855,185 @@ model TeamMember {
 }
 
 model Submission {
-  id          String           @id @default(cuid())
-  teamId      String           @unique
-  title       String
-  description String?          @db.Text
-  githubUrl   String?
-  demoUrl     String?
-  status      SubmissionStatus @default(DRAFT)
-  submittedAt DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id                String           @id @default(cuid())
+  teamId            String           @unique
+  title             String
+  description       String?          @db.Text
+  category          String?
+  executiveSummary  String?          @db.Text
+  problemStatement  String?          @db.Text
+  objectives        String?          @db.Text
+  innovationSummary String?          @db.Text
+  solutionSummary   String?          @db.Text
+  expectedImpact    String?          @db.Text
+  technologies      String[]         @default([])
+  githubUrl         String?
+  demoUrl           String?
+  slidesUrl         String?
+  logoUrl           String?
+  teamPhotoUrl      String?
+  repositoryType    String?
+  readinessScore    Int              @default(0)
+  currentVersion    Int              @default(1)
+  status            SubmissionStatus @default(DRAFT)
+  submittedAt       DateTime?
+  lockedAt          DateTime?
+  lastSavedAt       DateTime?
+  receiptId         String?          @unique
+  validationReport  Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
-  team   Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  files  SubmissionFile[]
-  scores JudgeScore[]
+  team        Team                   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  files       SubmissionFile[]
+  versions    SubmissionVersion[]
+  compliance  SubmissionCompliance[]
+  scores      JudgeScore[]
+  assignments JudgeAssignment[]
 
   @@map("submissions")
 }
 
 model SubmissionFile {
-  id           String   @id @default(cuid())
-  submissionId String
-  name         String
-  url          String
-  mimeType     String
-  size         Int
-  createdAt    DateTime @default(now())
+  id               String               @id @default(cuid())
+  submissionId     String
+  name             String
+  url              String
+  mimeType         String
+  size             Int
+  category         DeliverableCategory  @default(DOCUMENTS)
+  requirementKey   String?
+  validationStatus FileValidationStatus @default(PENDING)
+  validationMessage String?
+  versionNumber    Int                  @default(1)
+  uploadedById     String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  uploadedBy User?      @relation("SubmissionFileUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
 
+  @@index([submissionId, category])
+  @@index([submissionId, requirementKey])
   @@map("submission_files")
 }
 
-model JudgeScore {
-  id           String   @id @default(cuid())
+model SubmissionVersion {
+  id                  String   @id @default(cuid())
+  submissionId        String
+  versionNumber       Int
+  authorId            String?
+  changeSummary       String?
+  snapshot            Json
+  modifiedDeliverables String[] @default([])
+  createdAt           DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  author     User?      @relation("SubmissionVersionAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@unique([submissionId, versionNumber])
+  @@index([submissionId])
+  @@map("submission_versions")
+}
+
+model SubmissionCompliance {
+  id           String                @id @default(cuid())
   submissionId String
+  declaration  ComplianceDeclaration
+  accepted     Boolean               @default(false)
+  acceptedById String?
+  acceptedAt   DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  acceptedBy User?      @relation("ComplianceAcceptor", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@unique([submissionId, declaration])
+  @@map("submission_compliance")
+}
+
+model JudgeAssignment {
+  id             String                @id @default(cuid())
+  judgeId        String
+  submissionId   String
+  eventId        String?
+  round          String                @default("Technical Evaluation")
+  timeSlot       DateTime?
+  priority       Int                   @default(0)
+  status         JudgeAssignmentStatus @default(WAITING)
+  reviewProgress Int                   @default(0)
+  assignedAt     DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  judge      User         @relation("JudgeAssignments", fields: [judgeId], references: [id], onDelete: Cascade)
+  submission Submission   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  event      Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  notes      JudgeNote[]
+  bookmarks  JudgeBookmark[]
+
+  @@unique([judgeId, submissionId])
+  @@index([judgeId, status])
+  @@index([eventId])
+  @@map("judge_assignments")
+}
+
+model JudgeScore {
+  id                String           @id @default(cuid())
+  submissionId      String
+  judgeId           String
+  innovation        Float            @default(0)
+  technical         Float            @default(0)
+  presentation      Float            @default(0)
+  scalability       Float            @default(0)
+  impact            Float            @default(0)
+  ui                Float            @default(0)
+  business          Float            @default(0)
+  comments          String?          @db.Text
+  status            EvaluationStatus @default(NOT_STARTED)
+  progressPercent   Int              @default(0)
+  sectionsCompleted Json?
+  draftData         Json?
+  startedAt         DateTime?
+  submittedAt       DateTime?
+  lastSavedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  judge      User       @relation("JudgeEvaluations", fields: [judgeId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, judgeId])
+  @@index([judgeId, status])
+  @@map("judge_scores")
+}
+
+model JudgeNote {
+  id           String   @id @default(cuid())
+  assignmentId String
   judgeId      String
-  innovation   Float    @default(0)
-  technical    Float    @default(0)
-  presentation Float    @default(0)
-  scalability  Float    @default(0)
-  impact       Float    @default(0)
-  ui           Float    @default(0)
-  business     Float    @default(0)
-  comments     String?  @db.Text
+  content      String   @default("") @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  assignment JudgeAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  judge      User            @relation("JudgeNotes", fields: [judgeId], references: [id], onDelete: Cascade)
 
-  @@unique([submissionId, judgeId])
-  @@map("judge_scores")
+  @@unique([assignmentId, judgeId])
+  @@map("judge_notes")
+}
+
+model JudgeBookmark {
+  id           String             @id @default(cuid())
+  assignmentId String
+  judgeId      String
+  label        JudgeBookmarkLabel
+  createdAt    DateTime           @default(now())
+
+  assignment JudgeAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, judgeId, label])
+  @@map("judge_bookmarks")
 }
 
 model Quiz {
@@ -367,4 +1169,115 @@ model AuditLog {
 
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+enum DocumentCategory {
+  PROPOSAL
+  RESEARCH
+  TECHNICAL
+  TESTING
+  USER
+  PRESENTATION
+}
+
+enum DocumentStatus {
+  DRAFT
+  IN_REVIEW
+  FINAL
+}
+
+model Whiteboard {
+  id         String   @id @default(cuid())
+  teamId     String
+  title      String
+  templateId String?
+  pageIndex  Int      @default(0)
+  zoom       Float    @default(1)
+  gridMode   Boolean  @default(true)
+  snapToGrid Boolean  @default(true)
+  createdById String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  team      Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy User?              @relation("WhiteboardCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  objects   WhiteboardObject[]
+
+  @@index([teamId])
+  @@map("whiteboards")
+}
+
+model WhiteboardObject {
+  id         String   @id @default(cuid())
+  boardId    String
+  objectType String
+  layer      Int      @default(0)
+  positionX  Float    @default(0)
+  positionY  Float    @default(0)
+  width      Float    @default(160)
+  height     Float    @default(100)
+  rotation   Float    @default(0)
+  properties Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  board Whiteboard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@index([boardId, layer])
+  @@map("whiteboard_objects")
+}
+
+model TeamDocument {
+  id          String           @id @default(cuid())
+  teamId      String
+  title       String
+  category    DocumentCategory @default(TECHNICAL)
+  status      DocumentStatus   @default(DRAFT)
+  content     String           @default("") @db.Text
+  templateId  String?
+  createdById String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy User?          @relation("DocumentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  links     DocumentLink[]
+
+  @@index([teamId, category])
+  @@map("team_documents")
+}
+
+model DocumentLink {
+  id         String   @id @default(cuid())
+  documentId String
+  targetType String
+  targetId   String
+  label      String?
+  createdAt  DateTime @default(now())
+
+  document TeamDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([targetType, targetId])
+  @@map("document_links")
+}
+
+model TimelineEvent {
+  id         String   @id @default(cuid())
+  teamId     String
+  actorId    String?
+  eventType  String
+  targetType String?
+  targetId   String?
+  title      String
+  detail     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([teamId, createdAt])
+  @@index([teamId, eventType])
+  @@map("timeline_events")
 }

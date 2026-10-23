@@ -14,28 +14,28 @@ type Post = {
 const seed: Post[] = [
   {
     platform: "Instagram",
-    author: "@hackos.lab",
+    author: "@niral.hackathon",
     text: "Hardware desks are buzzing — kit check-ins now open.",
     likes: 214,
     shares: 38,
   },
   {
     platform: "LinkedIn",
-    author: "HackOS Official",
+    author: "Niral Hackathon Official",
     text: "Proud to welcome our Platinum partners for Edge AI tracks.",
     likes: 482,
     shares: 91,
   },
   {
     platform: "YouTube",
-    author: "HackOS Streams",
+    author: "Niral Hackathon Streams",
     text: "Workshop replay: MQTT for industrial gateways.",
     likes: 1203,
     shares: 156,
   },
   {
     platform: "X",
-    author: "@hackos",
+    author: "@niralhackathon",
     text: "Problem statements dropped. Tag your team build thread.",
     likes: 670,
     shares: 204,

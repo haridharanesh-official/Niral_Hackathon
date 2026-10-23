@@ -26,17 +26,17 @@ export function StatisticsCards({ stats }: { stats: HomeStatistics | null }) {
       initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7"
+      className="mt-10 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7"
     >
       {items.map((stat) => (
         <div
           key={stat.label}
-          className="rounded-2xl border border-white/8 bg-black/25 px-3 py-3 text-center backdrop-blur-md"
+          className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] px-3.5 py-3 text-center shadow-sm transition hover:border-stone-400"
         >
-          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
+          <dt className="text-xs font-medium text-[var(--muted)]">
             {stat.label}
           </dt>
-          <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-white sm:text-xl">
+          <dd className="mt-1 font-sans text-lg sm:text-xl font-bold tabular-nums text-[var(--foreground)]">
             <AnimatedCounter
               value={stat.value}
               format={"format" in stat ? stat.format : undefined}
