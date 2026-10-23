@@ -26,7 +26,7 @@ const stories = [
       "12-person team",
     ],
     interview:
-      "HackOS forced us to ship a mesh that survived real buildings — that prototype became our seed deck.",
+      "Niral Hackathon forced us to ship a mesh that survived real buildings — that prototype became our seed deck.",
   },
   {
     name: "Dev Patel",

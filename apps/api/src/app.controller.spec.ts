@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { APP_NAME } from '@hackos/shared';
+
 describe('AppController', () => {
   let appController: AppController;
 
@@ -17,8 +19,8 @@ describe('AppController', () => {
   describe('root', () => {
     it('should return platform info', () => {
       const info = appController.getInfo();
-      expect(info.name).toBe('HackOS');
-      expect(info.status).toBe('initialized');
+      expect(info.name).toBe(APP_NAME);
+      expect(info.status).toBe('production-ready-scaffold');
     });
   });
 });

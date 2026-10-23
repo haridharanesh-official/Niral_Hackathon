@@ -11,8 +11,12 @@ export function LoginButton({
 }) {
   return (
     <Link href="/login" onClick={onNavigate}>
-      <Button variant={fullWidth ? "secondary" : "ghost"} size="sm" className={fullWidth ? "w-full" : undefined}>
-        Login
+      <Button
+        variant="secondary"
+        size="sm"
+        className={fullWidth ? "w-full rounded-full" : "rounded-full px-4"}
+      >
+        Sign in
       </Button>
     </Link>
   );
@@ -33,7 +37,11 @@ export function RegisterButton({
         onNavigate?.();
       }}
     >
-      <Button size="sm" className={fullWidth ? "cta-primary w-full" : "cta-primary"}>
+      <Button
+        size="sm"
+        variant="primary"
+        className={fullWidth ? "w-full rounded-full" : "rounded-full px-4"}
+      >
         Register
       </Button>
     </Link>

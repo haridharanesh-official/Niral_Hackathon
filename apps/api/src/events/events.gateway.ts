@@ -62,4 +62,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   broadcastAnnouncement(title: string, body: string) {
     this.server.emit('announcement', { title, body, at: new Date().toISOString() });
   }
+
+  emitDashboardEvent(event: string, userId: string, payload: Record<string, unknown>) {
+    this.server.emit(event, {
+      ...payload,
+      userId,
+      version: Date.now(),
+      at: new Date().toISOString(),
+    });
+  }
 }

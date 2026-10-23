@@ -1,116 +1,163 @@
 "use client";
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { Panel, StatChip } from "@/components/dashboard/panel";
-import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
+import {
+  trackDashboardEvent,
+  useDashboardData,
+  useTodaysTasks,
+  useWidgetLayout,
+  WidgetId,
+} from "@/components/dashboard/command-center/hooks";
+import {
+  AnnouncementsWidget,
+  CalendarWidget,
+  EventTimeline,
+  LeaderboardPreview,
+  ProgressOverview,
+  QuizGamesProgress,
+  TodaysTasks,
+  WelcomeBanner,
+  WidgetCustomizeBar,
+} from "@/components/dashboard/command-center/widgets";
+import {
+  AchievementBadgesWidget,
+  ActivityFeed,
+  AiSmartWorkspace,
+  CollaborationPanel,
+  DailyChallengeWidget,
+  ProjectHealthDashboard,
+  ResourceRecommendationPanel,
+  SmartNotificationsPanel,
+  SmartRecommendations,
+  TeamIntelligencePanel,
+  XpAchievementWidget,
+} from "@/components/dashboard/command-center/intelligence-widgets";
+import { cn } from "@/lib/utils";
 
-const achievements = [
-  { title: "First Signal", xp: 10 },
-  { title: "Squad Up", xp: 25 },
-  { title: "Quiz Master", xp: 50 },
-];
-
-const sessions = [
-  { title: "Mentor: Embedded Architecture", time: "Today · 16:30" },
-  { title: "Pitch Clinic", time: "Tomorrow · 11:00" },
-];
-
-const challenges = [
-  { title: "Edge Intelligence", status: "In progress" },
-  { title: "Secure Firmware", status: "Locked" },
-];
+const WIDE: WidgetId[] = ["aiWorkspace", "teamIntel", "projectHealth", "activity"];
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-  const user = session?.user;
+  const { data, loading, offline, saveWidgetConfig, session, EVENT_START, PHASES } =
+    useDashboardData();
+  const { tasks, toggle, defer } = useTodaysTasks(
+    data.checklist,
+    session?.accessToken,
+  );
+  const layout = useWidgetLayout(data.widgetConfig ?? null, saveWidgetConfig);
+
+  useEffect(() => {
+    trackDashboardEvent("dashboard_opened", { role: session?.user?.role });
+  }, [session?.user?.role]);
+
+  const widgets: Record<WidgetId, ReactNode> = {
+    aiWorkspace: (
+      <AiSmartWorkspace data={data} name={session?.user?.name} />
+    ),
+    recommendations: <SmartRecommendations data={data} />,
+    progress: (
+      <ProgressOverview checklist={data.checklist} percent={data.percent} />
+    ),
+    tasks: <TodaysTasks tasks={tasks} onToggle={toggle} onDefer={defer} />,
+    projectHealth: <ProjectHealthDashboard />,
+    teamIntel: <TeamIntelligencePanel team={data.team} />,
+    timeline: <EventTimeline phases={PHASES} />,
+    activity: <ActivityFeed />,
+    xp: <XpAchievementWidget userXp={session?.user?.xp} />,
+    badges: <AchievementBadgesWidget />,
+    dailyChallenge: <DailyChallengeWidget />,
+    resources: <ResourceRecommendationPanel />,
+    collab: <CollaborationPanel team={data.team} />,
+    announcements: <AnnouncementsWidget />,
+    smartNotifs: <SmartNotificationsPanel />,
+    leaderboard: <LeaderboardPreview />,
+    calendar: <CalendarWidget />,
+    quizGames: <QuizGamesProgress />,
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="font-mono text-xs uppercase tracking-[0.22em] text-sky-300">
-          Participant Overview
+    <div
+      className={cn(
+        "motion-safe:animate-in space-y-6",
+        layout.density === "compact" && "space-y-4 [&_section]:p-4",
+      )}
+    >
+      <a
+        href="#main-widgets"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-lg focus:bg-sky-500 focus:px-3 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Skip to dashboard widgets
+      </a>
+
+      <WelcomeBanner
+        name={session?.user?.name}
+        teamName={data.team?.name}
+        eventName={data.eventName}
+        eventStart={EVENT_START}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted" aria-live="polite">
+          {loading
+            ? "Syncing Innovation OS…"
+            : "Proactive workspace · prioritized by timeline, team, and progress"}
         </p>
-        <h1 className="mt-2 font-display text-3xl font-bold text-white">
-          Welcome, {user?.name?.split(" ")[0] ?? "Hacker"}
-        </h1>
-        <p className="mt-1 text-muted">
-          Track XP, sessions, challenges, and team momentum in one place.
-        </p>
+        <div className="flex flex-wrap gap-2 text-xs text-muted">
+          <kbd className="rounded border border-white/15 px-1.5 py-0.5 font-mono">
+            /
+          </kbd>
+          <span>focus search</span>
+          <kbd className="rounded border border-white/15 px-1.5 py-0.5 font-mono">
+            g then t
+          </kbd>
+          <span>team</span>
+        </div>
+        <WidgetCustomizeBar
+          hidden={layout.hidden}
+          visible={layout.visible}
+          onToggle={layout.toggleWidget}
+          onMove={layout.moveWidget}
+          onRestore={layout.restoreDefaults}
+          density={layout.density}
+          onDensity={layout.setDensityPref}
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatChip label="XP" value={user?.xp ?? 0} />
-        <StatChip label="Rank" value="#128" />
-        <StatChip label="Badges" value={achievements.length} />
-        <StatChip label="Attendance" value="Checked in" />
-      </div>
+      {offline ? (
+        <div
+          className="rounded-2xl border border-orange-400/30 bg-orange-500/10 px-4 py-3 text-sm text-orange-100"
+          role="status"
+          aria-live="polite"
+        >
+          Offline mode: showing last synchronized dashboard. Live updates resume
+          automatically when connection returns.
+        </div>
+      ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Panel title="Current Challenges" className="xl:col-span-2">
-          <ul className="space-y-3">
-            {challenges.map((item) => (
-              <li
-                key={item.title}
-                className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/20 px-4 py-3"
-              >
-                <span className="text-white">{item.title}</span>
-                <span className="font-mono text-xs text-sky-300">{item.status}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex gap-3">
-            <Link href="/quiz">
-              <Button size="sm">Open Quiz Arena</Button>
-            </Link>
-            <Link href="/games">
-              <Button size="sm" variant="secondary">
-                Mini Games
-              </Button>
-            </Link>
+      <div id="main-widgets" className="grid gap-4 xl:grid-cols-3">
+        {layout.visible.map((id) => (
+          <div
+            key={id}
+            className={cn(WIDE.includes(id) && "xl:col-span-2")}
+          >
+            {widgets[id]}
           </div>
-        </Panel>
-
-        <Panel title="Upcoming Sessions">
-          <ul className="space-y-3">
-            {sessions.map((item) => (
-              <li key={item.title} className="rounded-2xl border border-white/5 bg-black/20 px-4 py-3">
-                <p className="text-sm text-white">{item.title}</p>
-                <p className="mt-1 font-mono text-xs text-muted">{item.time}</p>
-              </li>
-            ))}
-          </ul>
-        </Panel>
+        ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Panel title="Achievements & Badges">
-          <ul className="space-y-2">
-            {achievements.map((item) => (
-              <li key={item.title} className="flex justify-between text-sm">
-                <span className="text-white">{item.title}</span>
-                <span className="text-violet-200">+{item.xp} XP</span>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-        <Panel title="Notifications">
-          <ul className="space-y-2 text-sm text-muted">
-            <li>Hardware kit ready for pickup · Desk B</li>
-            <li>Judge briefing published for Track AI</li>
-            <li>New mentor slots opened for tomorrow</li>
-          </ul>
-        </Panel>
-        <Panel title="Certificates & Downloads">
-          <div className="space-y-3">
-            <Button variant="outline" size="sm" className="w-full" disabled>
-              Participation certificate (after event)
-            </Button>
-            <Button variant="secondary" size="sm" className="w-full">
-              Download starter kit PDF
-            </Button>
-          </div>
-        </Panel>
+      <div className="fixed bottom-4 right-4 z-30 flex flex-col gap-2">
+        <a
+          href="/ai"
+          className="rounded-full border border-violet-400/30 bg-violet-500/20 px-3 py-2 text-xs text-violet-100 backdrop-blur hover:bg-violet-500/30"
+        >
+          AI Assist
+        </a>
+        <a
+          href="/dashboard/team"
+          className="rounded-full border border-sky-400/30 bg-sky-500/20 px-3 py-2 text-xs text-sky-100 backdrop-blur hover:bg-sky-500/30"
+        >
+          Team Chat
+        </a>
       </div>
     </div>
   );

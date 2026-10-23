@@ -1,19 +1,27 @@
+"use client";
+
 import Link from "next/link";
-import { APP_NAME } from "@hackos/shared";
+import { useAppContent } from "@/store/content-context";
 
 export function Logo() {
+  const { content } = useAppContent();
+  const appName = content?.event?.name || "Niral Hackathon";
+  const initial = appName.charAt(0) || "H";
+
   return (
     <Link
       href="/"
-      className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-      aria-label={`${APP_NAME} home`}
+      className="group flex items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      aria-label={`${appName} home`}
     >
-      <div className="glow-ring flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-violet-500 font-display text-sm font-bold text-white">
-        H
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-white shadow-sm transition group-hover:scale-105">
+        {initial}
       </div>
-      <span className="font-display text-sm font-semibold tracking-[0.22em] text-sky-300">
-        {APP_NAME}
-      </span>
+      <div className="flex flex-col">
+        <span className="font-sans text-base font-bold tracking-tight text-[var(--foreground)] transition group-hover:text-[var(--primary)]">
+          {appName}
+        </span>
+      </div>
     </Link>
   );
 }

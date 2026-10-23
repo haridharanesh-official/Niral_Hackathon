@@ -153,9 +153,9 @@ const themes: Theme[] = [
 ];
 
 const difficultyTone = {
-  Beginner: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10",
-  Intermediate: "text-sky-300 border-sky-400/30 bg-sky-500/10",
-  Advanced: "text-orange-300 border-orange-400/30 bg-orange-500/10",
+  Beginner: "text-[#15803D] border-[#86EFAC] bg-[#EAFBF1] dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800",
+  Intermediate: "text-[#B45309] border-[#FED7AA] bg-[#FFF8EC] dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
+  Advanced: "text-[#8C3B23] border-[#FDBA74] bg-[#FBF0EB] dark:bg-[var(--primary-soft)] dark:text-[var(--primary)] dark:border-[#8C3B23]/40",
 };
 
 export function ChallengesSection() {
@@ -179,16 +179,15 @@ export function ChallengesSection() {
   }, [active]);
 
   return (
-    <section id="themes" className="scroll-mt-24 py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+    <section id="themes" className="scroll-mt-24 py-16">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="font-display text-3xl font-bold text-white">
-              Event Themes
+            <h2 className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
+              Event Themes & Problem Tracks
             </h2>
-            <p className="mt-3 max-w-2xl text-muted">
-              Challenge domains spanning industry, agriculture, healthcare, cities,
-              energy, and AI + IoT.
+            <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
+              Challenge domains spanning industry automation, agriculture, healthcare, smart cities, and AI hardware.
             </p>
           </div>
           <div className="flex gap-2">
@@ -197,6 +196,7 @@ export function ChallengesSection() {
               size="sm"
               aria-label="Previous themes"
               onClick={() => scrollBy(-1)}
+              className="rounded-full h-9 w-9 p-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -205,6 +205,7 @@ export function ChallengesSection() {
               size="sm"
               aria-label="Next themes"
               onClick={() => scrollBy(1)}
+              className="rounded-full h-9 w-9 p-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -213,42 +214,49 @@ export function ChallengesSection() {
 
         <div
           ref={scrollerRef}
-          className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 scrollbar-thin"
+          className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 scrollbar-thin"
           role="list"
         >
           {themes.map((theme, index) => (
             <motion.article
               key={theme.title}
               role="listitem"
-              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.04 }}
-              className="glass flex w-[min(100%,20rem)] shrink-0 snap-start flex-col rounded-3xl p-6"
+              className="flex w-[min(100%,21rem)] shrink-0 snap-start flex-col justify-between rounded-[28px] border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-sm transition hover:shadow-md hover:border-stone-400"
             >
-              <theme.icon className="h-6 w-6 text-sky-300" aria-hidden />
-              <h3 className="mt-4 font-display text-xl font-semibold text-white">
-                {theme.title}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
-                {theme.description}
-              </p>
-              <span
-                className={cn(
-                  "mt-4 inline-flex w-fit rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em]",
-                  difficultyTone[theme.difficulty],
-                )}
-              >
-                {theme.difficulty}
-              </span>
-              <Button
-                className="cta-primary mt-5 w-full"
-                size="sm"
-                onClick={() => setActive(theme)}
-              >
-                Explore
-                <CircuitBoard className="h-3.5 w-3.5" aria-hidden />
-              </Button>
+              <div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FBF0EB] dark:bg-[var(--primary-soft)] text-[var(--primary)]">
+                  <theme.icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h3 className="mt-4 font-sans text-xl font-bold text-[var(--foreground)]">
+                  {theme.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                  {theme.description}
+                </p>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[var(--card-border)] flex items-center justify-between gap-2">
+                <span
+                  className={cn(
+                    "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
+                    difficultyTone[theme.difficulty],
+                  )}
+                >
+                  {theme.difficulty}
+                </span>
+                <Button
+                  className="cta-primary text-xs"
+                  size="sm"
+                  onClick={() => setActive(theme)}
+                >
+                  Explore
+                  <CircuitBoard className="h-3.5 w-3.5" aria-hidden />
+                </Button>
+              </div>
             </motion.article>
           ))}
         </div>
@@ -256,31 +264,31 @@ export function ChallengesSection() {
 
       {active ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-labelledby="theme-modal-title"
           onClick={() => setActive(null)}
         >
           <div
-            className="glass max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-6 shadow-2xl"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-[var(--card-border)] bg-[var(--card)] p-6 sm:p-8 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-sky-300">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
                   Theme detail
                 </p>
                 <h3
                   id="theme-modal-title"
-                  className="mt-2 font-display text-2xl font-bold text-white"
+                  className="mt-1 font-sans text-2xl font-bold text-[var(--foreground)]"
                 >
                   {active.title}
                 </h3>
               </div>
               <button
                 type="button"
-                className="rounded-lg p-2 text-muted hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted)] hover:bg-[var(--sand-100)] hover:text-[var(--foreground)]"
                 aria-label="Close theme details"
                 onClick={() => setActive(null)}
               >
@@ -288,49 +296,51 @@ export function ChallengesSection() {
               </button>
             </div>
 
-            <p className="mt-4 text-sm leading-relaxed text-muted">
+            <p className="mt-4 text-sm leading-relaxed text-[var(--muted)]">
               {active.description}
             </p>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <div>
-                <h4 className="font-display text-sm font-semibold text-white">
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--sand-50)] p-4">
+                <h4 className="font-sans text-sm font-semibold text-[var(--foreground)]">
                   Sample projects
                 </h4>
-                <ul className="mt-2 space-y-1.5 text-sm text-muted">
+                <ul className="mt-2 space-y-1.5 text-xs text-[var(--muted)]">
                   {active.sampleProjects.map((p) => (
-                    <li key={p}>· {p}</li>
+                    <li key={p}>• {p}</li>
                   ))}
                 </ul>
               </div>
-              <div>
-                <h4 className="font-display text-sm font-semibold text-white">
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--sand-50)] p-4">
+                <h4 className="font-sans text-sm font-semibold text-[var(--foreground)]">
                   Suggested hardware
                 </h4>
-                <ul className="mt-2 space-y-1.5 text-sm text-muted">
+                <ul className="mt-2 space-y-1.5 text-xs text-[var(--muted)]">
                   {active.hardware.map((h) => (
-                    <li key={h}>· {h}</li>
+                    <li key={h}>• {h}</li>
                   ))}
                 </ul>
               </div>
             </div>
 
             <div className="mt-5">
-              <h4 className="font-display text-sm font-semibold text-white">
+              <h4 className="font-sans text-sm font-semibold text-[var(--foreground)]">
                 Reference architecture
               </h4>
-              <p className="mt-2 text-sm text-muted">{active.architecture}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-[var(--muted)]">
+                {active.architecture}
+              </p>
             </div>
 
             <div className="mt-5">
-              <h4 className="font-display text-sm font-semibold text-white">
+              <h4 className="font-sans text-sm font-semibold text-[var(--foreground)]">
                 Technology stack
               </h4>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 {active.technologies.map((tech) => (
                   <span
                     key={tech}
-                    className="rounded-full border border-sky-400/20 bg-sky-500/10 px-2.5 py-1 font-mono text-[11px] text-sky-200"
+                    className="rounded-full border border-[var(--card-border)] bg-[var(--sand-50)] px-3 py-1 font-mono text-[11px] text-[var(--foreground)]"
                   >
                     {tech}
                   </span>
@@ -338,28 +348,10 @@ export function ChallengesSection() {
               </div>
             </div>
 
-            <div className="mt-5">
-              <h4 className="font-display text-sm font-semibold text-white">
-                Learning resources
-              </h4>
-              <ul className="mt-2 space-y-1 text-sm">
-                {active.resources.map((r) => (
-                  <li key={r.label}>
-                    <a
-                      href={r.href}
-                      className="text-sky-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-                      target={r.href.startsWith("http") ? "_blank" : undefined}
-                      rel={
-                        r.href.startsWith("http")
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
-                    >
-                      {r.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-6 pt-4 border-t border-[var(--card-border)] flex justify-end">
+              <Button size="sm" onClick={() => setActive(null)}>
+                Close
+              </Button>
             </div>
           </div>
         </div>

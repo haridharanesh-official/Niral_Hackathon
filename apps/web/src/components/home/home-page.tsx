@@ -35,6 +35,7 @@ import { ContactNewsletterSection } from "@/components/home/newsletter-section";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { QuickActionsDock } from "@/components/landing/quick-actions-dock";
 import { AiAssistantWidget } from "@/components/home/ai-assistant-widget";
+import { LiveContentEditorDock } from "@/components/common/live-content-dock";
 
 export function HomePage() {
   return (
@@ -75,6 +76,7 @@ export function HomePage() {
       <SiteFooter />
       <QuickActionsDock />
       <AiAssistantWidget />
+      <LiveContentEditorDock />
     </HomeUiProvider>
   );
 }

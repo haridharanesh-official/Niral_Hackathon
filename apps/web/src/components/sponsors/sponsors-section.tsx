@@ -36,7 +36,7 @@ export function SponsorsSection() {
           status={status}
           error={error}
           onRetry={reload}
-          emptyMessage="No sponsors available."
+          emptyMessage="Official partners and sponsors for NIRAL 2026 are currently being finalized and will be announced soon."
           skeleton={<SectionSkeleton cards={4} />}
         >
           <div

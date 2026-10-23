@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuditModule } from '../audit/audit.module';
+import { SessionModule } from '../session/session.module';
 
 @Module({
   imports: [
@@ -13,15 +15,18 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const expiresIn = config.get<string>('JWT_EXPIRES_IN') ?? '7d';
+        // Access token default 30m (SRS §23 / §60); override with JWT_EXPIRES_IN
+        const expiresIn = config.get<string>('JWT_EXPIRES_IN') ?? '30m';
         return {
           secret: config.get<string>('JWT_SECRET') ?? 'dev-secret-change-me',
           signOptions: {
-            expiresIn: expiresIn as `${number}d` | `${number}h` | `${number}s`,
+            expiresIn: expiresIn as `${number}d` | `${number}h` | `${number}m` | `${number}s`,
           },
         };
       },
     }),
+    AuditModule,
+    SessionModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

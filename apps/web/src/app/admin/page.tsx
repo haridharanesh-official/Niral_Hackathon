@@ -19,9 +19,11 @@ export default function AdminPage() {
 
   if (!session?.user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <Link href="/login">
-          <Button>Sign in</Button>
+          <Button size="md" className="cta-primary">
+            Sign in
+          </Button>
         </Link>
       </div>
     );
@@ -29,77 +31,104 @@ export default function AdminPage() {
 
   if (!allowed) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
-        <p className="text-muted">Admin access requires ORGANIZER or ADMIN role.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center bg-[var(--background)]">
+        <p className="text-sm text-[var(--muted)]">Admin access requires ORGANIZER or ADMIN role.</p>
         <Link href="/dashboard">
-          <Button variant="secondary">Back to dashboard</Button>
+          <Button variant="secondary" size="md">
+            Back to dashboard
+          </Button>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen px-6 py-10">
-      <div className="pointer-events-none absolute inset-0 circuit-grid opacity-25" />
-      <div className="relative z-10 mx-auto max-w-6xl space-y-6">
+    <div className="relative min-h-screen bg-[var(--background)] px-4 py-8 sm:px-6">
+      <div className="pointer-events-none absolute inset-0 circuit-grid opacity-30" />
+      <div className="relative z-10 mx-auto max-w-[1400px] space-y-6">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.22em] text-sky-300">
-              Admin Panel
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Admin & Governance Panel
             </p>
-            <h1 className="mt-2 font-display text-4xl font-bold text-white">
-              Everything configurable
+            <h1 className="mt-1 font-sans text-3xl sm:text-4xl font-bold tracking-tight text-[var(--foreground)]">
+              Everything Configurable
             </h1>
           </div>
-          <Link href="/dashboard" className="text-sm text-sky-300 hover:underline">
+          <Link href="/dashboard" className="text-xs font-semibold text-[var(--primary)] hover:underline">
             ← Dashboard
           </Link>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatChip label="Users" value="2,480" />
-          <StatChip label="Active quizzes" value="12" />
-          <StatChip label="Games" value="12" />
-          <StatChip label="API health" value="OK" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatChip label="Registered Users" value="2,480" />
+          <StatChip label="Active Quizzes" value="12" />
+          <StatChip label="Interactive Games" value="12" />
+          <StatChip label="API Status & Health" value="100% OK" />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Panel title="NIRAL Event Settings & Governance" className="border-sky-500/30">
+            <ul className="space-y-2 text-xs text-[var(--muted)]">
+              <li>• Authoritative configuration for NIRAL Hackathon 2026 (Dec 3–4, 2026)</li>
+              <li>• Registration capacity, team size limits, and schedule parameters</li>
+              <li>• Public event lifecycle: DRAFT → REGISTRATION → LIVE → COMPLETED</li>
+            </ul>
+            <div className="mt-4 flex gap-2">
+              <Link href="/admin/event-settings">
+                <Button size="sm" className="cta-primary">
+                  Configure Event Settings
+                </Button>
+              </Link>
+            </div>
+          </Panel>
+
           <Panel title="Role & Permissions">
-            <ul className="space-y-2 text-sm text-muted">
-              <li>RBAC matrix · VISITOR → ADMIN</li>
-              <li>JWT guards on protected Nest routes</li>
-              <li>NextAuth session for UI gates</li>
+            <ul className="space-y-2 text-xs text-[var(--muted)]">
+              <li>• RBAC matrix · VISITOR → PARTICIPANT → JUDGE → ORGANIZER → ADMIN</li>
+              <li>• JWT guards with session signature validation</li>
+              <li>• Server-side role enforcement on all protected endpoints</li>
             </ul>
             <Button className="mt-4" size="sm" variant="secondary">
               Manage roles
             </Button>
           </Panel>
-          <Panel title="Event Settings">
-            <ul className="space-y-2 text-sm text-muted">
-              <li>Theme · Cyber glassmorphism</li>
-              <li>Max team size · 4</li>
-              <li>Registration · Open</li>
+
+          <Panel title="Universal CMS & Live Broadcaster">
+            <ul className="space-y-2 text-xs text-[var(--muted)]">
+              <li>• Live synced across all pages & API endpoints</li>
+              <li>• Hero copy, prizes, timeline dates, and emergency alerts</li>
+              <li>• Instant client broadcast without redeploy</li>
             </ul>
-            <Button className="mt-4" size="sm" variant="secondary">
-              Edit event
-            </Button>
+            <div className="mt-4 flex gap-2">
+              <Link href="/admin/content">
+                <Button size="sm" className="cta-primary">
+                  Open Universal CMS
+                </Button>
+              </Link>
+            </div>
           </Panel>
-          <Panel title="Builders" className="lg:col-span-2">
+
+          <Panel title="Interactive Builders" className="lg:col-span-2">
             <div className="grid gap-3 sm:grid-cols-2">
               {builders.map((builder) => (
                 <div
                   key={builder}
-                  className="rounded-2xl border border-white/8 bg-black/20 px-4 py-4"
+                  className="rounded-2xl border border-[var(--card-border)] bg-[var(--sand-50)] p-4 transition hover:border-stone-400"
                 >
-                  <p className="text-white">{builder}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    Schema-backed configuration surface
+                  <p className="font-sans font-semibold text-[var(--foreground)]">{builder}</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    Schema-backed configuration surface for realtime event updates
                   </p>
                 </div>
               ))}
             </div>
           </Panel>
-          <Panel title="People Ops">
+
+          <Panel title="People & Staff Operations">
+            <p className="text-xs text-[var(--muted)] mb-3">
+              Assign evaluating panels, jury members, and floor mentor stations.
+            </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline">
                 Mentors
@@ -112,13 +141,14 @@ export default function AdminPage() {
               </Button>
             </div>
           </Panel>
-          <Panel title="API Management">
-            <p className="text-sm text-muted">
-              Rate limits, audit logs, and service health probes are enabled on NestJS.
+
+          <Panel title="API Management & Gateway">
+            <p className="text-xs text-[var(--muted)]">
+              Rate limits, security audit logs, and service health probes are active.
             </p>
             <Link href="/api-status">
-              <Button className="mt-4" size="sm">
-                Open status
+              <Button className="mt-4" size="sm" variant="secondary">
+                Open Status Monitor
               </Button>
             </Link>
           </Panel>

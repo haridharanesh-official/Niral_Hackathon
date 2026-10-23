@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { homeEventSeed, toRegistrationProgress } from "@/services/home/seed";
+import { getContentStore } from "@/lib/content-store";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(toRegistrationProgress(homeEventSeed));
+  return NextResponse.json(getContentStore().registration);
 }

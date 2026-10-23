@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { homeTestimonialsSeed } from "@/services/home/seed";
+import { getContentStore } from "@/lib/content-store";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(homeTestimonialsSeed);
+  return NextResponse.json(getContentStore().testimonials);
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { ParticleField } from "@/components/landing/particle-field";
-
 export function AnimatedBackground({
   parallax = { x: 0, y: 0 },
   reduceMotion,
@@ -10,12 +8,13 @@ export function AnimatedBackground({
   reduceMotion?: boolean | null;
 }) {
   return (
-    <div className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-0 circuit-grid opacity-50" />
-      <div className="pcb-traces absolute inset-0 opacity-40" aria-hidden />
-      <ParticleField />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* Warm organic sand grid */}
+      <div className="circuit-grid absolute inset-0 opacity-40" />
+
+      {/* Ambient warm terracotta & amber glow orbs */}
       <div
-        className="animate-float-orb absolute -left-24 top-20 h-80 w-80 rounded-full bg-sky-500/25 blur-3xl motion-reduce:animate-none"
+        className="animate-float-orb absolute -left-20 top-16 h-96 w-96 rounded-full bg-[var(--primary)]/10 blur-3xl motion-reduce:animate-none"
         style={{
           transform: reduceMotion
             ? undefined
@@ -23,18 +22,18 @@ export function AnimatedBackground({
         }}
       />
       <div
-        className="animate-float-orb absolute right-0 top-40 h-96 w-96 rounded-full bg-violet-500/20 blur-3xl motion-reduce:animate-none [animation-delay:1.4s]"
+        className="animate-float-orb absolute right-0 top-32 h-[28rem] w-[28rem] rounded-full bg-[var(--accent)]/10 blur-3xl motion-reduce:animate-none [animation-delay:1.6s]"
         style={{
           transform: reduceMotion
             ? undefined
-            : `translate(${parallax.x * 0.5}px, ${parallax.y * 0.35}px)`,
+            : `translate(${parallax.x * 0.4}px, ${parallax.y * 0.3}px)`,
         }}
       />
       <div
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-30"
         style={{
           background:
-            "radial-gradient(ellipse at 70% 40%, rgba(56,189,248,0.18), transparent 55%), linear-gradient(180deg, transparent 55%, #05070f 100%)",
+            "radial-gradient(ellipse at 50% 30%, rgba(140, 59, 35, 0.06), transparent 60%), linear-gradient(180deg, transparent 65%, var(--background) 100%)",
         }}
       />
     </div>

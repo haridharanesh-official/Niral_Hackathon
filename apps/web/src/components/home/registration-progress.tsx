@@ -38,22 +38,17 @@ export function RegistrationProgressSection() {
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
-                    Registration Progress
+                    Registration Status
                   </h2>
                   <p className="mt-2 text-sm text-muted">
                     {data.status === "closed"
-                      ? "Registration Closed"
+                      ? "Registrations Opening Soon · 1,000 Capacity"
                       : `${data.filled.toLocaleString("en-IN")} / ${data.capacity.toLocaleString("en-IN")} Seats Filled`}
                   </p>
                 </div>
-                <p
-                  className={cn(
-                    "font-mono text-3xl font-bold tabular-nums",
-                    data.status !== "open" ? "text-orange-300" : "text-sky-300",
-                  )}
-                >
-                  {data.percent}%
-                </p>
+                <div className="rounded-xl border border-sky-400/20 bg-sky-500/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky-200">
+                  {data.status === "closed" ? "Opening Soon" : `${data.percent}% Filled`}
+                </div>
               </div>
 
               <div

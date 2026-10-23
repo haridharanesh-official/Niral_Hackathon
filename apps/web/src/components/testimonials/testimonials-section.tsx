@@ -33,7 +33,7 @@ export function TestimonialsSection() {
           status={status}
           error={error}
           onRetry={reload}
-          emptyMessage="No testimonials available."
+          emptyMessage="Participant and mentor stories will be published live during the NIRAL 2026 event days."
           skeleton={<SectionSkeleton cards={3} />}
         >
           <div

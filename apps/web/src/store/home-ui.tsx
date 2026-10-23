@@ -21,7 +21,7 @@ type HomeUiState = {
 const HomeUiContext = createContext<HomeUiState | null>(null);
 
 export function HomeUiProvider({ children }: { children: ReactNode }) {
-  const [dark, setDarkState] = useState(true);
+  const [dark, setDarkState] = useState(false);
   const [lang, setLang] = useState<"EN" | "HI">("EN");
 
   const setDark = useCallback((value: boolean) => {

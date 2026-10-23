@@ -1,0 +1,41 @@
+-- Migration: 20261023120000_phase1_niral_event_configuration
+-- Phase 1: Centralized NIRAL Event Configuration & Lifecycle
+
+-- CreateEnum: EventStatus
+DO $$ BEGIN
+  CREATE TYPE "EventStatus" AS ENUM ('DRAFT', 'REGISTRATION_OPEN', 'REGISTRATION_CLOSED', 'UPCOMING', 'LIVE', 'COMPLETED', 'ARCHIVED');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+-- CreateEnum: EventMode
+DO $$ BEGIN
+  CREATE TYPE "EventMode" AS ENUM ('OFFLINE', 'ONLINE', 'HYBRID');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+-- AlterTable "events" (mapped from Event model)
+ALTER TABLE "events"
+  ADD COLUMN IF NOT EXISTS "publicDescription" TEXT,
+  ADD COLUMN IF NOT EXISTS "tagline" TEXT,
+  ADD COLUMN IF NOT EXISTS "organizerName" TEXT,
+  ADD COLUMN IF NOT EXISTS "officialEmail" TEXT,
+  ADD COLUMN IF NOT EXISTS "contactPhone" TEXT,
+  ADD COLUMN IF NOT EXISTS "websiteUrl" TEXT,
+  ADD COLUMN IF NOT EXISTS "timezone" TEXT NOT NULL DEFAULT 'Asia/Kolkata',
+  ADD COLUMN IF NOT EXISTS "hasExactTimes" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "venueName" TEXT,
+  ADD COLUMN IF NOT EXISTS "venueAddress" TEXT,
+  ADD COLUMN IF NOT EXISTS "eventMode" "EventMode" NOT NULL DEFAULT 'HYBRID',
+  ADD COLUMN IF NOT EXISTS "registrationStartsAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "registrationEndsAt" TIMESTAMP(3),
+  ADD COLUMN IF NOT EXISTS "registrationEnabled" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "maxCapacity" INTEGER,
+  ADD COLUMN IF NOT EXISTS "minTeamSize" INTEGER NOT NULL DEFAULT 2,
+  ADD COLUMN IF NOT EXISTS "maxTeamSize" INTEGER NOT NULL DEFAULT 4,
+  ADD COLUMN IF NOT EXISTS "prizePool" DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS "status" "EventStatus" NOT NULL DEFAULT 'DRAFT',
+  ADD COLUMN IF NOT EXISTS "isPublished" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "logoUrl" TEXT,
+  ADD COLUMN IF NOT EXISTS "bannerUrl" TEXT;

@@ -1,4 +1,10 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -8,7 +14,7 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(280)
+  @MaxLength(2000)
   bio?: string;
 
   @IsOptional()
@@ -25,4 +31,16 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(120)
   department?: string;
+
+  @IsOptional()
+  @IsObject()
+  profile?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsBoolean()
+  markComplete?: boolean;
+
+  @IsOptional()
+  @IsObject()
+  notificationPrefs?: Record<string, unknown>;
 }

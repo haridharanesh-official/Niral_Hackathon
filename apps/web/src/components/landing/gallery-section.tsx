@@ -202,7 +202,7 @@ export function GallerySection() {
                 label="Share"
                 onClick={() =>
                   navigator.clipboard?.writeText(
-                    `${active.title} — HackOS Gallery`,
+                    `${active.title} — Niral Hackathon Gallery`,
                   )
                 }
               />
