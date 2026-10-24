@@ -75,7 +75,6 @@ export function HeroSection() {
             }
           />
           <CTAButtons isLive={isLive} />
-          <StatisticsCards stats={statsQuery.data} />
         </SectionState>
       </div>
 

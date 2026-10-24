@@ -1,259 +1,128 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ArrowRight, Bell, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-type Problem = {
-  title: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  category: string;
-  reward: string;
-  duration: string;
-  objectives: string[];
-  requirements: string[];
-  components: string[];
-  deliverables: string[];
-  judging: string[];
-  links: { label: string; href: string }[];
-};
-
-const problems: Problem[] = [
+const tracks = [
   {
-    title: "Smart Warehouse Automation",
-    difficulty: "Advanced",
-    category: "Industrial IoT",
-    reward: "Special Innovation Award",
-    duration: "24 Hours",
-    objectives: [
-      "Automate inventory location tracking",
-      "Detect anomalous movement on the floor",
-      "Surface ops alerts within 5 seconds",
-    ],
-    requirements: [
-      "Working prototype or digital twin",
-      "MQTT or REST telemetry stream",
-      "Operator dashboard",
-    ],
-    components: ["ESP32 / RPi", "RFID or CV camera", "Relay / actuator"],
-    deliverables: ["Demo video", "Architecture diagram", "Repo + README"],
-    judging: ["Innovation", "Reliability", "Scalability", "UX"],
-    links: [{ label: "Warehouse IoT primer", href: "#resources" }],
+    name: "Industrial Automation",
+    category: "Telemetry, SCADA & Predictive Maintenance",
+    status: "Briefs Coming Soon",
   },
   {
-    title: "Precision Irrigation Advisor",
-    difficulty: "Intermediate",
-    category: "Smart Agriculture",
-    reward: "AgriTech Track Prize",
-    duration: "18 Hours",
-    objectives: [
-      "Fuse soil + weather signals",
-      "Recommend irrigation windows",
-      "Reduce water use vs baseline",
-    ],
-    requirements: ["Sensor ingest", "Rule or ML model", "Mobile/web alert"],
-    components: ["Soil moisture probe", "LoRa node", "Gateway"],
-    deliverables: ["Live demo", "Water savings estimate", "Field log"],
-    judging: ["Impact", "Technical depth", "Feasibility"],
-    links: [{ label: "Soil sensing guide", href: "#resources" }],
+    name: "Smart Agriculture",
+    category: "Soil Sensing, LoRaWAN & Precision Irrigation",
+    status: "Briefs Coming Soon",
   },
   {
-    title: "Remote Patient Vitals Mesh",
-    difficulty: "Advanced",
-    category: "Healthcare IoT",
-    reward: "HealthTech Sponsor Challenge",
-    duration: "24 Hours",
-    objectives: [
-      "Stream vitals securely",
-      "Detect falls or hypoxia events",
-      "Notify caregivers with priority",
-    ],
-    requirements: ["BLE wearable path", "Privacy-aware storage", "Alert SLA"],
-    components: ["Pulse ox / IMU", "ESP32-C3", "Phone gateway"],
-    deliverables: ["Consent flow", "Alert demo", "Threat model notes"],
-    judging: ["Safety", "Privacy", "Reliability", "Presentation"],
-    links: [{ label: "Wearables checklist", href: "#resources" }],
+    name: "Healthcare IoT",
+    category: "Wearables, BLE Monitoring & Emergency Telemetry",
+    status: "Briefs Coming Soon",
   },
   {
-    title: "Campus Energy Twin",
-    difficulty: "Intermediate",
-    category: "Energy Management",
-    reward: "Green Innovation Award",
-    duration: "20 Hours",
-    objectives: [
-      "Model building load profiles",
-      "Highlight peak waste windows",
-      "Suggest actionable setpoints",
-    ],
-    requirements: ["Time-series dashboard", "At least one control suggestion"],
-    components: ["Smart meters / clamps", "RPi gateway", "Cloud or local TSDB"],
-    deliverables: ["Dashboard", "Savings hypothesis", "Ops playbook"],
-    judging: ["Clarity", "Analytics quality", "Actionability"],
-    links: [{ label: "Energy analytics pack", href: "#resources" }],
+    name: "Smart Cities",
+    category: "Urban Sensing, Computer Vision & Mobility",
+    status: "Briefs Coming Soon",
+  },
+  {
+    name: "Energy Management",
+    category: "Grid Monitoring, Metering & Optimization",
+    status: "Briefs Coming Soon",
+  },
+  {
+    name: "AI + Edge Computing",
+    category: "Constrained Devices, TinyML & Real-time Vision",
+    status: "Briefs Coming Soon",
   },
 ];
 
 export function ProblemStatementsSection() {
   const reduceMotion = useReducedMotion();
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState<string | null>(problems[0]?.title ?? null);
 
   return (
-    <section id="problems" className="scroll-mt-24 py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+    <section id="problems" className="scroll-mt-24 py-16" aria-label="Problem Statements">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="font-display text-3xl font-bold text-white">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              NIRAL Hackathon 2026 Challenges
+            </span>
+            <h2 className="mt-1 font-sans text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
               Problem Statements
             </h2>
-            <p className="mt-3 max-w-xl text-muted">
-              Featured challenges — expand a card for objectives, kits, and judging.
+            <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
+              Official industry challenge statements and detailed specifications will be published prior to the hackathon kickoff.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              aria-label="Previous problems"
-              onClick={() =>
-                scrollerRef.current?.scrollBy({
-                  left: -320,
-                  behavior: "smooth",
-                })
-              }
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              aria-label="Next problems"
-              onClick={() =>
-                scrollerRef.current?.scrollBy({
-                  left: 320,
-                  behavior: "smooth",
-                })
-              }
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-500/10 px-3.5 py-1 text-xs font-semibold text-sky-300">
+              <Sparkles className="h-3.5 w-3.5" />
+              Coming Soon
+            </span>
           </div>
         </div>
 
-        <div
-          ref={scrollerRef}
-          className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
-        >
-          {problems.map((problem, index) => {
-            const expanded = open === problem.title;
-            return (
-              <motion.article
-                key={problem.title}
-                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.04 }}
-                className="glass w-[min(100%,22rem)] shrink-0 snap-start rounded-3xl p-5"
-              >
-                <h3 className="font-display text-lg font-semibold text-white">
-                  {problem.title}
+        {/* 6 Track Preview Cards with Clean Coming Soon Status */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {tracks.map((track, index) => (
+            <motion.div
+              key={track.name}
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.04 }}
+              className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-sm transition hover:border-stone-400 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-[var(--muted)] uppercase tracking-wider">
+                    <Layers className="h-3 w-3 text-[var(--primary)]" /> Track {index + 1}
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-[var(--primary-soft)] px-2.5 py-0.5 text-[10px] font-semibold text-[var(--primary)]">
+                    {track.status}
+                  </span>
+                </div>
+                <h3 className="font-sans text-base font-bold text-[var(--foreground)]">
+                  {track.name}
                 </h3>
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-                      Difficulty
-                    </dt>
-                    <dd className="mt-1 text-sky-200">{problem.difficulty}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-                      Category
-                    </dt>
-                    <dd className="mt-1 text-white">{problem.category}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-                      Reward
-                    </dt>
-                    <dd className="mt-1 text-violet-200">{problem.reward}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-                      Duration
-                    </dt>
-                    <dd className="mt-1 font-mono text-white">{problem.duration}</dd>
-                  </div>
-                </dl>
+                <p className="mt-1 text-xs text-[var(--muted)] leading-relaxed">
+                  {track.category}
+                </p>
+              </div>
 
-                <button
-                  type="button"
-                  className="mt-5 flex w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-sm text-sky-200 transition hover:border-sky-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-                  aria-expanded={expanded}
-                  onClick={() =>
-                    setOpen(expanded ? null : problem.title)
-                  }
-                >
-                  {expanded ? "Hide details" : "Expand view"}
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition",
-                      expanded && "rotate-180",
-                    )}
-                  />
-                </button>
+              <div className="mt-4 pt-3 border-t border-[var(--card-border)] flex items-center justify-between text-[11px] text-[var(--muted)]">
+                <span>Kit Manifest: TBA</span>
+                <span>Rubric: 36h Sprint</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-                {expanded ? (
-                  <div className="mt-4 space-y-4 border-t border-white/10 pt-4 text-sm text-muted">
-                    <Detail title="Objectives" items={problem.objectives} />
-                    <Detail title="Requirements" items={problem.requirements} />
-                    <Detail
-                      title="Suggested components"
-                      items={problem.components}
-                    />
-                    <Detail
-                      title="Expected deliverables"
-                      items={problem.deliverables}
-                    />
-                    <Detail title="Judging criteria" items={problem.judging} />
-                    <div>
-                      <p className="font-display text-xs font-semibold text-white">
-                        Reference links
-                      </p>
-                      <ul className="mt-1 space-y-1">
-                        {problem.links.map((link) => (
-                          <li key={link.label}>
-                            <a
-                              href={link.href}
-                              className="text-sky-300 hover:underline"
-                            >
-                              {link.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ) : null}
-              </motion.article>
-            );
-          })}
+        {/* Action card */}
+        <div className="mt-8 rounded-[24px] border border-[var(--card-border)] bg-[var(--card-subtle)] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 className="font-sans text-base font-bold text-[var(--foreground)]">
+              Want to receive the problem statements the moment they drop?
+            </h4>
+            <p className="text-xs text-[var(--muted)] mt-1">
+              Registered participants and newsletter subscribers will receive prompt notification upon release.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <a href="#tracks">
+              <Button size="sm" variant="secondary">
+                View Domain Overviews
+              </Button>
+            </a>
+            <a href="#newsletter">
+              <Button size="sm" className="cta-primary">
+                <Bell className="mr-1.5 h-3.5 w-3.5" /> Get Notified
+              </Button>
+            </a>
+          </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function Detail({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div>
-      <p className="font-display text-xs font-semibold text-white">{title}</p>
-      <ul className="mt-1 space-y-1">
-        {items.map((item) => (
-          <li key={item}>· {item}</li>
-        ))}
-      </ul>
-    </div>
   );
 }

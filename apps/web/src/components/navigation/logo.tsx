@@ -5,8 +5,8 @@ import { useAppContent } from "@/store/content-context";
 
 export function Logo() {
   const { content } = useAppContent();
-  const appName = content?.event?.name || "Niral Hackathon";
-  const initial = appName.charAt(0) || "H";
+  const appName = content?.event?.name || "NIRAL Hackathon 2026";
+  const initial = appName.charAt(0) || "N";
 
   return (
     <Link

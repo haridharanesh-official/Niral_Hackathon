@@ -1,5 +1,5 @@
-import { HomePage } from "@/components/home/home-page";
+import { NiralHome } from '@/components/niral/niral-home';
 
 export default function Home() {
-  return <HomePage />;
+  return <NiralHome />;
 }

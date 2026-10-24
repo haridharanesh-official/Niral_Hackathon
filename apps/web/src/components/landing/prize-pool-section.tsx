@@ -16,7 +16,7 @@ export function PrizePoolSection() {
   const hasConfirmedPrize = Boolean(event?.prizePool && event.prizePool > 0);
   const totalPrizeFormatted = hasConfirmedPrize
     ? `₹${event!.prizePool.toLocaleString("en-IN")}`
-    : "To be announced";
+    : "Coming Soon";
 
   return (
     <section id="prizes" className="scroll-mt-24 py-16">
@@ -28,8 +28,8 @@ export function PrizePoolSection() {
             </h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
               {hasConfirmedPrize
-                ? `${totalPrizeFormatted} total across track winners, prototype manufacturing grants, and sponsor awards.`
-                : "Official prize pool distribution, hardware grants, and category bounties will be announced soon."}
+                ? `${totalPrizeFormatted} total across track winners, prototype grants, and sponsor awards.`
+                : "Official prize pool distribution, hardware prototype grants, and category awards coming soon."}
             </p>
           </div>
           <Link href="/register">

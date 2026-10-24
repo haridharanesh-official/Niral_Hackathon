@@ -49,8 +49,8 @@ export function TimelineSection() {
               Official hackathon dates are confirmed for December 3–4, 2026. The detailed checkpoint and mentorship schedule is currently being finalized.
             </p>
           </div>
-          <div className="rounded-xl border border-sky-400/20 bg-sky-500/10 px-3.5 py-2 text-xs text-sky-200">
-            Detailed session timings to be announced
+          <div className="rounded-xl border border-sky-400/30 bg-sky-500/10 px-3.5 py-2 text-xs font-medium text-sky-300">
+            Detailed schedule coming soon
           </div>
         </div>
 

@@ -1,10 +1,9 @@
 export const NAV_LINKS = [
   { href: "#about", label: "About" },
-  { href: "#themes", label: "Themes" },
-  { href: "#timeline", label: "Timeline" },
-  { href: "#resources", label: "Resources" },
-  { href: "#leaderboard", label: "Leaderboard" },
-  { href: "#gallery", label: "Gallery" },
+  { href: "#tracks", label: "Tracks" },
+  { href: "#problems", label: "Problem Statements" },
+  { href: "#timeline", label: "Schedule" },
+  { href: "#rules", label: "Rules" },
   { href: "#faq", label: "FAQ" },
   { href: "#contact", label: "Contact" },
 ] as const;

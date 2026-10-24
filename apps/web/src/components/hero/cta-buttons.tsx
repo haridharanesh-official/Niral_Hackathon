@@ -29,10 +29,10 @@ export function CTAButtons({ isLive }: { isLive?: boolean }) {
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Button>
       </Link>
-      <a href="#themes">
+      <a href="#tracks">
         <Button variant="secondary" size="lg">
           <CircuitBoard className="h-4 w-4" aria-hidden />
-          Explore Challenges
+          Explore Tracks
         </Button>
       </a>
     </motion.div>

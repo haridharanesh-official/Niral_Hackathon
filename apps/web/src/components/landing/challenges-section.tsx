@@ -106,7 +106,7 @@ const themes: Theme[] = [
     architecture:
       "City sensors/cameras → edge inference → municipal ops console.",
     hardware: ["Camera nodes", "Ultrasonic sensors", "RPi", "GPS modules"],
-    resources: [{ label: "Smart city patterns", href: "#resources" }],
+    resources: [{ label: "Open Geospatial Consortium", href: "https://www.ogc.org/" }],
   },
   {
     icon: Sun,
@@ -123,7 +123,7 @@ const themes: Theme[] = [
     architecture:
       "Meters/inverters → gateway → time-series DB → optimization services.",
     hardware: ["Current clamps", "Smart meters", "RPi", "Relay controllers"],
-    resources: [{ label: "Docker deploy guide", href: "#resources" }],
+    resources: [{ label: "Modbus Protocol Docs", href: "https://modbus.org/" }],
   },
   {
     icon: Zap,
@@ -179,7 +179,7 @@ export function ChallengesSection() {
   }, [active]);
 
   return (
-    <section id="themes" className="scroll-mt-24 py-16">
+    <section id="tracks" className="scroll-mt-24 py-16">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

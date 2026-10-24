@@ -10,38 +10,27 @@ export function AboutSection() {
   const reduceMotion = useReducedMotion();
   const { content } = useAppContent();
   const event = content?.event;
-  const s = content?.statistics;
 
-  const aboutStats = [
+  const aboutPillars = [
     {
-      label: "Participants",
-      render: (n: number) => `${n.toLocaleString("en-IN")}+`,
-      value: s?.participants ?? 2500,
+      title: "36-Hour Sprint",
+      subtitle: "Continuous building, debugging, and live hardware prototyping on-site.",
+      badge: "Format",
     },
     {
-      label: "Teams",
-      render: (n: number) => `${n}+`,
-      value: s?.teams ?? 600,
+      title: "Hardware & Edge AI",
+      subtitle: "ESP32, STM32, Raspberry Pi, industrial telemetry, and embedded vision.",
+      badge: "Focus",
     },
     {
-      label: "Mentors",
-      render: (n: number) => `${n}+`,
-      value: s?.mentors ?? 42,
+      title: "Organized by IoT Club",
+      subtitle: "Hosted at Sri Shakthi Institute of Engineering and Technology.",
+      badge: "Host",
     },
     {
-      label: "Industry Partners",
-      render: (n: number) => `${n}+`,
-      value: s?.sponsors ?? 15,
-    },
-    {
-      label: "Innovation",
-      render: (n: number) => `${n} Hours`,
-      value: 72,
-    },
-    {
-      label: "Prize Pool",
-      render: (n: number) => `₹${n.toLocaleString("en-IN")}+`,
-      value: event?.prizePool ?? 500000,
+      title: "National Participation",
+      subtitle: "Open to engineering students, developers, and makers across India.",
+      badge: "Eligibility",
     },
   ];
 
@@ -49,7 +38,7 @@ export function AboutSection() {
     <section id="about" className="relative scroll-mt-24 overflow-hidden py-16">
       <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6">
         <p className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-          About {event?.name || "Niral Hackathon"}
+          About NIRAL Hackathon 2026
         </p>
 
         <div className="mt-4 grid items-center gap-10 lg:grid-cols-2">
@@ -60,37 +49,49 @@ export function AboutSection() {
             className="space-y-5"
           >
             <h2 className="font-sans text-3xl sm:text-4xl font-bold tracking-tight text-[var(--foreground)] leading-tight">
-              {event?.tagline || "The Future of Connected Hardware Starts Here"}
+              Empowering the Next Generation of IoT & Hardware Innovators
             </h2>
             <p className="text-sm leading-relaxed text-[var(--muted)]">
               {event?.description ||
-                "A research-driven hackathon platform bringing together innovators, engineers, researchers, and students to build tangible solutions."}
+                "NIRAL Hackathon 2026 is a flagship hackathon hosted by the IoT Club at Sri Shakthi Institute of Engineering and Technology. Over 36 intensive hours, teams converge on campus to tackle critical real-world challenges in industrial automation, healthcare, precision agriculture, smart cities, and edge AI."}
+            </p>
+            <p className="text-sm leading-relaxed text-[var(--muted)]">
+              Participants receive hands-on mentoring from industry experts, access to testing hardware components, and evaluation under a transparent, objective rubric.
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
-              <a href="#themes">
+              <a href="#tracks">
                 <Button size="md" className="cta-primary">
-                  Explore themes <ArrowRight className="ml-1 h-4 w-4" />
+                  Explore Tracks <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </a>
-              <a href="#prizes">
+              <a href="#rules">
                 <Button size="md" variant="secondary">
-                  View rewards
+                  Rules & Eligibility
                 </Button>
               </a>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {aboutStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card)] p-4 text-center shadow-sm transition hover:border-stone-400"
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {aboutPillars.map((pillar, index) => (
+              <motion.div
+                key={pillar.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-sm transition hover:border-stone-400"
               >
-                <div className="font-sans text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)]">
-                  <AnimatedCounter value={stat.value} format={stat.render} />
-                </div>
-                <div className="mt-1 text-xs text-[var(--muted)]">{stat.label}</div>
-              </div>
+                <span className="inline-flex items-center rounded-full bg-[var(--primary-soft)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--primary)]">
+                  {pillar.badge}
+                </span>
+                <h3 className="mt-3 font-sans text-base font-bold text-[var(--foreground)]">
+                  {pillar.title}
+                </h3>
+                <p className="mt-1.5 text-xs text-[var(--muted)] leading-relaxed">
+                  {pillar.subtitle}
+                </p>
+              </motion.div>
             ))}
           </div>
         </div>

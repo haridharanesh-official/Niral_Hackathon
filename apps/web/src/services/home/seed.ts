@@ -18,7 +18,7 @@ export const homeEventSeed: HomeEvent = {
   description:
     "NIRAL Hackathon 2026 is an innovation-driven IoT and emerging technologies platform for students, researchers, makers, and innovators.",
   tagline: "The Future of Innovation Starts Here",
-  venue: "To be announced (Hybrid — Campus + Online)",
+  venue: "Sri Shakthi Institute of Engineering and Technology",
   startsAt: "2026-12-03T00:00:00.000Z",
   endsAt: "2026-12-04T23:59:59.000Z",
   registrationDeadline: "TBA",
@@ -156,30 +156,30 @@ export const homeThemesSeed: ThemeItem[] = [
 export const homeAnnouncementsSeed: AnnouncementItem[] = [
   {
     id: "a1",
-    title: "Workshop starts at 10:00 AM",
-    message: "On-device ML clinic in Hall A.",
+    title: "NIRAL Hackathon 2026 dates confirmed: December 3–4, 2026",
+    message: "Join us at Sri Shakthi Institute of Engineering and Technology.",
     priority: "high",
     publishedAt: new Date().toISOString(),
   },
   {
     id: "a2",
-    title: "New sponsor announced",
-    message: "Welcome our latest Platinum partner.",
+    title: "Pre-registration is now open — register your team today",
+    message: "Open to students, developers, and innovators across India.",
     priority: "normal",
     publishedAt: new Date().toISOString(),
   },
   {
     id: "a3",
-    title: "Problem statements released",
-    message: "Featured challenges are live on the home page.",
+    title: "Organized by IoT Club, Sri Shakthi Institute of Engineering and Technology",
+    message: "Official Contact: iotclub.siet@gmail.com | 8508511975",
     priority: "high",
     publishedAt: new Date().toISOString(),
   },
   {
     id: "a4",
-    title: "Registration deadline extended",
-    message: "Seats remain — register before capacity closes.",
-    priority: "high",
+    title: "Detailed problem statements & hardware catalog coming soon",
+    message: "Official challenge releases will be published ahead of the event.",
+    priority: "normal",
     publishedAt: new Date().toISOString(),
   },
 ];

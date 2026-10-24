@@ -25,38 +25,60 @@ export function ContactNewsletterSection() {
   const [pending, setPending] = useState(false);
 
   return (
-    <section id="contact" className="scroll-mt-24 py-20">
-      <div className="mx-auto grid max-w-6xl gap-8 px-6 lg:grid-cols-2">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8">
-          <h2 className="font-display text-3xl font-bold text-white">Contact</h2>
-          <p className="mt-3 text-muted">
-            Questions about sponsorships, mentoring, or campus hosting?
-          </p>
-          <div className="mt-6 space-y-3 text-sm">
-            <p>
-              <span className="text-muted">Email · </span>
-              <a className="text-sky-300 hover:underline" href="mailto:hello@niralhackathon.com">
-                hello@niralhackathon.com
-              </a>
+    <section id="contact" className="scroll-mt-24 py-16">
+      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 sm:px-6 lg:grid-cols-2">
+        <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card)] p-8 sm:p-10 shadow-sm flex flex-col justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Get in Touch
+            </span>
+            <h2 className="mt-1 font-sans text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
+              Contact & Organizing Desk
+            </h2>
+            <p className="mt-2 text-sm text-[var(--muted)] leading-relaxed">
+              Reach out to the NIRAL Hackathon 2026 organizing committee at IoT Club, Sri Shakthi Institute of Engineering and Technology for registrations, mentorship, hardware lab inquiries, or sponsorships.
             </p>
-            <p>
-              <span className="text-muted">Ops desk · </span>
-              <span className="text-white">+1 (555) 014-2026</span>
-            </p>
-            <p>
-              <span className="text-muted">Venue · </span>
-              <span className="text-white">Hybrid — Campus Innovation Hall + Online</span>
-            </p>
+            <div className="mt-8 space-y-5">
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-subtle)] p-4">
+                <span className="text-[var(--muted)] block text-xs font-semibold uppercase tracking-wider">
+                  Official Email
+                </span>
+                <a className="mt-1 text-[var(--primary)] font-semibold hover:underline text-base inline-block" href="mailto:iotclub.siet@gmail.com">
+                  iotclub.siet@gmail.com
+                </a>
+              </div>
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-subtle)] p-4">
+                <span className="text-[var(--muted)] block text-xs font-semibold uppercase tracking-wider">
+                  Helpline / Phone
+                </span>
+                <a className="mt-1 text-[var(--foreground)] font-semibold hover:underline text-base inline-block" href="tel:8508511975">
+                  8508511975
+                </a>
+              </div>
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-subtle)] p-4">
+                <span className="text-[var(--muted)] block text-xs font-semibold uppercase tracking-wider">
+                  Venue & Host Institution
+                </span>
+                <span className="mt-1 text-[var(--foreground)] font-semibold text-base block">
+                  Sri Shakthi Institute of Engineering and Technology
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div
           id="newsletter"
-          className="rounded-3xl border border-sky-400/20 bg-gradient-to-br from-sky-500/10 to-violet-500/10 p-8"
+          className="rounded-[28px] border border-[var(--primary)]/30 bg-[var(--card)] p-8 sm:p-10 shadow-sm"
         >
-          <h2 className="font-display text-3xl font-bold text-white">Newsletter</h2>
-          <p className="mt-3 text-muted">
-            Challenge teasers, mentor schedules, and prize updates.
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+            Stay Connected
+          </span>
+          <h2 className="mt-1 font-sans text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
+            Hackathon Updates & Bulletin
+          </h2>
+          <p className="mt-2 text-sm text-[var(--muted)] leading-relaxed">
+            Subscribe for track problem statement drops, hardware kit manifests, and mentor scheduling announcements.
           </p>
           <form
             className="mt-6 grid gap-3"
@@ -109,11 +131,11 @@ export function ContactNewsletterSection() {
               aria-label="Interests"
               disabled={pending}
             >
-              <option>Hardware</option>
-              <option>AI / ML</option>
-              <option>Cloud</option>
-              <option>Product</option>
-              <option>Sponsorship</option>
+              <option>Hardware & Sensors</option>
+              <option>AI / ML & Edge</option>
+              <option>Cloud & Backend</option>
+              <option>Embedded & IoT Systems</option>
+              <option>Cybersecurity</option>
             </select>
             <select
               className="field-input"

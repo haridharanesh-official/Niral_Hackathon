@@ -27,24 +27,28 @@ export function ContactNewsletterSection() {
     <section id="contact" className="scroll-mt-24 py-20">
       <div className="mx-auto grid max-w-6xl gap-8 px-6 lg:grid-cols-2">
         <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8">
-          <h2 className="font-display text-3xl font-bold text-white">Contact</h2>
+          <h2 className="font-display text-3xl font-bold text-white">Contact & Organizing Desk</h2>
           <p className="mt-3 text-muted">
-            Questions about sponsorships, mentoring, or campus hosting?
+            Reach out to the NIRAL Hackathon 2026 organizing team for registrations, guidelines, and sponsorships.
           </p>
-          <div className="mt-6 space-y-3 text-sm">
+          <div className="mt-6 space-y-4 text-sm">
             <p>
-              <span className="text-muted">Email · </span>
-              <a className="text-sky-300 hover:underline" href="mailto:hello@niralhackathon.com">
-                hello@niralhackathon.com
+              <span className="text-muted block text-xs uppercase tracking-wider">Official Email</span>
+              <a className="text-sky-300 font-medium hover:underline text-base" href="mailto:iotclub.siet@gmail.com">
+                iotclub.siet@gmail.com
               </a>
             </p>
             <p>
-              <span className="text-muted">Ops desk · </span>
-              <span className="text-white">+1 (555) 014-2026</span>
+              <span className="text-muted block text-xs uppercase tracking-wider">Helpline / Phone</span>
+              <a className="text-white font-medium hover:underline text-base" href="tel:8508511975">
+                8508511975
+              </a>
             </p>
             <p>
-              <span className="text-muted">Venue · </span>
-              <span className="text-white">Hybrid — Campus Innovation Hall + Online</span>
+              <span className="text-muted block text-xs uppercase tracking-wider">Official Venue</span>
+              <span className="text-white font-medium text-base">
+                Sri Shakthi Institute of Engineering and Technology
+              </span>
             </p>
           </div>
         </div>
@@ -106,11 +110,11 @@ export function ContactNewsletterSection() {
               onChange={(e) => setInterest(e.target.value)}
               aria-label="Interests"
             >
-              <option>Hardware</option>
-              <option>AI / ML</option>
-              <option>Cloud</option>
-              <option>Product</option>
-              <option>Sponsorship</option>
+              <option>Hardware & Sensors</option>
+              <option>AI / ML & Edge</option>
+              <option>Cloud & Backend</option>
+              <option>Embedded & IoT Systems</option>
+              <option>Cybersecurity</option>
             </select>
             <select
               className="field-input"
