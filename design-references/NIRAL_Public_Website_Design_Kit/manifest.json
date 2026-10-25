@@ -1,0 +1,76 @@
+{
+  "kit": "NIRAL 2026 Public Website Design Kit",
+  "reference_policy": "Design mockups only; not factual event data",
+  "pages": [
+    {
+      "file": "references/01_home_introduction.png",
+      "route": "/",
+      "page": "Home / Introduction",
+      "dimensions": "1086x1448",
+      "sha256": "d11b99bee804459a77292359dd53c3601e434f7d490fe1581a95800317072724"
+    },
+    {
+      "file": "references/02_about_niral.png",
+      "route": "/about",
+      "page": "About NIRAL",
+      "dimensions": "1086x1448",
+      "sha256": "409b77419265aeb87eb397a138e7768b1e0d35268ecafe1d970de4aac826e167"
+    },
+    {
+      "file": "references/03_how_to_participate.png",
+      "route": "/participate",
+      "page": "How to Participate",
+      "dimensions": "1086x1448",
+      "sha256": "8295285cfcc629bb116e6e0e40871c7c214c8d6c108c464c59637ae412c6174a"
+    },
+    {
+      "file": "references/04_innovation_tracks.png",
+      "route": "/tracks",
+      "page": "Innovation Tracks",
+      "dimensions": "1086x1448",
+      "sha256": "456e2983b1ba33d14ab9be97eec1d1a9199965bce2210abc1414c3c426384e53"
+    },
+    {
+      "file": "references/05_problem_statements.png",
+      "route": "/problems",
+      "page": "Problem Statements",
+      "dimensions": "1086x1448",
+      "sha256": "6677ff21b196a3052a3d808a6a1fb2109612a09239fbe5dabd2977fd34486866"
+    },
+    {
+      "file": "references/06_event_schedule.png",
+      "route": "/schedule",
+      "page": "Event Schedule",
+      "dimensions": "1086x1448",
+      "sha256": "73d6b9a61d41e7eace354cea7bc532b56ac11edec2bfc001ee22e940d087f743"
+    },
+    {
+      "file": "references/07_rules_eligibility.png",
+      "route": "/rules",
+      "page": "Rules & Eligibility",
+      "dimensions": "1086x1448",
+      "sha256": "6a2e7c1f936c1b4a90e252139e112130381875f5832427c74b5e249c27212187"
+    },
+    {
+      "file": "references/08_official_updates.png",
+      "route": "/updates",
+      "page": "Official Updates",
+      "dimensions": "1086x1448",
+      "sha256": "d0b2572cd9e8825425a17458fbd015d959470295eea40fdf7adee65676c89ff0"
+    },
+    {
+      "file": "references/09_frequently_asked_questions.png",
+      "route": "/faq",
+      "page": "FAQ",
+      "dimensions": "1086x1448",
+      "sha256": "038395699e351314243232f980bd986b0966cb63989c8fd3ad7961f405e990f7"
+    },
+    {
+      "file": "references/10_contact_venue.png",
+      "route": "/contact",
+      "page": "Contact & Venue",
+      "dimensions": "1086x1448",
+      "sha256": "6764099c3beec5ed58bbdc27c473eb9ab443a16523dc99d28c55cb3844ba0135"
+    }
+  ]
+}

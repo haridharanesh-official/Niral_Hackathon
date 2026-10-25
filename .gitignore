@@ -54,5 +54,6 @@ apps/api/prisma/*.db-journal
 
 # Misc
 *.pem
+*.zip
 .vercel
 .docker

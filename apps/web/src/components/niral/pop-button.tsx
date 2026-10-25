@@ -10,9 +10,10 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   href?: string;
   children: ReactNode;
   cream?: boolean;
+  dark?: boolean;
 };
-export function PopButton({ href, children, cream, className = '', ...props }: Props) {
-  const classes = `${styles.pop} ${cream ? styles.cream : ''} ${className}`;
+export function PopButton({ href, children, cream, dark, className = '', ...props }: Props) {
+  const classes = `${styles.pop} ${cream ? styles.cream : ''} ${dark ? styles.dark : ''} ${className}`;
   if (href)
     return (
       <Link href={href} className={classes}>

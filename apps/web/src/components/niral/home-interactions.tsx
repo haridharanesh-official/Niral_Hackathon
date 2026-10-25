@@ -17,6 +17,7 @@ export const navigation = [
   'Problems',
   'Schedule',
   'Rules',
+  'Updates',
   'FAQ',
   'Contact',
 ];

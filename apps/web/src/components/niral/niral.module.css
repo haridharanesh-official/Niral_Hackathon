@@ -149,6 +149,14 @@
 .cream:hover {
   background: #fff0e9;
 }
+.dark {
+  background: #111;
+  color: #fff;
+}
+.dark:hover {
+  background: #262626;
+  color: #fff;
+}
 .headerActions .pop {
   padding: 7px 20px;
   font-size: 14px;
