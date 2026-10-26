@@ -63,7 +63,7 @@ const allFaqs: FaqEntry[] = [
     {
       num: 4,
       q: 'Can I participate in a team?',
-      a: 'Yes! You can participate individually or form a team. Team details, including size limits and composition rules, will be confirmed by the organizers closer to the event. Check the Rules page for the latest guidelines.',
+      a: 'The event configuration specifies teams of 2–4 members. Check the Rules page for participation guidance.',
       category: 'Teams',
     },
     {
@@ -75,7 +75,7 @@ const allFaqs: FaqEntry[] = [
     {
       num: 6,
       q: 'How many team members are allowed?',
-      a: 'Team size guidelines will be confirmed by the organizers. Please refer to the Rules page for the latest official team policy.',
+      a: 'The event configuration specifies 2–4 members per team. Solo participation and team composition exceptions have not been confirmed.',
       category: 'Teams',
     },
     {
@@ -156,7 +156,7 @@ export function FaqPage() {
             </div>
             <PopButton
               onClick={() => {
-                /* search is live-filtering */
+                document.getElementById('faq-results')?.focus();
               }}
             >
               Search
@@ -193,7 +193,7 @@ export function FaqPage() {
         style={{
           display: 'flex',
           gap: 4,
-          overflowX: 'auto',
+          flexWrap: 'wrap',
           marginBottom: 36,
           borderBottom: '2px solid #e6e3df',
           paddingBottom: 0,
@@ -232,7 +232,7 @@ export function FaqPage() {
       </div>
 
       {/* FAQ Accordion Grid */}
-      <section style={{ margin: '0 0 60px' }}>
+      <section id="faq-results" tabIndex={-1} style={{ margin: '0 0 60px' }}>
         <div style={{ marginBottom: 28 }}>
           <span className={publicStyles.sectionEyebrow}>COMMON QUESTIONS</span>
           <h2 className={publicStyles.sectionTitle}>
@@ -260,7 +260,7 @@ export function FaqPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))',
               gap: 14,
             }}
           >

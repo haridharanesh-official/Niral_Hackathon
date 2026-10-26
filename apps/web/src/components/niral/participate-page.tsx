@@ -17,7 +17,6 @@ import {
   UserPlus,
   FileText,
   BarChart2,
-  Lock,
   Mail,
   User,
 } from 'lucide-react';
@@ -34,7 +33,6 @@ export function ParticipatePage() {
   // Quick form state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [formMsg, setFormMsg] = useState('');
 
   const journeySteps = [
@@ -98,11 +96,11 @@ export function ParticipatePage() {
   const faqs = [
     {
       q: 'Is there a registration fee?',
-      a: 'No, NIRAL 2026 is completely free to participate.',
+      a: 'Registration fee details will be confirmed by the organizers. Check the Updates page for official announcements.',
     },
     {
       q: 'Can I participate in a team?',
-      a: 'Yes, you can participate solo or in a team of up to 4 members.',
+      a: 'The event configuration specifies teams of 2–4 members. Solo participation has not been confirmed.',
     },
     {
       q: 'What is the eligibility criteria?',
@@ -116,7 +114,7 @@ export function ParticipatePage() {
 
   const handleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !email) {
+    if (!fullName.trim() || !email.trim()) {
       setFormMsg('Please provide your name and email.');
       return;
     }
@@ -138,6 +136,7 @@ export function ParticipatePage() {
 
   return (
     <PublicPageShell activeRoute="/participate">
+      <p className={publicStyles.tactileCardPeach}>Create an account to prepare your profile. Event registration availability and fees await organizer confirmation; an account does not confirm enrollment.</p>
       {/* Hero Section */}
       <section className={publicStyles.heroSection} aria-labelledby="participate-title">
         <div className={publicStyles.heroContent}>
@@ -157,7 +156,7 @@ export function ParticipatePage() {
           </p>
           <div className={publicStyles.heroActions}>
             <PopButton href="/register">
-              Register Now <ArrowRight size={18} />
+              Create Account <ArrowRight size={18} />
             </PopButton>
             <PopButton href="#journey" cream>
               <Play size={16} /> Watch Guide
@@ -180,7 +179,7 @@ export function ParticipatePage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
             gap: 20,
             position: 'relative',
           }}
@@ -265,7 +264,7 @@ export function ParticipatePage() {
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
           gap: 36,
           alignItems: 'start',
           margin: '60px 0',
@@ -282,7 +281,7 @@ export function ParticipatePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
               gap: 16,
             }}
           >
@@ -358,13 +357,13 @@ export function ParticipatePage() {
                 borderRadius: 20,
               }}
             >
-              Quick Registration ⚡
+              Start Your Account ⚡
             </span>
           </div>
 
           <form onSubmit={handleQuickSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>
+              <label htmlFor="participate-name" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>
                 Full Name
               </label>
               <div
@@ -381,7 +380,7 @@ export function ParticipatePage() {
                 <User size={16} color="#777" />
                 <input
                   type="text"
-                  placeholder="e.g. Priyanshu Sharma"
+                  id="participate-name" autoComplete="name" placeholder="e.g. Priyanshu Sharma"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
@@ -391,7 +390,7 @@ export function ParticipatePage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>
+              <label htmlFor="participate-email" style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>
                 Email Address
               </label>
               <div
@@ -408,36 +407,10 @@ export function ParticipatePage() {
                 <Mail size={16} color="#777" />
                 <input
                   type="email"
-                  placeholder="name@college.edu"
+                  id="participate-email" autoComplete="email" placeholder="name@college.edu"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  style={{ border: 'none', outline: 'none', width: '100%', fontSize: 14 }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>
-                Password
-              </label>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  background: '#fff',
-                  border: '2px solid #111',
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                }}
-              >
-                <Lock size={16} color="#777" />
-                <input
-                  type="password"
-                  placeholder="Create a secure password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   style={{ border: 'none', outline: 'none', width: '100%', fontSize: 14 }}
                 />
               </div>
@@ -462,7 +435,7 @@ export function ParticipatePage() {
               }}
             >
               <Sparkles size={15} color="#fd9b9b" />
-              <span>Join hundreds of curious students and makers!</span>
+              <span>Account creation is separate from event enrollment. Check Updates for registration availability.</span>
             </div>
           </form>
         </div>
@@ -504,7 +477,7 @@ export function ParticipatePage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
             gap: 18,
           }}
         >
@@ -578,7 +551,7 @@ export function ParticipatePage() {
 
         <div className={publicStyles.heroActions}>
           <PopButton href="/register">
-            Register Now <ArrowRight size={18} />
+            Create Account <ArrowRight size={18} />
           </PopButton>
           <PopButton href="/about" cream>
             Learn More

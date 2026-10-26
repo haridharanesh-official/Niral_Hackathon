@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ElementType } from 'react';
 import {
   ArrowRight,
@@ -43,6 +43,21 @@ export function TracksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Tracks');
   const [activeModalTrack, setActiveModalTrack] = useState<TrackItem | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!activeModalTrack) return;
+    const dialog = dialogRef.current;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    dialog?.showModal();
+    document.body.style.overflow = 'hidden';
+    return () => {
+      dialog?.close();
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [activeModalTrack]);
+
 
   const categories = [
     'All Tracks',
@@ -60,7 +75,7 @@ export function TracksPage() {
       category: 'IoT',
       icon: Wifi,
       description: 'Build connected solutions for a smarter, safer and more efficient world.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['MQTT', 'ESP-IDF', 'Node-RED', 'LoRaWAN', 'BLE'],
       hardware: ['ESP32', 'Raspberry Pi', 'LoRa Nodes', 'Environmental Sensors'],
       sampleProject: 'Autonomous IoT telemetry mesh with real-time cloud failover',
@@ -71,7 +86,7 @@ export function TracksPage() {
       category: 'AI/ML',
       icon: Cpu,
       description: 'Bring intelligent systems to the edge with next-gen AI/ML solutions.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['TensorFlow Lite', 'Edge Impulse', 'OpenCV', 'PyTorch Mobile'],
       hardware: ['Jetson Nano', 'ESP32-S3 AI', 'Raspberry Pi Camera', 'Kneron NPU'],
       sampleProject: 'On-device vision defect detection and predictive vibration analytics',
@@ -82,7 +97,7 @@ export function TracksPage() {
       category: 'Hardware',
       icon: Settings,
       description: 'Design integrated systems that solve real-world industrial and civic challenges.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['SCADA', 'Modbus', 'CAN bus', 'Industrial Gateway', 'Docker'],
       hardware: ['PLC Controllers', 'RS485 Adapters', 'Current Sensors', 'Smart Relays'],
       sampleProject: 'Factory floor digital twin with real-time anomaly isolation',
@@ -93,7 +108,7 @@ export function TracksPage() {
       category: 'Hardware',
       icon: Layers,
       description: 'Create autonomous, assistive and intelligent machines for the future.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['ROS2', 'Micro-ROS', 'Computer Vision', 'PID Control', 'LiDAR'],
       hardware: ['Stepper Drivers', 'STM32 Nucleo', 'Time-of-Flight Sensors', 'Robotic Arm'],
       sampleProject: 'Assistive navigation robot with obstacle avoidance and voice telemetry',
@@ -104,7 +119,7 @@ export function TracksPage() {
       category: 'Hardware',
       icon: Radio,
       description: 'Build low-level, high-impact solutions with embedded hardware and firmware.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['C/C++', 'FreeRTOS', 'Bare-metal ARM', 'I2C/SPI', 'UART'],
       hardware: ['STM32', 'RP2040', 'Nordic nRF52', 'Custom PCB Nodes'],
       sampleProject: 'Ultra low-power battery-operated soil logger running FreeRTOS',
@@ -115,7 +130,7 @@ export function TracksPage() {
       category: 'Sustainability',
       icon: Building,
       description: 'Reimagine campus life with technology-driven, sustainable solutions.',
-      problemsCount: 'Curated Challenges',
+      problemsCount: 'Example Domain',
       technologies: ['GIS', 'MQTT', 'Energy Analytics', 'Smart Attendance', 'Next.js'],
       hardware: ['RFID/NFC Readers', 'Power Clamps', 'Occupancy Sensors', 'Indoor Gateways'],
       sampleProject: 'Campus load-shedding monitor and intelligent classroom ventilation',
@@ -167,6 +182,7 @@ export function TracksPage() {
         <TracksConstellationArt />
       </section>
 
+      <p className={publicStyles.sectionSubtitle}>These domains and project examples are illustrative. Official tracks and challenges await organizer publication.</p>
       {/* Search & Category Filter Bar */}
       <div className={publicStyles.filterBarContainer} id="tracks-grid">
         <div className={publicStyles.searchRow}>
@@ -185,6 +201,7 @@ export function TracksPage() {
               <button
                 key={cat}
                 type="button"
+                aria-pressed={selectedCategory === cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`${publicStyles.filterChip} ${
                   selectedCategory === cat ? publicStyles.filterChipActive : ''
@@ -226,10 +243,11 @@ export function TracksPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
             gap: 24,
           }}
         >
+          {filteredTracks.length === 0 && <p role="status">No tracks match your search. Try another keyword or category.</p>}
           {filteredTracks.map((track) => {
             const Icon = track.icon;
             return (
@@ -345,7 +363,7 @@ export function TracksPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
             gap: 18,
           }}
         >
@@ -423,7 +441,7 @@ export function TracksPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
             gap: 16,
             marginBottom: 36,
           }}
@@ -472,11 +490,23 @@ export function TracksPage() {
 
       {/* Track Detail Modal */}
       {activeModalTrack && (
-        <div
-          className={publicStyles.modalOverlay}
-          onClick={() => setActiveModalTrack(null)}
-          role="dialog"
-          aria-modal="true"
+        <dialog
+          ref={dialogRef}
+          className={publicStyles.trackDialog}
+          aria-labelledby="track-dialog-title"
+          onCancel={() => setActiveModalTrack(null)}
+          onKeyDown={(event) => {
+            if (event.key !== 'Tab') return;
+            const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input, select, textarea, [tabindex="0"]'));
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault(); last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault(); first?.focus();
+            }
+          }}
+          onClick={(event) => { if (event.target === event.currentTarget) setActiveModalTrack(null); }}
         >
           <div
             className={publicStyles.modalBox}
@@ -487,12 +517,13 @@ export function TracksPage() {
               className={publicStyles.modalCloseBtn}
               onClick={() => setActiveModalTrack(null)}
               aria-label="Close track details"
+              autoFocus
             >
               <X size={18} />
             </button>
 
             <span className={publicStyles.sectionEyebrow}>TRACK OVERVIEW</span>
-            <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 28, fontWeight: 700, margin: '0 0 8px 0' }}>
+            <h2 id="track-dialog-title" style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 28, fontWeight: 700, margin: '0 0 8px 0' }}>
               {activeModalTrack.title}
             </h2>
             <p style={{ fontSize: 15, color: '#555', marginBottom: 20 }}>
@@ -524,14 +555,14 @@ export function TracksPage() {
 
             <div style={{ marginBottom: 24 }}>
               <h4 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', color: '#888', marginBottom: 8 }}>
-                Sample Architecture / Project
+                Illustrative Architecture / Project
               </h4>
               <p style={{ fontSize: 13.5, color: '#333', background: '#faf7f2', padding: 12, borderRadius: 8, border: '1px solid #dededb' }}>
                 {activeModalTrack.sampleProject}
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div className={publicStyles.modalActions}>
               <PopButton href="/problems" onClick={() => setActiveModalTrack(null)}>
                 View Problem Statements <ArrowRight size={16} />
               </PopButton>
@@ -540,7 +571,7 @@ export function TracksPage() {
               </PopButton>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </PublicPageShell>
   );

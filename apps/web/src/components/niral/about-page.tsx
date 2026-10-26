@@ -51,8 +51,8 @@ export function AboutPage() {
       Icon: Users,
     },
     {
-      title: 'Mentorship & Guidance',
-      desc: 'Learn from industry experts and innovators.',
+      title: 'Shared Learning',
+      desc: 'Exchange ideas and learn alongside fellow builders.',
       Icon: Lightbulb,
     },
     {
@@ -103,7 +103,7 @@ export function AboutPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
             gap: 32,
             alignItems: 'end',
             marginBottom: 36,
@@ -128,7 +128,7 @@ export function AboutPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
             gap: 22,
           }}
         >
@@ -226,7 +226,7 @@ export function AboutPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
             gap: 40,
             alignItems: 'center',
           }}
@@ -323,7 +323,7 @@ export function AboutPage() {
 
           <div className={publicStyles.bottomBannerAction}>
             <PopButton href="/register">
-              Register Now <ArrowRight size={18} />
+              Create Account <ArrowRight size={18} />
             </PopButton>
             <span className={publicStyles.bannerSubnote}>Be a part of NIRAL 2026</span>
           </div>

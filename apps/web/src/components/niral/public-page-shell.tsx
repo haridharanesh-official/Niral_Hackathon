@@ -8,9 +8,6 @@ import {
   MapPin,
   Mail,
   Phone,
-  Youtube,
-  Instagram,
-  Linkedin,
   Github,
 } from 'lucide-react';
 import { PopButton } from './pop-button';
@@ -56,7 +53,7 @@ export function PublicPageShell({
   const current = activeRoute || pathname;
 
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${publicStyles.publicPage}`}>
       <a className={styles.skip} href="#niral-main">
         Skip to content
       </a>
@@ -86,7 +83,7 @@ export function PublicPageShell({
           <PopButton href="/login" cream>
             Sign In
           </PopButton>
-          <PopButton href="/register">Register</PopButton>
+          <PopButton href="/register">Create Account</PopButton>
         </div>
         <MobileMenu />
       </header>
@@ -132,33 +129,6 @@ export function PublicPageShell({
             ))}
           </nav>
           <div className={publicStyles.socialIcons}>
-            <a
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="NIRAL on YouTube"
-              className={publicStyles.socialBtn}
-            >
-              <Youtube size={17} />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="NIRAL on Instagram"
-              className={publicStyles.socialBtn}
-            >
-              <Instagram size={17} />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="NIRAL on LinkedIn"
-              className={publicStyles.socialBtn}
-            >
-              <Linkedin size={17} />
-            </a>
             <a
               href="https://github.com/haridharanesh-official/Niral_Hackathon"
               target="_blank"

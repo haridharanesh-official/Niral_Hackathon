@@ -26,94 +26,9 @@ export function SchedulePage() {
     { icon: Users, label: 'Offline Event', sub: 'On-campus' },
   ];
 
-  // Per the master prompt, the mock's exact hours are NOT authorized facts.
-  // Show confirmed day-level info with TBA times.
-  const day1Sessions = [
-    {
-      time: 'Morning',
-      title: 'Registrations & Check-in',
-      description: 'Collect your kit, meet fellow innovators, and get set!',
-      venue: 'Main Lobby',
-    },
-    {
-      time: 'Morning',
-      title: 'Inauguration Ceremony',
-      description: 'Welcome address and event kickoff.',
-      venue: 'Auditorium',
-    },
-    {
-      time: 'Morning',
-      title: 'Problem Statement Release',
-      description: 'Explore problem statements across all tracks.',
-      venue: 'Auditorium',
-    },
-    {
-      time: 'Late Morning',
-      title: 'Team Formation & Networking',
-      description: 'Find your team, brainstorm ideas, and connect.',
-      venue: 'Discussion Area',
-    },
-    {
-      time: 'Afternoon',
-      title: 'Lunch Break',
-      description: 'Refuel and get ready to build!',
-      venue: 'Dining Hall',
-    },
-    {
-      time: 'Afternoon',
-      title: 'Technical Session',
-      description: 'Insights from industry experts.',
-      venue: 'Auditorium',
-    },
-    {
-      time: 'Afternoon – Night',
-      title: 'Hacking Hours Begin',
-      description: 'Turn ideas into reality. Mentors will be around!',
-      venue: 'Hackathon Arena',
-    },
-  ];
-
-  const day2Sessions = [
-    {
-      time: 'Early Morning',
-      title: 'Hacking Continues',
-      description: 'Continue building your projects with mentor support.',
-      venue: 'Hackathon Arena',
-    },
-    {
-      time: 'Morning',
-      title: 'Submission Deadline',
-      description: 'Final code freeze and project submission.',
-      venue: 'Online Portal',
-    },
-    {
-      time: 'Late Morning',
-      title: 'Project Presentations',
-      description: 'Demo your solution to the judging panel.',
-      venue: 'Auditorium',
-    },
-    {
-      time: 'Afternoon',
-      title: 'Judging & Evaluation',
-      description: 'Judges review and score all submissions.',
-      venue: 'Judging Rooms',
-    },
-    {
-      time: 'Afternoon',
-      title: 'Awards & Closing Ceremony',
-      description: 'Winners announced, prizes distributed, and farewell.',
-      venue: 'Auditorium',
-    },
-  ];
-
-  const sessions = activeDay === 1 ? day1Sessions : day2Sessions;
-
-  const keyHighlights = [
-    'Problem statements reveal',
-    'Expert keynote sessions',
-    'Team formation support',
-    '24 hours of building',
-  ];
+  // No approved session records are available. Never publish a draft agenda.
+  const sessions: { time: string; title: string; description: string; venue: string }[] = [];
+  const keyHighlights = ['December 3–4, 2026', 'Session details awaiting publication', 'Exact timings to be announced'];
 
   return (
     <PublicPageShell activeRoute="/schedule">
@@ -135,7 +50,7 @@ export function SchedulePage() {
           </p>
           <div className={publicStyles.heroActions}>
             <PopButton href="/register">
-              Register Now <ArrowRight size={18} />
+              Create Account <ArrowRight size={18} />
             </PopButton>
           </div>
         </div>
@@ -146,7 +61,7 @@ export function SchedulePage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
           gap: 18,
           margin: '10px 0 40px',
         }}
@@ -176,6 +91,7 @@ export function SchedulePage() {
 
       {/* Day Tabs */}
       <div
+        className={publicStyles.dayTabs}
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -235,6 +151,7 @@ export function SchedulePage() {
 
       {/* Day Schedule + Sidebar */}
       <section
+        className={publicStyles.responsiveColumns}
         style={{
           display: 'grid',
           gridTemplateColumns: '1.6fr 1fr',
@@ -259,12 +176,13 @@ export function SchedulePage() {
             </h2>
             <p className={publicStyles.sectionSubtitle}>
               {activeDay === 1
-                ? 'Kickstart your NIRAL journey with inspiring sessions, team formation, and the beginning of an exciting build.'
-                : 'Finish building, polish your demo, present to judges, and celebrate the results.'}
+                ? 'December 3, 2026. Sessions, times and room assignments have not been published.'
+                : 'December 4, 2026. Sessions, times and room assignments have not been published.'}
             </p>
           </div>
 
-          {/* Session cards as a timeline */}
+          <p role="status" className={publicStyles.tactileCardPeach}>Schedule to be announced. Only the event dates are confirmed.</p>
+          {/* Published sessions only */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' }}>
             {/* Vertical line */}
             <div
@@ -470,7 +388,7 @@ export function SchedulePage() {
         </div>
         <div className={publicStyles.bottomBannerAction}>
           <PopButton href="/register">
-            Register Now <ArrowRight size={18} />
+            Create Account <ArrowRight size={18} />
           </PopButton>
           <span className={publicStyles.bannerSubnote}>Join NIRAL Hackathon 2026</span>
         </div>

@@ -28,10 +28,12 @@ export function ContactPage() {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [copiedVenue, setCopiedVenue] = useState(false);
   const [mapZoom, setMapZoom] = useState(1);
+  const [copyStatus, setCopyStatus] = useState('');
 
-  const copyToClipboard = (text: string, type: 'email' | 'phone' | 'venue') => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string, type: 'email' | 'phone' | 'venue') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus('Copied to clipboard.');
       if (type === 'email') {
         setCopiedEmail(true);
         setTimeout(() => setCopiedEmail(false), 2000);
@@ -42,6 +44,8 @@ export function ContactPage() {
         setCopiedVenue(true);
         setTimeout(() => setCopiedVenue(false), 2000);
       }
+    } catch {
+      setCopyStatus('Copy failed. Select the displayed text and copy it manually.');
     }
   };
 
@@ -93,7 +97,7 @@ export function ContactPage() {
 
           <div className={publicStyles.heroActions}>
             <PopButton href="/register">
-              Register Now <ArrowRight size={16} />
+              Create Account <ArrowRight size={16} />
             </PopButton>
             <Link href="/about" className={publicStyles.outlinedBtn}>
               <Compass size={16} /> Explore the Event
@@ -104,6 +108,7 @@ export function ContactPage() {
         <ContactMapArt />
       </section>
 
+      <p role="status" aria-live="polite">{copyStatus}</p>
       {/* Section 1: Reach Us Directly */}
       <section style={{ padding: '48px 0' }} aria-labelledby="reach-title">
         <div className={publicStyles.eyebrow}>
@@ -121,7 +126,7 @@ export function ContactPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
             gap: 24,
             marginTop: 32,
           }}
@@ -350,9 +355,8 @@ export function ContactPage() {
                   fontSize: 13,
                   fontWeight: 600,
                   color: '#111',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  minWidth: 0,
+                  overflowWrap: 'anywhere',
                 }}
               >
                 Sri Shakthi Institute of Engineering and Technology
@@ -405,6 +409,7 @@ export function ContactPage() {
         </p>
 
         <div
+          className={publicStyles.responsiveColumns}
           style={{
             display: 'grid',
             gridTemplateColumns: 'minmax(320px, 1.1fr) minmax(340px, 1.4fr)',
@@ -509,6 +514,7 @@ export function ContactPage() {
               background: '#f4f0e8',
             }}
           >
+            <p style={{ padding: 12, fontSize: 12 }}>Illustrative campus map — use Get Directions for navigation. Event room details await confirmation.</p>
             {/* Map Canvas SVG */}
             <div
               style={{
@@ -678,6 +684,7 @@ export function ContactPage() {
                 <button
                   type="button"
                   onClick={() => setMapZoom((z) => Math.min(z + 0.25, 2))}
+                  disabled={mapZoom >= 2}
                   aria-label="Zoom in"
                   title="Zoom in"
                   style={{
@@ -698,6 +705,7 @@ export function ContactPage() {
                 <button
                   type="button"
                   onClick={() => setMapZoom((z) => Math.max(z - 0.25, 0.75))}
+                  disabled={mapZoom <= 0.75}
                   aria-label="Zoom out"
                   title="Zoom out"
                   style={{
@@ -738,7 +746,7 @@ export function ContactPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
             gap: 20,
             marginTop: 32,
           }}

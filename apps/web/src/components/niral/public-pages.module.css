@@ -532,3 +532,201 @@
     transition: none !important;
   }
 }
+
+/* NIRAL_UI_ARTWORK_LAYERING_V2 */
+/* Make all original artwork badges sit above transformed front windows. */
+.interactiveStack .floatingBadge {
+  transform: translateZ(85px);
+  backface-visibility: hidden;
+  white-space: nowrap;
+}
+.interactiveStack .floatingBadge:hover {
+  transform: translateZ(85px) translateY(-3px) scale(1.03);
+}
+
+/* About hero: tilt the illustration only, not its accessible controls. */
+.aboutArtCanvas {
+  isolation: isolate;
+  min-height: 430px;
+}
+.aboutVisualStage {
+  position: absolute;
+  inset: 11% 9% 15%;
+  width: auto;
+  max-width: none;
+  aspect-ratio: auto;
+  height: auto;
+  pointer-events: none;
+}
+.aboutArtOutline {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #111;
+  border-radius: 23px;
+}
+.aboutRearLeft, .aboutRearRight, .aboutBackWindow, .aboutFrontWindow {
+  position: absolute;
+  border: 2px solid #111;
+  border-radius: 15px;
+}
+.aboutRearLeft {
+  inset: 30% 33% 17% 16%;
+  background: var(--niral-soft-coral, #ffe2db);
+  transform: rotate(-5deg) translateZ(3px);
+}
+.aboutRearRight {
+  inset: 27% 10% 18% 45%;
+  background: var(--niral-coral, #fd9b9b);
+  transform: rotate(6deg) translateZ(6px);
+}
+.aboutBackWindow {
+  inset: 17% 28% 27% 15%;
+  background: var(--niral-soft-coral, #ffe2db);
+  transform: rotate(-5deg) translateZ(12px);
+  overflow: hidden;
+}
+.aboutFrontWindow {
+  inset: 19% 19% 23% 24%;
+  background: #fff;
+  box-shadow: 0 7px 0 #111;
+  transform: rotate(3deg) translateZ(28px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.aboutWindowTop {
+  height: 32px;
+  flex: 0 0 32px;
+  border-bottom: 2px solid #111;
+  background: var(--niral-paper, #faf7f2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+}
+.aboutWindowDots { color: #ba7373; letter-spacing: 2px; font-size: 10px; }
+.aboutWindowName { font-size: 10px; letter-spacing: 1.2px; font-weight: 700; color: #777; }
+.aboutWindowBody {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(#dededb .65px, transparent .65px) 4px 4px/18px 18px, #fff;
+}
+.aboutCodeBlock {
+  width: 69%;
+  aspect-ratio: 1.34;
+  max-height: 76%;
+  display: grid;
+  place-items: center;
+  border: 2px solid #111;
+  border-radius: 13px;
+  background: var(--niral-coral, #fd9b9b);
+  box-shadow: 0 5px 0 #111;
+}
+.aboutCursor {
+  position: absolute;
+  top: 68%;
+  left: 69%;
+  color: var(--niral-coral, #fd9b9b);
+  font-size: 50px;
+  line-height: 1;
+  font-weight: 900;
+  text-shadow: -2px -2px #111, 2px -2px #111, -2px 2px #111, 2px 2px #111;
+  transform: translateZ(46px) rotate(-15deg);
+}
+.aboutFloatingLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.aboutFloatingLayer .aboutBadge {
+  pointer-events: auto;
+  position: absolute;
+  transform: none;
+  background: var(--niral-soft-coral, #ffe2db);
+  white-space: nowrap;
+  box-shadow: 0 3px 0 #111;
+}
+.aboutFloatingLayer .aboutBadge:hover { transform: translateY(-3px) scale(1.03); }
+.aboutFloatingLayer .aboutBadge[aria-pressed="true"] { background: var(--niral-coral, #fd9b9b); }
+.aboutBadgeIdeas { top: 10%; left: 1%; }
+.aboutBadgeBuild { top: 9%; right: 1%; }
+.aboutBadgeInnovate { right: 0; bottom: 20%; }
+.aboutBadgeCollaborate { left: 0; bottom: 24%; }
+.aboutArtCaption {
+  position: absolute;
+  z-index: 11;
+  bottom: 1%;
+  left: 8%;
+  right: 8%;
+  min-height: 22px;
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #555;
+}
+@media (max-width: 600px) {
+  .aboutArtCanvas { min-height: 350px; }
+  .aboutVisualStage { inset: 13% 7% 20%; }
+  .aboutFloatingLayer .aboutBadge { font-size: 11px; padding: 7px 9px; gap: 5px; }
+  .aboutFloatingLayer .aboutBadge svg { width: 15px; height: 15px; }
+  .aboutBadgeIdeas { top: 6%; left: 0; }
+  .aboutBadgeBuild { top: 6%; right: 0; }
+  .aboutBadgeInnovate { right: 0; bottom: 20%; }
+  .aboutBadgeCollaborate { left: 0; bottom: 20%; }
+  .aboutWindowName { display: none; }
+}
+@media (max-width: 360px) {
+  .aboutArtCanvas { min-height: 320px; }
+  .aboutFloatingLayer .aboutBadge { font-size: 10px; padding: 6px 7px; }
+  .aboutCodeBlock svg { width: 44px; }
+}
+
+/* Public layouts shrink to their container rather than being clipped by the root. */
+.publicPage { overflow: visible; }
+.publicPage main { overflow-wrap: anywhere; }
+.heroSection > *, .responsiveColumns > * { min-width: 0; }
+.bottomBannerText, .searchBox { min-width: 0; }
+.searchBox { flex-basis: 240px; max-width: 100%; }
+.searchBox input { min-width: 0; width: 100%; }
+.searchBox:focus-within { outline: 3px solid #9b2946; outline-offset: 4px; }
+.selectDropdown { max-width: 100%; }
+.floatingBadge:not(button) { cursor: default; }
+.modalBox { overflow-wrap: anywhere; }
+.modalBox h2 { padding-right: 40px; }
+.modalActions { display: flex; flex-wrap: wrap; gap: 12px; }
+.outlinedBtn { display: inline-flex; align-items: center; gap: 8px; border: 2px solid #111; border-radius: 10px; padding: 14px 20px; background: #faf7f2; box-shadow: 0 4px #111; }
+.artCanvas { min-width: 0; }
+@media (max-width: 1050px) {
+ .responsiveColumns { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (max-width: 600px) {
+ .interactiveStack:not(.aboutVisualStage) { width: 100%; min-height: 320px; aspect-ratio: auto; }
+ .interactiveStack .floatingBadge { padding: 7px 9px; font-size: 11px; gap: 5px; }
+ .floatingBadge svg { flex-shrink: 0; }
+ .modalBox { padding: 24px 18px; }
+ .heroActions > a, .bottomBannerAction > a, .modalActions > a { white-space: normal; max-width: 100%; text-align: center; }
+ .bottomBannerText { min-width: 0; }
+ .dayTabs { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .interactiveStack .floatingBadge:hover { transform: translateZ(85px) !important; }
+ .aboutFloatingLayer .aboutBadge:hover { transform: none !important; }
+}
+
+.trackDialog { border: 0; padding: 20px; background: transparent; max-width: 720px; width: 100%; max-height: 100dvh; color: #111; }
+.trackDialog::backdrop { background: rgb(0 0 0 / 65%); backdrop-filter: blur(4px); }
+.trackDialog .modalBox { max-height: calc(100dvh - 48px); }
+@media (min-width: 1051px) and (max-width: 1350px) {
+ .publicPage header { flex-wrap: wrap; padding-block: 16px; gap: 12px; }
+ .publicPage header nav { order: 3; width: 100%; justify-content: center; }
+}
+
+.publicPage main a { max-width: 100%; white-space: normal; }
+@media (max-width: 600px) {
+ .artSatellite { font-size: 10px !important; padding: 6px 8px !important; gap: 4px !important; white-space: nowrap; }
+ .artSatellite[data-domain="Smart Campus"] { left: 0 !important; bottom: 12% !important; }
+ .artSatellite[data-domain="Embedded"] { right: 8% !important; bottom: 0 !important; }
+}

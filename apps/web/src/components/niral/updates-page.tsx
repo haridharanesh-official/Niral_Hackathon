@@ -18,34 +18,8 @@ export function UpdatesPage() {
 
   const categoryFilters = ['All Updates', 'Announcements', 'Schedule', 'Participation', 'General'];
 
-  // Use seed announcements from the content store as a starting point.
-  // These are confirmed factual announcements, not mock data.
-  const announcements = [
-    {
-      id: 'u1',
-      title: 'NIRAL Hackathon 2026 dates confirmed',
-      body: 'December 3–4, 2026 at Sri Shakthi Institute of Engineering and Technology. Mark your calendars!',
-      category: 'Announcements',
-      priority: 'important' as const,
-      date: 'Confirmed',
-    },
-    {
-      id: 'u2',
-      title: 'Organized by IoT Club',
-      body: 'NIRAL Hackathon 2026 is officially organized by the IoT Club, Sri Shakthi Institute of Engineering and Technology. Contact: iotclub.siet@gmail.com',
-      category: 'General',
-      priority: 'normal' as const,
-      date: 'Confirmed',
-    },
-    {
-      id: 'u3',
-      title: 'Problem statements & tracks coming soon',
-      body: 'Official challenge releases and innovation tracks will be published ahead of the event. Stay tuned for updates.',
-      category: 'Announcements',
-      priority: 'normal' as const,
-      date: 'Coming Soon',
-    },
-  ];
+  // The local content store contains generated seed notices, not verified publications.
+  const announcements: { id: string; title: string; body: string; category: string; priority: string; date: string }[] = [];
 
   const filteredAnnouncements = announcements.filter(
     (a) => activeFilter === 'All Updates' || a.category === activeFilter,
@@ -54,7 +28,7 @@ export function UpdatesPage() {
   const keyDates = [
     { label: 'Event Dates', value: 'Dec 3–4, 2026' },
     { label: 'Venue', value: 'Sri Shakthi Institute' },
-    { label: 'Registration', value: 'Opening Soon' },
+    { label: 'Registration', value: 'Awaiting confirmation' },
     { label: 'Problem Statements', value: 'Coming Soon' },
   ];
 
@@ -122,11 +96,12 @@ export function UpdatesPage() {
           </div>
         </div>
 
-        {/* Announcement Cards */}
+        <p role="status" className={publicStyles.tactileCardPeach}>No verified announcements are available yet. Confirmed event dates: December 3–4, 2026. Contact the organizers for registration updates.</p>
+        {/* Published announcement cards */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
             gap: 20,
           }}
         >
@@ -195,6 +170,7 @@ export function UpdatesPage() {
 
       {/* Latest Updates Feed & Sidebar */}
       <section
+        className={publicStyles.responsiveColumns}
         style={{
           display: 'grid',
           gridTemplateColumns: '1.5fr 1fr',

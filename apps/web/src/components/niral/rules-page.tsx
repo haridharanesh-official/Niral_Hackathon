@@ -34,7 +34,7 @@ export function RulesPage() {
       num: 2,
       title: 'Use of AI Tools',
       content:
-        'AI-assisted coding tools (e.g., GitHub Copilot) are permitted as aids, but the core logic and innovation must originate from the team. Excessive reliance on auto-generated code without understanding will be scrutinized during evaluation.',
+        'The organizers have not published an AI tools policy. Confirm permitted tools and disclosure requirements before using them in your submission.',
     },
     {
       num: 3,
@@ -73,8 +73,8 @@ export function RulesPage() {
       icon: Globe,
     },
     {
-      title: 'Individual or Team',
-      desc: 'Participate individually or in teams (2–4 members per team).',
+      title: 'Team Participation',
+      desc: 'The event configuration specifies teams of 2–4 members.',
       icon: Users,
     },
   ];
@@ -115,7 +115,7 @@ export function RulesPage() {
           </p>
           <div className={publicStyles.heroActions}>
             <PopButton href="/register">
-              Register Now <ArrowRight size={18} />
+              Create Account <ArrowRight size={18} />
             </PopButton>
             <PopButton href="/tracks" cream>
               <Play size={16} /> Explore Tracks
@@ -124,12 +124,14 @@ export function RulesPage() {
         </div>
         <RulesGuidelinesArt />
       </section>
+      <p className={publicStyles.tactileCardPeach}>Team size: 2–4 members per event configuration. Other eligibility, submission, judging and conduct guidance below is provisional pending organizer publication.</p>
+
 
       {/* Event Rules Accordion */}
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: 36,
           margin: '50px 0 60px',
           alignItems: 'start',
@@ -263,7 +265,7 @@ export function RulesPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
             gap: 18,
           }}
         >
@@ -308,7 +310,7 @@ export function RulesPage() {
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
           gap: 28,
           margin: '60px 0',
         }}
@@ -437,7 +439,7 @@ export function RulesPage() {
           </div>
         </div>
         <PopButton href="/register">
-          Register Now <ArrowRight size={18} />
+          Create Account <ArrowRight size={18} />
         </PopButton>
       </section>
     </PublicPageShell>

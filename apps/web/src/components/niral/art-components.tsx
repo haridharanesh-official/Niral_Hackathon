@@ -45,143 +45,75 @@ function useCardTilt(intensity = 35) {
   return { x, y, handlePointerMove, handlePointerLeave, reduced };
 }
 
-// 1. ABOUT HERO ART: Layered browser window with </> tile, lightbulb, lightning, and floating badges
+// 1. ABOUT HERO ART: NIRAL ABOUT HERO V2: CORRECTED LAYERING
+// The 3D scene tilts, while its interactive badges stay in an independent
+// foreground layer. This prevents the browser window covering its labels.
 export function AboutHeroArt() {
-  const { x, y, handlePointerMove, handlePointerLeave } = useCardTilt(30);
+  const { x, y, handlePointerMove, handlePointerLeave } = useCardTilt(34);
   const [activeBadge, setActiveBadge] = useState<string | null>(null);
-
+  const concepts = [
+    { name: 'Ideas', Icon: Lightbulb, key: 'ideas', text: 'Start with a meaningful question and explore creative possibilities.' },
+    { name: 'Build', Icon: Zap, key: 'build', text: 'Experiment with technology and transform ideas into practical prototypes.' },
+    { name: 'Innovate', Icon: Cpu, key: 'innovate', text: 'Explore thoughtful approaches to real-world challenges.' },
+    { name: 'Collaborate', Icon: Users, key: 'collaborate', text: 'Learn from different perspectives and build together.' },
+  ];
   return (
     <div
-      className={publicStyles.artCanvas}
+      className={`${publicStyles.artCanvas} ${publicStyles.aboutArtCanvas}`}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
+      aria-label="Interactive NIRAL illustration: ideas, building, innovation and collaboration"
     >
       <motion.div
-        className={publicStyles.interactiveStack}
+        className={`${publicStyles.interactiveStack} ${publicStyles.aboutVisualStage}`}
         style={{ rotateX: x, rotateY: y }}
+        aria-hidden="true"
       >
-        {/* Background slanted card */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: '10% 8% 10% 12%',
-            background: 'var(--niral-soft-coral, #ffe2db)',
-            border: '2.5px solid #111',
-            borderRadius: '20px',
-            transform: 'translateZ(-15px) rotate(4deg)',
-          }}
-        />
-
-        {/* Main code window */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: '4% 6% 12% 6%',
-            background: '#fff',
-            border: '2.5px solid #111',
-            borderRadius: '22px',
-            boxShadow: '0 8px 0 #111',
-            transform: 'translateZ(20px)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Window header */}
-          <div
-            style={{
-              padding: '12px 18px',
-              borderBottom: '2px solid #111',
-              background: '#faf7f2',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
-            }}
-          >
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#fd9b9b', border: '1px solid #111' }} />
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffe2db', border: '1px solid #111' }} />
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#111' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 12, color: '#666', letterSpacing: 1.5 }}>
-              NIRAL_STUDIO.PROTOTYPE
-            </span>
+        <div className={publicStyles.aboutArtOutline} />
+        <div className={publicStyles.aboutRearLeft} />
+        <div className={publicStyles.aboutRearRight} />
+        <div className={publicStyles.aboutBackWindow}>
+          <div className={publicStyles.aboutWindowTop}><span>● ● ●</span></div>
+        </div>
+        <div className={publicStyles.aboutFrontWindow}>
+          <div className={publicStyles.aboutWindowTop}>
+            <span className={publicStyles.aboutWindowDots}>● ● ●</span>
+            <span className={publicStyles.aboutWindowName}>NIRAL / STUDIO</span>
           </div>
-
-          {/* Window body with centered 3D code badge */}
-          <div
-            style={{
-              flex: 1,
-              display: 'grid',
-              placeItems: 'center',
-              background: 'radial-gradient(#dededb 0.75px, transparent 0.75px) 4px 4px/18px 18px, #fff',
-            }}
-          >
-            <motion.div
-              whileHover={{ scale: 1.08, rotate: -4 }}
-              style={{
-                width: '60%',
-                aspectRatio: '1.4 / 1',
-                background: 'var(--niral-coral, #fd9b9b)',
-                border: '2.5px solid #111',
-                borderRadius: '16px',
-                boxShadow: '0 6px 0 #111',
-                display: 'grid',
-                placeItems: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <Code2 size={68} strokeWidth={2.2} color="#111" />
-            </motion.div>
+          <div className={publicStyles.aboutWindowBody}>
+            <div className={publicStyles.aboutCodeBlock}>
+              <Code2 size={64} strokeWidth={2.2} color="#111" />
+            </div>
           </div>
         </div>
-
-        {/* Floating Badges */}
-        <button
-          type="button"
-          onClick={() => setActiveBadge(activeBadge === 'ideate' ? null : 'ideate')}
-          className={publicStyles.floatingBadge}
-          style={{ top: '2%', left: '0%' }}
-        >
-          <Lightbulb size={18} color="#b85b5b" />
-          <span>Ideate</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveBadge(activeBadge === 'build' ? null : 'build')}
-          className={publicStyles.floatingBadge}
-          style={{ top: '2%', right: '2%' }}
-        >
-          <Zap size={18} color="#111" />
-          <span>Build</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveBadge(activeBadge === 'connect' ? null : 'connect')}
-          className={publicStyles.floatingBadge}
-          style={{ bottom: '15%', left: '-4%' }}
-        >
-          <Users size={18} color="#111" />
-          <span>Connect</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveBadge(activeBadge === 'innovate' ? null : 'innovate')}
-          className={publicStyles.floatingBadge}
-          style={{ bottom: '10%', right: '-2%' }}
-        >
-          <Cpu size={18} color="#111" />
-          <span>Innovate</span>
-        </button>
+        <div className={publicStyles.aboutCursor} aria-hidden="true">↗</div>
       </motion.div>
+      <div className={publicStyles.aboutFloatingLayer}>
+        {concepts.map(({ name, Icon, key }) => (
+          <button
+            key={key}
+            type="button"
+            className={`${publicStyles.floatingBadge} ${publicStyles.aboutBadge} ${publicStyles[`aboutBadge${name}`]}`}
+            aria-pressed={activeBadge === key}
+            aria-controls="niral-about-art-detail"
+            onClick={() => setActiveBadge(activeBadge === key ? null : key)}
+          >
+            <Icon size={18} aria-hidden="true" />
+            <span>{name}</span>
+          </button>
+        ))}
+      </div>
+      <p id="niral-about-art-detail" className={publicStyles.aboutArtCaption} aria-live="polite">
+        {concepts.find((c) => c.key === activeBadge)?.text ?? 'Select a concept to see what makes NIRAL special.'}
+      </p>
     </div>
   );
+
 }
 
 // 2. ABOUT EXPERIENCE ART: Laptop with 3D cube and IoT signal nodes
 export function AboutExperienceArt() {
-  const { x, y, handlePointerMove, handlePointerLeave } = useCardTilt(32);
+  const { x, y, handlePointerMove, handlePointerLeave, reduced } = useCardTilt(32);
 
   return (
     <div
@@ -264,8 +196,8 @@ export function AboutExperienceArt() {
             }}
           >
             <motion.div
-              animate={{ rotate: [0, 90, 180, 270, 360] }}
-              transition={{ repeat: Infinity, duration: 16, ease: 'linear' }}
+              animate={reduced ? undefined : { rotate: [0, 90, 180, 270, 360] }}
+              transition={{ duration: 16, ease: 'linear' }}
               style={{
                 width: 64,
                 height: 64,
@@ -288,6 +220,7 @@ export function AboutExperienceArt() {
             position: 'absolute',
             top: '4%',
             right: '10%',
+            transform: 'translateZ(65px)',
             padding: '10px 14px',
             background: '#fff',
             border: '2px solid #111',
@@ -401,11 +334,11 @@ export function ParticipateHeroArt() {
           <Lightbulb size={16} color="#b85b5b" />
           <span>Ideas</span>
         </div>
-        <div className={publicStyles.floatingBadge} style={{ top: '4%', right: '-2%' }}>
+        <div className={publicStyles.floatingBadge} style={{ top: '4%', right: '0%' }}>
           <Zap size={16} color="#111" />
           <span>Build</span>
         </div>
-        <div className={publicStyles.floatingBadge} style={{ bottom: '8%', left: '-4%' }}>
+        <div className={publicStyles.floatingBadge} style={{ bottom: '8%', left: '0%' }}>
           <Users size={16} color="#111" />
           <span>Collaborate</span>
         </div>
@@ -500,7 +433,8 @@ export function TracksConstellationArt() {
           return (
             <motion.div
               key={sat.title}
-              whileHover={{ scale: 1.1, translateY: -3 }}
+              className={publicStyles.artSatellite}
+              data-domain={sat.title}
               style={{
                 position: 'absolute',
                 top: sat.top,
@@ -517,8 +451,9 @@ export function TracksConstellationArt() {
                 gap: 7,
                 fontSize: 12,
                 fontWeight: 700,
-                cursor: 'pointer',
+                cursor: 'default',
                 zIndex: 6,
+                transform: 'translateZ(65px)',
               }}
             >
               <Icon size={16} color="#b85b5b" />
@@ -1085,7 +1020,7 @@ export function FaqQuestionsArt() {
           style={{
             position: 'absolute',
             bottom: '2%',
-            right: '-2%',
+            right: '0%',
             background: '#fff',
             border: '2px solid #111',
             borderRadius: '12px',
@@ -1109,7 +1044,7 @@ export function FaqQuestionsArt() {
 
 // 10. CONTACT MAP ART: 3D folded map with red location pin 📍
 export function ContactMapArt() {
-  const { x, y, handlePointerMove, handlePointerLeave } = useCardTilt(32);
+  const { x, y, handlePointerMove, handlePointerLeave, reduced } = useCardTilt(32);
 
   return (
     <div
@@ -1161,8 +1096,8 @@ export function ContactMapArt() {
           >
             {/* Center Location Pin */}
             <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+              animate={reduced ? undefined : { y: [0, -8, 0] }}
+              transition={{ duration: 2.2, ease: 'easeInOut' }}
               style={{
                 width: 60,
                 height: 60,

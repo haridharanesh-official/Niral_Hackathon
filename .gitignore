@@ -57,3 +57,5 @@ apps/api/prisma/*.db-journal
 *.zip
 .vercel
 .docker
+__pycache__/
+*.py[cod]
