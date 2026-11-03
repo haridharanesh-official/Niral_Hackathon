@@ -3,7 +3,16 @@ import { APP_NAME } from "@hackos/shared";
 import { Button } from "@/components/ui/button";
 
 async function getApiInfo() {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  const base = process.env.NEXT_PUBLIC_API_URL?.trim() ||
+    (process.env.NODE_ENV === "development" ? "http://localhost:4000" : "");
+
+  if (!base || !/^https?:\/\//.test(base)) {
+    return {
+      info: null,
+      health: null,
+      error: "Backend API is not configured for this deployment.",
+    };
+  }
 
   try {
     const [infoRes, healthRes] = await Promise.all([
@@ -14,12 +23,20 @@ async function getApiInfo() {
     const info = infoRes.ok ? await infoRes.json() : null;
     const health = healthRes.ok ? await healthRes.json() : null;
 
+    if (!infoRes.ok || !healthRes.ok) {
+      return {
+        info,
+        health,
+        error: "Backend API did not pass its health checks. Registration is not ready.",
+      };
+    }
+
     return { info, health, error: null as string | null };
   } catch {
     return {
       info: null,
       health: null,
-      error: "API unreachable. Start the NestJS server on port 4000.",
+      error: "Backend API is unreachable. Verify API hosting, network access, and environment settings.",
     };
   }
 }
