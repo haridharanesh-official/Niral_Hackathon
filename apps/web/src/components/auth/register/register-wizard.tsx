@@ -41,14 +41,19 @@ function loadDraft(): OnboardingDraft {
   try {
     const raw = window.sessionStorage.getItem(DRAFT_KEY);
     if (!raw) return emptyDraft();
-    return { ...emptyDraft(), ...JSON.parse(raw) };
+    const saved = JSON.parse(raw) as Partial<OnboardingDraft>;
+    // Ignore credentials saved by earlier versions of the registration flow.
+    return { ...emptyDraft(), ...saved, password: "", confirmPassword: "", verificationToken: undefined };
   } catch {
     return emptyDraft();
   }
 }
 
 function saveDraft(draft: OnboardingDraft) {
-  window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  // Never persist passwords or verification credentials in browser storage.
+  const { password: _password, confirmPassword: _confirmPassword,
+    verificationToken: _verificationToken, ...safeDraft } = draft;
+  window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(safeDraft));
 }
 
 export function RegisterWizard() {
