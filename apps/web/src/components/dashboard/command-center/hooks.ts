@@ -79,7 +79,10 @@ export function useDashboardData() {
   });
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
-  const CACHE_KEY = "hackos.dashboard.summary.cache";
+  // Scope cached participant data to the authenticated account.
+  const CACHE_KEY = session?.user?.id
+    ? `hackos.dashboard.summary.cache.${session.user.id}`
+    : null;
 
   const refresh = useCallback(async () => {
     if (!session?.accessToken) {
@@ -91,10 +94,16 @@ export function useDashboardData() {
       const [summary, onboarding] = await Promise.all([
         fetch(`${apiUrl}/api/dashboard/summary`, {
           headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`Dashboard API returned ${r.status}`);
+          return r.json();
+        }),
         fetch(`${apiUrl}/api/auth/onboarding`, {
           headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`Onboarding API returned ${r.status}`);
+          return r.json();
+        }),
       ]);
 
       setData({
@@ -109,12 +118,12 @@ export function useDashboardData() {
           : [],
         widgetConfig: summary?.widgetConfig ?? null,
       });
-      localStorage.setItem(CACHE_KEY, JSON.stringify(summary));
+      if (CACHE_KEY) localStorage.setItem(CACHE_KEY, JSON.stringify(summary));
       setOffline(false);
     } catch {
-      setOffline(!navigator.onLine);
+      setOffline(true);
       try {
-        const cached = localStorage.getItem(CACHE_KEY);
+        const cached = CACHE_KEY ? localStorage.getItem(CACHE_KEY) : null;
         if (!cached) return;
         const summary = JSON.parse(cached) as {
           teamOverview?: DashboardData["team"];
@@ -137,7 +146,20 @@ export function useDashboardData() {
     } finally {
       setLoading(false);
     }
-  }, [session?.accessToken]);
+  }, [session?.accessToken, CACHE_KEY]);
+
+  useEffect(() => {
+    setData({
+      checklist: null,
+      percent: 0,
+      team: null,
+      enrollment: null,
+      eventName: "NIRAL Hackathon 2026",
+      notifications: [],
+    });
+    setLoading(true);
+    setOffline(false);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     refresh().catch(() => setLoading(false));
