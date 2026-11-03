@@ -94,10 +94,16 @@ export function useDashboardData() {
       const [summary, onboarding] = await Promise.all([
         fetch(`${apiUrl}/api/dashboard/summary`, {
           headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`Dashboard API returned ${r.status}`);
+          return r.json();
+        }),
         fetch(`${apiUrl}/api/auth/onboarding`, {
           headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`Onboarding API returned ${r.status}`);
+          return r.json();
+        }),
       ]);
 
       setData({
