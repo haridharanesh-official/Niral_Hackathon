@@ -33,7 +33,8 @@ import {
 import { cn } from "@/lib/utils";
 import { trackAnalytics } from "@/hooks/use-analytics";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim() ||
+  (process.env.NODE_ENV === "development" ? "http://localhost:4000" : "");
 const DRAFT_KEY = "hackos.register.draft";
 
 function loadDraft(): OnboardingDraft {
@@ -51,8 +52,10 @@ function loadDraft(): OnboardingDraft {
 
 function saveDraft(draft: OnboardingDraft) {
   // Never persist passwords or verification credentials in browser storage.
-  const { password: _password, confirmPassword: _confirmPassword,
-    verificationToken: _verificationToken, ...safeDraft } = draft;
+  const safeDraft: Partial<OnboardingDraft> = { ...draft };
+  delete safeDraft.password;
+  delete safeDraft.confirmPassword;
+  delete safeDraft.verificationToken;
   window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(safeDraft));
 }
 
@@ -207,6 +210,10 @@ export function RegisterWizard() {
 
   async function submitRegistration() {
     if (!validateConsent()) return;
+    if (!apiUrl) {
+      setFormError("Registration is temporarily unavailable. Please contact the event organizers.");
+      return;
+    }
     setSubmitting(true);
     setFormError(null);
     setFormSuccess(null);
