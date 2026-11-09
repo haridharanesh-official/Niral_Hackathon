@@ -122,6 +122,8 @@ export function PublicPageShell({
         <div className={publicStyles.footerTopRow}>
           <Logo />
           <nav aria-label="Footer navigation" className={publicStyles.footerNav}>
+            <Link href="/privacy-policy">Privacy Policy</Link>
+            <Link href="/terms-of-service">Terms of Service</Link>
             {navItems.map((item) => (
               <Link key={item.name} href={item.href}>
                 {item.name}

@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { Panel, StatChip } from "@/components/dashboard/panel";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { Panel } from '@/components/dashboard/panel';
+import { Button } from '@/components/ui/button';
 
 const builders = [
-  "Quiz Builder",
-  "Game Builder",
-  "Certificate Builder",
-  "Problem Statement Builder",
+  'Quiz Builder',
+  'Game Builder',
+  'Certificate Builder',
+  'Problem Statement Builder',
 ];
 
 export default function AdminPage() {
   const { data: session } = useSession();
   const role = session?.user?.role;
-  const allowed = role === "ADMIN" || role === "ORGANIZER";
+  const allowed = role === 'ADMIN' || role === 'ORGANIZER';
 
   if (!session?.user) {
     return (
@@ -32,7 +32,9 @@ export default function AdminPage() {
   if (!allowed) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center bg-[var(--background)]">
-        <p className="text-sm text-[var(--muted)]">Admin access requires ORGANIZER or ADMIN role.</p>
+        <p className="text-sm text-[var(--muted)]">
+          Admin access requires ORGANIZER or ADMIN role.
+        </p>
         <Link href="/dashboard">
           <Button variant="secondary" size="md">
             Back to dashboard
@@ -55,22 +57,26 @@ export default function AdminPage() {
               Everything Configurable
             </h1>
           </div>
-          <Link href="/dashboard" className="text-xs font-semibold text-[var(--primary)] hover:underline">
+          <Link
+            href="/dashboard"
+            className="text-xs font-semibold text-[var(--primary)] hover:underline"
+          >
             ← Dashboard
           </Link>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatChip label="Registered Users" value="2,480" />
-          <StatChip label="Active Quizzes" value="12" />
-          <StatChip label="Interactive Games" value="12" />
-          <StatChip label="API Status & Health" value="100% OK" />
-        </div>
+        <Panel title="Registration and payments">
+          <Link href="/admin/payments">
+            Open audited payment controls, live counts and transaction reports →
+          </Link>
+        </Panel>
 
         <div className="grid gap-5 lg:grid-cols-2">
           <Panel title="NIRAL Event Settings & Governance" className="border-sky-500/30">
             <ul className="space-y-2 text-xs text-[var(--muted)]">
-              <li>• Authoritative configuration for NIRAL Hackathon 2026 (Dec 3–4, 2026)</li>
+              <li>
+                • Authoritative configuration for NIRAL Hackathon 2026 (Dec 3–4, 2026)
+              </li>
               <li>• Registration capacity, team size limits, and schedule parameters</li>
               <li>• Public event lifecycle: DRAFT → REGISTRATION → LIVE → COMPLETED</li>
             </ul>
@@ -116,7 +122,9 @@ export default function AdminPage() {
                   key={builder}
                   className="rounded-2xl border border-[var(--card-border)] bg-[var(--sand-50)] p-4 transition hover:border-stone-400"
                 >
-                  <p className="font-sans font-semibold text-[var(--foreground)]">{builder}</p>
+                  <p className="font-sans font-semibold text-[var(--foreground)]">
+                    {builder}
+                  </p>
                   <p className="mt-1 text-xs text-[var(--muted)]">
                     Schema-backed configuration surface for realtime event updates
                   </p>

@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { reconcile, toPaise, parseExampleAlert } from './reconcile.mjs';
+const order = { id: 'TEST-001', amountPaise: 100, payee: 'demo@fam' };
+const claim = { orderId: 'TEST-001', utr: '123456789012' };
+const email = { id: 'synthetic-01', from: 'alerts@example.test', body: 'Amount: ₹1.00\nUTR: 123456789012\nPayee: demo@fam\nStatus: Credited' };
+const args = { order, claim, messages: [email], expectedSender: email.from };
+const credit = { utr: claim.utr, amountPaise: 100, payee: 'demo@fam', recordType: 'RECEIVING_ACCOUNT_CREDIT' };
+assert.equal(toPaise('1.00'), 100);
+assert.equal(parseExampleAlert(email)?.utr, claim.utr);
+assert.equal(reconcile(args).status, 'ALERT_MATCHED_PENDING_CREDIT');
+assert.equal(reconcile({ ...args, officialCredits: [credit] }).status, 'SIMULATED_VERIFIED');
+assert.equal(reconcile({ ...args, officialCredits: [credit], usedUtrs: [claim.utr] }).status, 'REJECTED_DUPLICATE');
+assert.equal(reconcile({ ...args, order: { ...order, amountPaise: 200 } }).status, 'NEEDS_REVIEW');
+assert.equal(reconcile({ ...args, messages: [{ ...email, from: 'other@example.test' }] }).status, 'PENDING_ALERT');
+assert.equal(reconcile({ ...args, claim: { ...claim, utr: '987654321000' } }).status, 'PENDING_ALERT');
+assert.equal(reconcile({ ...args, messages: [{ ...email, body: 'Amount: ₹1.00\nUTR: 123456789012\nPayee: other@fam\nStatus: Credited' }] }).status, 'NEEDS_REVIEW');
+assert.equal(reconcile({ ...args, officialCredits: [{ ...credit, amountPaise: 200 }] }).status, 'ALERT_MATCHED_PENDING_CREDIT');
+console.log('10 synthetic reconciliation checks passed. No real transactions were processed.');

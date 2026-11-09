@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: hackos_secret
       POSTGRES_DB: hackos
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - hackos_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +22,7 @@ services:
     container_name: hackos-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - hackos_redis:/data
     command: redis-server --appendonly yes
@@ -37,8 +37,8 @@ services:
     container_name: hackos-mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
 
   api:
     build:
@@ -53,8 +53,15 @@ services:
       REDIS_URL: redis://redis:6379
       API_PORT: 4000
       CORS_ORIGIN: http://localhost:3000
+      WEB_URL: http://localhost:3000
+      EMAIL_PROVIDER: smtp
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      EMAIL_FROM: noreply@niral.example.test
+      MAIL_QUEUE_ENABLED: "true"
+      MAIL_QUEUE_KEY: ${MAIL_QUEUE_KEY:-}
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,7 +82,7 @@ services:
       AUTH_SECRET: change-me-in-production-use-long-random-string
       NEXTAUTH_SECRET: change-me-in-production-use-long-random-string
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       - api
     profiles: ["full"]

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { ONBOARDING_CHECKLIST } from "@hackos/shared";
 
@@ -42,22 +42,9 @@ export type DashboardData = {
   } | null;
 };
 
-const EVENT_START = new Date("2026-08-15T09:00:00Z").getTime();
-const PHASES = [
-  { id: "reg", label: "Registration", ends: new Date("2026-07-31T18:00:00Z").getTime() },
-  { id: "ideate", label: "Ideation", ends: new Date("2026-08-15T18:00:00Z").getTime() },
-  { id: "proto", label: "Prototype Development", ends: new Date("2026-08-16T18:00:00Z").getTime() },
-  { id: "submit", label: "Final Submission", ends: new Date("2026-08-17T12:00:00Z").getTime() },
-  { id: "demo", label: "Demo Day", ends: new Date("2026-08-17T18:00:00Z").getTime() },
-];
-
-export function currentPhase() {
-  const now = Date.now();
-  for (const phase of PHASES) {
-    if (now < phase.ends) return phase;
-  }
-  return PHASES[PHASES.length - 1];
-}
+const EVENT_START = 0;
+const PHASES: {id:string;label:string;ends:number}[] = [];
+export function currentPhase() { return {id:'unconfirmed', label:'Schedule to be announced', ends:0}; }
 
 export function greeting(name?: string | null) {
   const hour = new Date().getHours();
@@ -67,135 +54,29 @@ export function greeting(name?: string | null) {
   return `Good Evening, ${first}`;
 }
 
+const EMPTY_DASHBOARD: DashboardData = {checklist:null,percent:0,team:null,enrollment:null,eventName:'Event details to be announced',notifications:[]};
 export function useDashboardData() {
-  const { data: session } = useSession();
-  const [data, setData] = useState<DashboardData>({
-    checklist: null,
-    percent: 0,
-    team: null,
-    enrollment: null,
-    eventName: "HackOS IoT Innovation Hackathon",
-    notifications: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [offline, setOffline] = useState(false);
-  const CACHE_KEY = "hackos.dashboard.summary.cache";
-
-  const refresh = useCallback(async () => {
-    if (!session?.accessToken) {
-      setLoading(false);
-      return;
-    }
-    const token = session.accessToken;
-    try {
-      const [summary, onboarding] = await Promise.all([
-        fetch(`${apiUrl}/api/dashboard/summary`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
-        fetch(`${apiUrl}/api/auth/onboarding`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => (r.ok ? r.json() : null)),
-      ]);
-
-      setData({
-        checklist: onboarding?.checklist ?? null,
-        percent: onboarding?.percent ?? 0,
-        team: summary?.teamOverview?.id ? summary.teamOverview : null,
-        enrollment: summary?.enrollment ?? null,
-        eventName:
-          summary?.event?.name ?? "HackOS IoT Innovation Hackathon",
-        notifications: Array.isArray(summary?.notifications)
-          ? summary.notifications.slice(0, 8)
-          : [],
-        widgetConfig: summary?.widgetConfig ?? null,
-      });
-      localStorage.setItem(CACHE_KEY, JSON.stringify(summary));
-      setOffline(false);
-    } catch {
-      setOffline(!navigator.onLine);
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (!cached) return;
-        const summary = JSON.parse(cached) as {
-          teamOverview?: DashboardData["team"];
-          enrollment?: DashboardData["enrollment"];
-          event?: { name?: string };
-          notifications?: DashboardData["notifications"];
-          widgetConfig?: DashboardData["widgetConfig"];
-        };
-        setData((prev) => ({
-          ...prev,
-          team: summary.teamOverview ?? prev.team,
-          enrollment: summary.enrollment ?? prev.enrollment,
-          eventName: summary.event?.name ?? prev.eventName,
-          notifications: summary.notifications ?? prev.notifications,
-          widgetConfig: summary.widgetConfig ?? prev.widgetConfig,
-        }));
-      } catch {
-        /* ignore */
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.accessToken]);
-
-  useEffect(() => {
-    refresh().catch(() => setLoading(false));
-  }, [refresh]);
-
-  useEffect(() => {
-    if (!session?.accessToken) return;
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        refresh().catch(() => undefined);
-      }
-    };
-    const onOffline = () => setOffline(true);
-    const intervalId = window.setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      refresh().catch(() => undefined);
-    }, 30_000);
-    document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("online", onVisibility);
-    window.addEventListener("offline", onOffline);
-    return () => {
-      window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("online", onVisibility);
-      window.removeEventListener("offline", onOffline);
-    };
-  }, [refresh, session?.accessToken]);
-
-  const saveWidgetConfig = useCallback(
-    async (config: {
-      hidden?: WidgetId[];
-      order?: WidgetId[];
-      density?: "comfortable" | "compact";
-    }) => {
-      if (!session?.accessToken) return;
-      await fetch(`${apiUrl}/api/dashboard/widgets`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(config),
-      }).catch(() => undefined);
-    },
-    [session?.accessToken],
-  );
-
-  return {
-    data,
-    loading,
-    offline,
-    refresh,
-    saveWidgetConfig,
-    session,
-    EVENT_START,
-    PHASES,
-    ONBOARDING_CHECKLIST,
-  };
+ const {data:session}=useSession();
+ const owner=session?.user?.id, token=session?.accessToken;
+ const latest=useRef({owner,token}); latest.current={owner,token};
+ const [snapshot,setSnapshot]=useState<{owner:string;data:DashboardData}|null>(null);
+ const [loading,setLoading]=useState(true),[offline,setOffline]=useState(false);
+ const refresh=useCallback(async()=>{
+  if(!owner||!token)return;
+  setLoading(true);
+  try {
+   const [r,o]=await Promise.all([fetch(apiUrl+'/api/dashboard/summary',{headers:{Authorization:'Bearer '+token},cache:'no-store'}),fetch(apiUrl+'/api/auth/onboarding',{headers:{Authorization:'Bearer '+token},cache:'no-store'})]);
+   if(!r.ok||!o.ok)throw Error('Dashboard unavailable');
+   const summary=await r.json(),onboarding=await o.json();
+   if(latest.current.owner!==owner||latest.current.token!==token||summary.userSummary?.id!==owner)return;
+   setSnapshot({owner,data:{checklist:onboarding.checklist??null,percent:onboarding.percent??0,team:summary.teamOverview??null,enrollment:summary.enrollment??null,eventName:summary.event?.name??EMPTY_DASHBOARD.eventName,notifications:summary.notifications??[],widgetConfig:summary.widgetConfig??null}});
+   setOffline(false);
+  } catch {if(latest.current.owner===owner){setSnapshot(null);setOffline(true);}}
+  finally {if(latest.current.owner===owner)setLoading(false);}
+ },[owner,token]);
+ useEffect(()=>{for(const key of ['hackos.dashboard.summary.cache','hackos.dashboard.tasks','hackos.dashboard.tasks.queue','hackos.dashboard.widgets']){try{localStorage.removeItem(key);}catch{}} const timer=setTimeout(()=>{void refresh();},0);return()=>clearTimeout(timer);},[refresh]);
+ const saveWidgetConfig=useCallback(async(config:NonNullable<DashboardData['widgetConfig']>)=>{if(!token)return;const r=await fetch(apiUrl+'/api/dashboard/widgets',{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(config),cache:'no-store'});if(!r.ok)throw Error('Could not save preferences');},[token]);
+ return {data:owner&&snapshot?.owner===owner?snapshot.data:EMPTY_DASHBOARD,loading,offline,refresh,saveWidgetConfig,session,EVENT_START,PHASES,ONBOARDING_CHECKLIST};
 }
 
 export type WidgetLifecycleState =
@@ -249,188 +130,13 @@ export type TaskItem = {
   done: boolean;
 };
 
-const TASKS_KEY = "hackos.dashboard.tasks";
-
-export function useTodaysTasks(
-  checklist: Record<string, boolean> | null,
-  accessToken?: string,
-) {
-  const defaults: TaskItem[] = [
-    {
-      id: "proposal",
-      title: "Complete project proposal",
-      priority: "high",
-      due: "Today · 18:00",
-      effort: "45 min",
-      href: "/dashboard/project",
-      done: false,
-    },
-    {
-      id: "circuit",
-      title: "Upload circuit diagram",
-      priority: "medium",
-      due: "Today · 20:00",
-      effort: "30 min",
-      href: "/dashboard/project",
-      done: false,
-    },
-    {
-      id: "mentor",
-      title: "Attend mentor meeting",
-      priority: "high",
-      due: "Today · 15:00",
-      effort: "30 min",
-      href: "/dashboard/mentor",
-      done: false,
-    },
-    {
-      id: "quiz",
-      title: "Finish Daily Quiz",
-      priority: "medium",
-      due: "Today · 23:59",
-      effort: "15 min",
-      href: "/quiz",
-      done: false,
-    },
-    {
-      id: "iot",
-      title: "Complete IoT Challenge",
-      priority: "low",
-      due: "Tomorrow",
-      effort: "1 hr",
-      href: "/games",
-      done: false,
-    },
-    {
-      id: "rubric",
-      title: "Review judging rubric",
-      priority: "low",
-      due: "This week",
-      effort: "20 min",
-      href: "/dashboard/resources",
-      done: false,
-    },
-  ];
-
-  const [tasks, setTasks] = useState<TaskItem[]>(defaults);
-  const QUEUE_KEY = "hackos.dashboard.tasks.queue";
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(TASKS_KEY);
-      if (raw) setTasks(JSON.parse(raw) as TaskItem[]);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!accessToken) return;
-    fetch(`${apiUrl}/api/dashboard/tasks`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((items) => {
-        if (!Array.isArray(items) || items.length === 0) return;
-        setTasks(items as TaskItem[]);
-      })
-      .catch(() => undefined);
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (!accessToken) return;
-    const flush = async () => {
-      if (!navigator.onLine) return;
-      const queued = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]") as TaskItem[];
-      if (!queued.length) return;
-      for (const task of queued) {
-        await fetch(`${apiUrl}/api/dashboard/tasks`, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(task),
-        }).catch(() => undefined);
-      }
-      localStorage.removeItem(QUEUE_KEY);
-    };
-    flush().catch(() => undefined);
-    window.addEventListener("online", flush);
-    return () => window.removeEventListener("online", flush);
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (!checklist) return;
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id === "proposal" && checklist.profile && checklist.team) {
-          return t;
-        }
-        return t;
-      }),
-    );
-  }, [checklist]);
-
-  function toggle(id: string) {
-    setTasks((prev) => {
-      const next = prev.map((t) =>
-        t.id === id ? { ...t, done: !t.done } : t,
-      );
-      localStorage.setItem(TASKS_KEY, JSON.stringify(next));
-      const changed = next.find((t) => t.id === id);
-      if (changed) {
-        if (accessToken && navigator.onLine) {
-          fetch(`${apiUrl}/api/dashboard/tasks`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(changed),
-          }).catch(() => undefined);
-        } else {
-          const queued = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]") as TaskItem[];
-          localStorage.setItem(
-            QUEUE_KEY,
-            JSON.stringify([changed, ...queued.filter((q) => q.id !== changed.id)]),
-          );
-        }
-      }
-      return next;
-    });
-  }
-
-  function defer(id: string) {
-    setTasks((prev) => {
-      const next = prev.map((t) =>
-        t.id === id ? { ...t, due: "Deferred", priority: "low" as const } : t,
-      );
-      localStorage.setItem(TASKS_KEY, JSON.stringify(next));
-      const changed = next.find((t) => t.id === id);
-      if (changed) {
-        if (accessToken && navigator.onLine) {
-          fetch(`${apiUrl}/api/dashboard/tasks`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(changed),
-          }).catch(() => undefined);
-        } else {
-          const queued = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]") as TaskItem[];
-          localStorage.setItem(
-            QUEUE_KEY,
-            JSON.stringify([changed, ...queued.filter((q) => q.id !== changed.id)]),
-          );
-        }
-      }
-      return next;
-    });
-  }
-
-  return { tasks, toggle, defer };
+export function useTodaysTasks(_checklist: Record<string,boolean>|null,accessToken?:string) {
+ const [snapshot,setSnapshot]=useState<{token:string;items:TaskItem[]}|null>(null);
+ const tokenRef=useRef(accessToken);tokenRef.current=accessToken;
+ useEffect(()=>{const abort=new AbortController();if(accessToken)void fetch(apiUrl+'/api/dashboard/tasks',{headers:{Authorization:'Bearer '+accessToken},cache:'no-store',signal:abort.signal}).then(async r=>{if(!r.ok)throw Error('Unavailable');const items=await r.json();if(!abort.signal.aborted&&tokenRef.current===accessToken)setSnapshot({token:accessToken,items:Array.isArray(items)?items:[]});}).catch(()=>{if(!abort.signal.aborted)setSnapshot(null);});return()=>abort.abort();},[accessToken]);
+ const tasks=accessToken&&snapshot?.token===accessToken?snapshot.items:[];
+ async function save(id:string,defer:boolean){const current=tasks.find(t=>t.id===id);if(!current||!accessToken||!navigator.onLine)return;const next=defer?{...current,due:'Deferred',priority:'low' as const}:{...current,done:!current.done};const r=await fetch(apiUrl+'/api/dashboard/tasks',{method:'PATCH',cache:'no-store',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify(next)});if(r.ok&&tokenRef.current===accessToken){const items=await r.json();setSnapshot({token:accessToken,items});}}
+ return {tasks,toggle:(id:string)=>{void save(id,false).catch(()=>undefined);},defer:(id:string)=>{void save(id,true).catch(()=>undefined);}};
 }
 
 export const WIDGET_IDS = [
@@ -477,7 +183,7 @@ export const WIDGET_LABELS: Record<WidgetId, string> = {
   quizGames: "Quiz & Games",
 };
 
-const LAYOUT_KEY = "hackos.dashboard.widgets";
+
 
 export function useWidgetLayout(
   initial?: {
@@ -494,27 +200,6 @@ export function useWidgetLayout(
   const [hidden, setHidden] = useState<WidgetId[]>([]);
   const [order, setOrder] = useState<WidgetId[]>([...WIDGET_IDS]);
   const [density, setDensity] = useState<"comfortable" | "compact">("comfortable");
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LAYOUT_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as {
-        hidden?: WidgetId[];
-        order?: WidgetId[];
-        density?: "comfortable" | "compact";
-      };
-      if (parsed.hidden) setHidden(parsed.hidden.filter((id) => WIDGET_IDS.includes(id)));
-      if (parsed.order?.length) {
-        const known = parsed.order.filter((id) => WIDGET_IDS.includes(id));
-        const missing = WIDGET_IDS.filter((id) => !known.includes(id));
-        setOrder([...known, ...missing]);
-      }
-      if (parsed.density) setDensity(parsed.density);
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   useEffect(() => {
     if (!initial) return;
@@ -539,7 +224,7 @@ export function useWidgetLayout(
       order: next.order ?? order,
       density: next.density ?? density,
     };
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(payload));
+
     onPersist?.(payload);
   }
 
@@ -569,7 +254,7 @@ export function useWidgetLayout(
     setHidden([]);
     setOrder([...WIDGET_IDS]);
     setDensity("comfortable");
-    localStorage.removeItem(LAYOUT_KEY);
+    persist({ hidden: [], order: [...WIDGET_IDS], density: 'comfortable' });
   }
 
   function setDensityPref(value: "comfortable" | "compact") {

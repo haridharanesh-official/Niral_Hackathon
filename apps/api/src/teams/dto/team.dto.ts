@@ -74,3 +74,13 @@ export class InviteMemberDto {
   @MaxLength(254)
   email!: string;
 }
+
+export class RemoveMemberDto {
+  @IsString()
+  memberId!: string;
+}
+
+export class CancelInvitationDto {
+  @IsString()
+  invitationId!: string;
+}

@@ -3,7 +3,7 @@ import { ROLE_DASHBOARD_PATH, UserRole } from "@hackos/shared";
 export function dashboardPathForRole(role?: string | null): string {
   if (!role) return "/dashboard";
   const key = role as UserRole;
-  return ROLE_DASHBOARD_PATH[key] ?? "/dashboard";
+  return ({ VOLUNTEER: "/volunteer", JUDGE: "/judge", ORGANIZER: "/organizer", ADMIN: "/master" } as Record<string,string>)[key] ?? ROLE_DASHBOARD_PATH[key] ?? "/dashboard";
 }
 
 export const ROLE_LABELS: Record<string, string> = {

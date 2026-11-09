@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventsService } from './events.service';
-import { DEFAULT_EVENT_SLUG } from '@hackos/shared';
 
 describe('EventsService & Event Configuration (Phase 1 Integration)', () => {
   let service: EventsService;
@@ -23,24 +22,19 @@ describe('EventsService & Event Configuration (Phase 1 Integration)', () => {
       record: jest.fn().mockResolvedValue({ id: 'audit-1' }),
     };
 
+    mockPrisma.auditLog = {
+      create: jest.fn().mockResolvedValue({ id: 'audit-1' }),
+    };
+    mockPrisma.$transaction = jest.fn((fn: (tx: any) => unknown) =>
+      fn(mockPrisma),
+    );
     service = new EventsService(mockPrisma, mockAudit);
   });
 
   describe('getCurrentEvent', () => {
-    it('returns NIRAL 2026 default event configuration when DB has no custom record or is offline', async () => {
+    it('does not invent an event when no published record exists', async () => {
       mockPrisma.event.findFirst.mockResolvedValue(null);
-      mockPrisma.event.findUnique.mockResolvedValue(null);
-
-      const event = await service.getCurrentEvent();
-
-      expect(event).toBeDefined();
-      expect(event.name).toBe('NIRAL Hackathon 2026');
-      expect(event.slug).toBe(DEFAULT_EVENT_SLUG);
-      expect(event.timezone).toBe('Asia/Kolkata');
-      expect(event.startsAt).toContain('2026-12-03');
-      expect(event.endsAt).toContain('2026-12-04');
-      expect(event.hasExactTimes).toBe(false);
-      expect(event.registrationEnabled).toBe(false);
+      expect(await service.getCurrentEvent()).toBeNull();
     });
 
     it('returns authoritative event from database when present', async () => {
@@ -61,17 +55,16 @@ describe('EventsService & Event Configuration (Phase 1 Integration)', () => {
 
       const result = await service.getCurrentEvent();
       expect(result).toEqual(dbEvent);
-      expect(result.name).toBe('NIRAL Hackathon 2026');
+      expect(result!.name).toBe('NIRAL Hackathon 2026');
     });
 
-    it('gracefully handles database connection failures without throwing 500', async () => {
+    it('reports database failure rather than inventing a healthy event', async () => {
       mockPrisma.event.findFirst.mockRejectedValue(
         new Error('Connection refused'),
       );
-
-      const event = await service.getCurrentEvent();
-      expect(event).toBeDefined();
-      expect(event.slug).toBe('niral-2026');
+      await expect(service.getCurrentEvent()).rejects.toThrow(
+        'Connection refused',
+      );
     });
   });
 
@@ -146,11 +139,13 @@ describe('EventsService & Event Configuration (Phase 1 Integration)', () => {
       );
 
       expect(mockPrisma.event.update).toHaveBeenCalled();
-      expect(mockAudit.record).toHaveBeenCalledWith(
+      expect(mockPrisma.auditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: 'admin-user-id',
-          action: 'EVENT_SETTINGS_UPDATED',
-          resource: 'event',
+          data: expect.objectContaining({
+            userId: 'admin-user-id',
+            action: 'EVENT_SETTINGS_UPDATED',
+            resource: 'event',
+          }),
         }),
       );
       expect(result.tagline).toBe('New Verified Tagline');

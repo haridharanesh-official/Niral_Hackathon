@@ -10,7 +10,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://niralhackathon.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://niralhackathon.dpdns.org";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

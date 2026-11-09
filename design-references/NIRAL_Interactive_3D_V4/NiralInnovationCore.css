@@ -1,0 +1,118 @@
+.niral-core-v4{--ink:#111;--coral:#fd9b9b;--blush:#ffe2db;--paper:#faf7f2;--mint:#d7f4e3; font-family:'Space Grotesk',Arial,Helvetica,sans-serif; width:100%;}
+.niral-core-v4 *{box-sizing:border-box}
+.niral-core-v4 button{cursor:pointer}
+.niral-core-v4 button:focus-visible,.niral-core-v4 [tabindex]:focus-visible,.niral-core-v4 input:focus-visible{outline:3px solid #9b2946;outline-offset:3px}
+.niral-core-v4 .art-wrap{margin-top:24px;margin-bottom:25px}
+.niral-core-v4 .art-visual.nir-orbit-stage{height:342px;border-radius:22px;overflow:hidden;isolation:isolate;perspective:1050px;background:linear-gradient(128deg,#fffdfa 5%,#fff1ed 55%,#f9e8e6 100%);border:2px solid var(--ink);box-shadow:0 7px 0 #111, 0 14px 26px rgba(30,17,15,.075);cursor:grab;position:relative;touch-action:none}
+.niral-core-v4 .nir-orbit-stage.dragging{cursor:grabbing}
+.niral-core-v4 .nir-orbit-stage .stage-grid{position:absolute;inset:0;z-index:0;opacity:.48;background-image:linear-gradient(rgba(23,18,17,.058) 1px,transparent 1px),linear-gradient(90deg,rgba(23,18,17,.058) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(110deg,transparent,#000 22%,#000 78%,transparent)}
+.niral-core-v4 .nir-orbit-stage .stage-glow{position:absolute;inset:2%;background:radial-gradient(ellipse 57% 65% at 50% 51%,rgba(253,155,155,.48),transparent 75%);pointer-events:none}
+.niral-core-v4 .stage-head, .niral-core-v4 .stage-footer{position:absolute;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;z-index:6;pointer-events:none}
+.niral-core-v4 .stage-head{top:15px}
+.niral-core-v4 .stage-footer{bottom:13px;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:9px;letter-spacing:.6px;color:#615552}
+.niral-core-v4 .stage-id{font-size:9px;letter-spacing:1.3px;font-weight:850;border:1.5px solid #111;background:#fff;border-radius:7px;padding:7px 9px;box-shadow:0 2px #111}
+.niral-core-v4 .stage-led{display:inline-block;width:7px;height:7px;background:#65c798;border:1px solid #111;border-radius:50%;vertical-align:middle;margin-right:4px;animation:stagePulse 2.7s ease-in-out infinite}
+.niral-core-v4 .stage-hint{font-size:9px;font-weight:800;letter-spacing:.8px;color:#8f4747}
+.niral-core-v4 .stage-hint span{color:#111}
+.niral-core-v4 .stage-ground{position:absolute;left:26%;right:24%;bottom:49px;height:34px;border-radius:100%;background:#c96668;opacity:.20;filter:blur(19px);transform:rotate(-6deg);pointer-events:none}
+.niral-core-v4 .nir-orbit-stage .orbit-model{position:absolute;top:50%;left:50%;width:300px;height:210px;--rx:-18deg;--ry:-26deg;--zoom:1;--fit:1;transform:translate(-50%,-50%) rotateX(var(--rx)) rotateY(var(--ry)) scale(calc(var(--zoom) * var(--fit)));transform-style:preserve-3d;transition:none;z-index:2;will-change:transform;pointer-events:none}
+.niral-core-v4 .model-float{position:absolute;inset:0;transform-style:preserve-3d;animation:coreFloat 4s ease-in-out infinite}
+.niral-core-v4 .board-surface, .niral-core-v4 .board-thickness{position:absolute;left:0;top:0;width:300px;height:190px;border-radius:23px;border:3px solid #111;transform-style:preserve-3d;box-sizing:border-box}
+.niral-core-v4 .board-surface{background:linear-gradient(140deg,#fffdfb 10%,#ffe3db 69%,#ffc5be);box-shadow:inset 0 0 0 8px #fff9f5,inset 0 0 0 9px #1112, 0 6px 0 #111;transform:translateZ(0);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.niral-core-v4 .board-thickness{background:#111;transform:translate3d(4px,17px,-21px);box-shadow:0 15px 25px rgba(28,18,18,.28);transition:transform .5s}
+.niral-core-v4 .pcb-traces{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;opacity:.9}
+.niral-core-v4 .board-screw{position:absolute;width:10px;height:10px;border:2px solid #111;border-radius:50%;background:#fff;z-index:2}
+.niral-core-v4 .screw-a{top:10px;left:11px}
+.niral-core-v4 .screw-b{top:10px;right:11px}
+.niral-core-v4 .screw-c{bottom:10px;left:11px}
+.niral-core-v4 .screw-d{bottom:10px;right:11px}
+.niral-core-v4 .board-screw:after{content:"";position:absolute;width:4px;height:1px;left:1px;top:3px;background:#111;transform:rotate(-35deg)}
+.niral-core-v4 .board-header{position:absolute;left:26px;right:26px;top:15px;display:flex;justify-content:space-between;font:800 9px "JetBrains Mono",monospace;letter-spacing:1.1px;color:#9b5c5e}
+.niral-core-v4 .chip-heatsink{position:absolute;left:95px;top:49px;width:112px;height:96px;border:3px solid #111;border-radius:18px;background:#1c1b1c;transform:translateZ(21px);box-shadow:0 11px 0 #111;z-index:4;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.niral-core-v4 .chip-body{position:absolute;left:100px;top:36px;width:112px;height:96px;border:3px solid #111;border-radius:18px;background:#111;transform:translateZ(60px);box-shadow:0 11px 0 #111,0 14px 16px #1113;z-index:6;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.niral-core-v4 .chip-face{position:absolute;inset:0;display:grid;place-items:center;border-radius:14px;background:linear-gradient(142deg,#ffcac1 5%,#fd9b9b 54%,#ef7f84 100%);overflow:hidden}
+.niral-core-v4 .chip-face:after{content:"";position:absolute;width:100px;height:140px;transform:rotate(35deg);left:-93px;top:-60px;background:#fff5;filter:blur(8px)}
+.niral-core-v4 .chip-mark{font-size:58px;letter-spacing:-7px;line-height:1;font-weight:900;color:#151515;transform:translate(-5px,-5px)}
+.niral-core-v4 .chip-mark span{color:#fff}
+.niral-core-v4 .chip-sub{position:absolute;bottom:11px;right:13px;text-align:right;font:800 8px/1.2 "JetBrains Mono",monospace;letter-spacing:1.2px}
+.niral-core-v4 .chip-led{position:absolute;left:12px;bottom:12px;width:8px;height:8px;background:#dcfff0;border:1.5px solid #111;border-radius:50%;box-shadow:0 0 9px #90ffbd}
+.niral-core-v4 .board-annotation{position:absolute;font:800 9px/1.3 "JetBrains Mono",monospace;color:#915557;top:79px;letter-spacing:1.1px}
+.niral-core-v4 .left-annotation{left:28px}
+.niral-core-v4 .right-annotation{right:25px}
+.niral-core-v4 .micro-port{width:17px;height:26px;border:2px solid #111;border-radius:5px;position:absolute;background:#ffd7c9;transform:translateZ(12px)}
+.niral-core-v4 .port-one{left:-7px;top:61px}
+.niral-core-v4 .port-two{right:-7px;top:62px}
+.niral-core-v4 .port-three{right:-7px;top:102px}
+.niral-core-v4 .floating-module{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2.5px solid #111;border-radius:13px;box-shadow:0 7px 0 #111,0 13px 20px #1112;font-weight:900;z-index:8;transition:transform .55s cubic-bezier(.2,.8,.2,1);backface-visibility:visible}
+.niral-core-v4 .floating-module>span{font-size:23px;line-height:1}
+.niral-core-v4 .floating-module>small{font-size:7px;letter-spacing:1.1px;margin-top:5px}
+.niral-core-v4 .module-ai{width:58px;height:65px;background:#d9f6e8;left:-23px;top:-26px;transform:translateZ(53px) rotate(-12deg)}
+.niral-core-v4 .module-sensor{width:59px;height:65px;background:#fff;right:-19px;top:13px;transform:translateZ(75px) rotate(12deg)}
+.niral-core-v4 .module-cloud{width:56px;height:54px;background:#ffbcb5;left:5px;bottom:-3px;transform:translateZ(52px) rotate(9deg)}
+.niral-core-v4 .orbit-ring{position:absolute;border:2px dashed #ea848a;border-radius:50%;width:370px;height:265px;left:-35px;top:-42px;opacity:.68;transform:translateZ(-45px) rotateZ(-12deg);pointer-events:none}
+.niral-core-v4 .ring-two{width:335px;height:240px;left:-18px;top:-25px;border:2px solid #fd9b9b5e;transform:translateZ(-35px) rotateZ(13deg)}
+.niral-core-v4 .module-light{position:absolute;border-radius:50%;width:7px;height:7px;background:#fff;border:2px solid #111;box-shadow:0 0 0 7px #fd9b9b70}
+.niral-core-v4 .light-a{left:-33px;top:112px;transform:translateZ(30px)}
+.niral-core-v4 .light-b{right:-33px;top:154px;transform:translateZ(30px)}
+.niral-core-v4 .component-hotspot{position:absolute;z-index:10;display:flex;gap:7px;align-items:center;border:1.8px solid #111;border-radius:9px;background:#fff;padding:8px 10px;font:800 9px "Space Grotesk",Arial,sans-serif;letter-spacing:.2px;box-shadow:0 3px #111;transition:transform .15s,background .15s;cursor:pointer;touch-action:manipulation;white-space:nowrap}
+.niral-core-v4 .component-hotspot:hover{transform:translateY(-3px);box-shadow:0 6px #111}
+.niral-core-v4 .component-hotspot.is-active{background:#fd9b9b}
+.niral-core-v4 .hotspot-dot{width:7px;height:7px;border:1px solid #111;border-radius:50%;background:#fd9b9b}
+.niral-core-v4 .is-active .hotspot-dot{background:#fff}
+.niral-core-v4 .hot-core{left:15px;top:76px}
+.niral-core-v4 .hot-ai{right:14px;top:93px}
+.niral-core-v4 .hot-iot{left:17px;bottom:53px}
+.niral-core-v4 .component-hotspot:not(.is-active){background:#fff}
+.niral-core-v4 .hot-ai:not(.is-active) .hotspot-dot{background:#d7f4e3}
+.niral-core-v4 .hot-iot:not(.is-active) .hotspot-dot{background:#ffbcae}
+.niral-core-v4 .orbit-model.is-exploded .board-thickness{transform:translate3d(9px,31px,-55px)}
+.niral-core-v4 .orbit-model.is-exploded .board-surface{transform:translateZ(-30px)}
+.niral-core-v4 .orbit-model.is-exploded .chip-heatsink{transform:translateZ(45px)}
+.niral-core-v4 .orbit-model.is-exploded .chip-body{transform:translateZ(113px)}
+.niral-core-v4 .orbit-model.is-exploded .module-ai{transform:translate3d(-29px,-22px,100px) rotate(-18deg)}
+.niral-core-v4 .orbit-model.is-exploded .module-sensor{transform:translate3d(29px,-10px,127px) rotate(18deg)}
+.niral-core-v4 .orbit-model.is-exploded .module-cloud{transform:translate3d(-18px,29px,106px) rotate(14deg)}
+.niral-core-v4 .stage-hint, .niral-core-v4 .stage-coords{font-variant-numeric:tabular-nums}
+.niral-core-v4 .scene-caption{display:flex;gap:12px;align-items:center;margin-top:15px;border:1.5px solid #111;border-radius:13px;background:#fff;padding:12px 14px;box-shadow:0 3px #111;min-height:73px}
+.niral-core-v4 .caption-badge{min-width:47px;border:1.5px solid #111;border-radius:7px;background:#ffe2db;padding:8px 5px;text-align:center;font:800 10px "JetBrains Mono",monospace}
+.niral-core-v4 .scene-caption>div{flex:1;min-width:0}
+.niral-core-v4 .scene-caption strong{font-size:11px;letter-spacing:1px}
+.niral-core-v4 .scene-caption p{font-size:11px;color:#6a5b58;line-height:1.25;margin:3px 0 0}
+.niral-core-v4 .caption-arrow{font-size:16px;font-weight:900}
+.niral-core-v4 .scene-tools{margin-top:12px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.niral-core-v4 .scene-tools button{border:1.5px solid #111;border-radius:9px;background:#fff;padding:9px 9px;box-shadow:0 3px #111;font-size:11px;font-weight:750;min-height:36px;transition:transform .15s,background .15s,box-shadow .15s}
+.niral-core-v4 .scene-tools button:hover{transform:translateY(-2px);box-shadow:0 5px #111}
+.niral-core-v4 .scene-tools button[aria-pressed=true]{background:#fd9b9b}
+.niral-core-v4 .scene-tools .scene-zoom{display:flex;gap:7px;align-items:center;margin-left:auto;font-size:10px;font-weight:750}
+.niral-core-v4 .scene-tools #zoom{width:77px;accent-color:#e78f91;cursor:ew-resize}
+.niral-core-v4 .scene-help{font-size:11px!important;color:#77655e!important;margin-top:10px!important;line-height:1.4!important}
+.niral-core-v4 .nir-orbit-stage.is-paused .model-float, .niral-core-v4 .nir-orbit-stage.is-paused .stage-led{animation-play-state:paused}
+@keyframes coreFloat{0%,100%{transform:translateY(2px)}50%{transform:translateY(-8px)}}
+@keyframes stagePulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (max-width:1250px){.niral-core-v4 .art-visual.nir-orbit-stage{height:310px}
+.niral-core-v4 .nir-orbit-stage .orbit-model{--fit:.88}
+.niral-core-v4 .component-hotspot{font-size:8px}
+.niral-core-v4 .hot-core{left:9px}
+.niral-core-v4 .hot-ai{right:9px}
+.niral-core-v4 .hot-iot{left:9px}}
+@media (max-width:790px){.niral-core-v4 .art-wrap{display:block;margin:20px 0 16px}
+.niral-core-v4 .art-visual.nir-orbit-stage{height:310px}
+.niral-core-v4 .nir-orbit-stage .orbit-model{--fit:.83}
+.niral-core-v4 .creative-bottom{margin-top:18px}}
+@media (max-width:480px){.niral-core-v4 .art-visual.nir-orbit-stage{height:274px}
+.niral-core-v4 .nir-orbit-stage .orbit-model{--fit:.68}
+.niral-core-v4 .stage-head{top:10px;left:9px;right:9px}
+.niral-core-v4 .stage-id{font-size:8px;padding:6px}
+.niral-core-v4 .stage-hint{font-size:8px}
+.niral-core-v4 .hot-core{left:7px;top:65px}
+.niral-core-v4 .hot-ai{right:7px;top:75px}
+.niral-core-v4 .hot-iot{left:7px;bottom:40px}
+.niral-core-v4 .component-hotspot{padding:6px;font-size:8px}
+.niral-core-v4 .stage-footer{left:9px;right:9px;bottom:10px}
+.niral-core-v4 .scene-tools{gap:6px}
+.niral-core-v4 .scene-tools button{padding:8px;font-size:10px}
+.niral-core-v4 .scene-tools .scene-zoom{width:100%;justify-content:flex-end}
+.niral-core-v4 .scene-tools #zoom{width:140px}}
+@media (prefers-reduced-motion:reduce){.niral-core-v4 .model-float, .niral-core-v4 .stage-led{animation:none!important}
+.niral-core-v4 .nir-orbit-stage .orbit-model{transition:none}
+.niral-core-v4 .floating-module, .niral-core-v4 .board-surface, .niral-core-v4 .chip-body, .niral-core-v4 .chip-heatsink{transition:none!important}}

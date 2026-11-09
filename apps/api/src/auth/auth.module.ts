@@ -16,11 +16,19 @@ import { SessionModule } from '../session/session.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         // Access token default 30m (SRS §23 / §60); override with JWT_EXPIRES_IN
+        if (
+          config.get('NODE_ENV') === 'production' &&
+          (config.get<string>('JWT_SECRET')?.length ?? 0) < 32
+        )
+          throw new Error(
+            'JWT_SECRET must contain at least 32 characters in production',
+          );
         const expiresIn = config.get<string>('JWT_EXPIRES_IN') ?? '30m';
         return {
           secret: config.get<string>('JWT_SECRET') ?? 'dev-secret-change-me',
           signOptions: {
-            expiresIn: expiresIn as `${number}d` | `${number}h` | `${number}m` | `${number}s`,
+            expiresIn: expiresIn as
+              `${number}d` | `${number}h` | `${number}m` | `${number}s`,
           },
         };
       },

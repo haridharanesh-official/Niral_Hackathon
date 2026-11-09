@@ -1,8 +1,20 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EnrollmentService } from './enrollment.service';
-import { EnrollEventDto } from './dto/enroll.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '@hackos/shared';
+import { EnrollEventDto, EnrollmentStatusDto } from './dto/enroll.dto';
 
 type AuthRequest = Request & { user: { userId: string } };
 
@@ -20,6 +32,17 @@ export class EnrollmentController {
   @Get('event')
   activeEvent() {
     return this.enrollmentService.getActiveEvent();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
+  @Patch(':id/status')
+  status(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() dto: EnrollmentStatusDto,
+  ) {
+    return this.enrollmentService.transition(id, dto.status, req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)

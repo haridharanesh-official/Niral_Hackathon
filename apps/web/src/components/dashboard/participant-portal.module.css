@@ -1,0 +1,377 @@
+/* NIRAL Hackathon 2026 — Participant Portal Design System */
+
+.portalRoot {
+  --niral-canvas: #fff;
+  --niral-paper: #faf7f2;
+  --niral-ink: #111;
+  --niral-coral: #fd9b9b;
+  --niral-soft-coral: #ffe2db;
+  --niral-muted: #696969;
+  --niral-border: #111;
+  background:
+    radial-gradient(#dededb 0.65px, transparent 0.65px) 4px 4px/23px 23px,
+    var(--niral-canvas);
+  color: var(--niral-ink);
+  font-family: 'Inter', Arial, sans-serif;
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  color-scheme: light;
+}
+
+.portalRoot * {
+  box-sizing: border-box;
+}
+
+.portalContainer {
+  width: min(1320px, 92%);
+  margin-inline: auto;
+}
+
+/* Header */
+.portalHeader {
+  width: min(1320px, 92%);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 100px;
+  border-bottom: 2px solid var(--niral-border);
+  padding: 16px 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.portalNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navLink {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  background: var(--niral-soft-coral);
+  color: #000;
+}
+
+.navLinkActive {
+  background: var(--niral-coral);
+  color: #111;
+  font-weight: 700;
+  border: 1.5px solid var(--niral-border);
+  box-shadow: 0 2px 0 var(--niral-border);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.userPill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 8px;
+  background: #fff;
+  border: 2px solid var(--niral-border);
+  border-radius: 30px;
+  box-shadow: 2px 2px 0 var(--niral-border);
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--niral-coral);
+  border: 1.5px solid var(--niral-border);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #111;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--niral-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 0 var(--niral-border);
+  cursor: pointer;
+}
+
+/* Mobile Drawer */
+.mobileDrawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawerContent {
+  width: 290px;
+  background: #fff;
+  border-left: 2px solid var(--niral-border);
+  height: 100%;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: -4px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--niral-border);
+  padding-bottom: 16px;
+}
+
+/* Main Content Area */
+.portalMain {
+  flex: 1;
+  width: min(1320px, 92%);
+  margin-inline: auto;
+  padding: 32px 0 60px;
+}
+
+/* Editorial Heading */
+.headingWrapper {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b76262;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.portalTitle {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  font-size: clamp(28px, 2.8vw, 42px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+  color: var(--niral-ink);
+}
+
+.portalTitle mark {
+  background: var(--niral-soft-coral);
+  color: inherit;
+  border-radius: 6px;
+  padding: 0 8px;
+  box-decoration-break: clone;
+}
+
+.portalSubtitle {
+  font-size: 15px;
+  color: var(--niral-muted);
+  margin-top: 8px;
+  max-width: 780px;
+}
+
+/* Tactile Cards */
+.card {
+  border: 2px solid var(--niral-border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 4px 4px 0 var(--niral-border);
+  padding: 24px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  position: relative;
+}
+
+.cardPaper {
+  background: var(--niral-paper);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-family: 'Space Grotesk', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--niral-ink);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1.5px solid var(--niral-border);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 var(--niral-border);
+}
+
+.badgeSuccess {
+  background: #c3e6cb;
+  color: #155724;
+}
+
+.badgeWarning {
+  background: #ffeeba;
+  color: #856404;
+}
+
+.badgeCoral {
+  background: var(--niral-coral);
+  color: #111;
+}
+
+.badgeNeutral {
+  background: var(--niral-paper);
+  color: #444;
+}
+
+.badgeUrgent {
+  background: #fd9b9b;
+  color: #900;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Info Strip / Footer */
+.portalFooter {
+  width: min(1320px, 92%);
+  margin-inline: auto;
+  border-top: 2px solid var(--niral-border);
+  padding: 24px 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--niral-muted);
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLeft strong {
+  color: var(--niral-ink);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .portalNav {
+    display: none;
+  }
+  .mobileMenuBtn {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .portalHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .headerRight {
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .portalMain {
+    min-width: 0;
+  }
+  .userPill {
+    padding: 4px 8px;
+  }
+  .userName,
+  .userRole {
+    display: none;
+  }
+  .portalHeader {
+    min-height: 80px;
+  }
+  .card {
+    padding: 18px;
+  }
+}

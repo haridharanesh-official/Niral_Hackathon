@@ -225,6 +225,8 @@ export async function NiralHome() {
         <Logo />
         <p>Ideate. Build. Innovate.</p>
         <nav aria-label="Footer navigation">
+          <Link href="/privacy-policy">Privacy Policy</Link>
+          <Link href="/terms-of-service">Terms of Service</Link>
           {['Home', 'About', 'Tracks', 'Schedule', 'Rules', 'FAQ', 'Contact'].map(
             (name) => (
               <Link key={name} href={hrefFor(name)}>

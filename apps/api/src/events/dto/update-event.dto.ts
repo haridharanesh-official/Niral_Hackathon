@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsObject,
   Max,
   Min,
 } from 'class-validator';
@@ -131,5 +132,6 @@ export class UpdateEventDto {
   bannerUrl?: string;
 
   @IsOptional()
+  @IsObject()
   settings?: Record<string, unknown>;
 }

@@ -22,7 +22,7 @@ export class HealthService {
     const cache = await this.redis.ping();
 
     return {
-      status: 'ok',
+      status: database === 'up' && cache === 'up' ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       services: {
         api: 'up',

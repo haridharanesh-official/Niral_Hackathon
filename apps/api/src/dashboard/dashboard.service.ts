@@ -33,30 +33,59 @@ export class DashboardService {
   ) {}
 
   async summary(userId: string) {
-    const [user, team, enrollment, notes, activeEvent] = await Promise.all([
-      this.prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          name: true,
-          role: true,
-          xp: true,
-          profile: true,
-          notificationPrefs: true,
-        },
-      }),
-      this.teams.getMyTeam(userId),
-      this.enrollment.myEnrollment(userId),
-      this.notifications.list(userId, { page: 1, pageSize: 8, status: 'all' }),
-      this.enrollment.getActiveEvent(),
-    ]);
+    const [user, team, enrollment, notes, activeEvent, announcementsList] =
+      await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            xp: true,
+            college: true,
+            department: true,
+            profile: true,
+            notificationPrefs: true,
+            profileCompletedAt: true,
+          },
+        }),
+        this.teams.getMyTeam(userId),
+        this.enrollment.myEnrollment(userId),
+        this.notifications.list(userId, { page: 1, pageSize: 8, status: 'all' }),
+        this.enrollment.getActiveEvent(),
+        this.announcements(userId),
+      ]);
+
+    const defaultEvent = {
+      id: 'niral-2026',
+      name: 'NIRAL Hackathon 2026',
+      startsAt: '2026-12-03T00:00:00.000Z',
+      endsAt: '2026-12-04T23:59:59.000Z',
+      venueName: 'Sri Shakthi Institute of Engineering and Technology',
+      venueAddress: 'Coimbatore, Tamil Nadu',
+      timezone: 'Asia/Kolkata',
+      eventMode: 'ONSITE',
+      minTeamSize: 2,
+      maxTeamSize: 4,
+      settings: {
+        tracks: [
+          'AI & Smart Automation',
+          'Healthcare & MedTech',
+          'Smart Agriculture & Food Security',
+          'Cyber Physical Systems & IoT',
+          'Open Innovation',
+        ],
+      },
+    };
 
     const tasks = this.readTasks(user?.profile).slice(0, 12);
     return {
       userSummary: user,
-      event: enrollment.event ?? activeEvent,
+      event: enrollment.event ?? activeEvent ?? defaultEvent,
       enrollment: enrollment.enrollment,
       teamOverview: team,
+      latestAnnouncements: announcementsList.slice(0, 3),
       progressMetrics: {
         completedTasks: tasks.filter((t) => t.done).length,
         totalTasks: tasks.length,
@@ -69,9 +98,130 @@ export class DashboardService {
     };
   }
 
+  async announcements(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profile: true },
+    });
+    const profile = (user?.profile as Record<string, unknown> | null) ?? {};
+    const readAnnouncements = Array.isArray(profile.readAnnouncements)
+      ? (profile.readAnnouncements as string[])
+      : [];
+
+    const dbAnnouncements = await this.prisma.announcement.findMany({
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        priority: true,
+        published: true,
+        createdAt: true,
+      },
+    });
+
+    if (dbAnnouncements.length === 0) {
+      const officialSeed = [
+        {
+          id: 'niral-ann-1',
+          title: 'Official NIRAL Hackathon 2026 Problem Tracks Live',
+          body: 'Problem tracks covering AI & Smart Automation, Healthcare & MedTech, Smart Agriculture, and Cyber Physical Systems are officially live. Align your squad around one of the challenges.',
+          priority: 'urgent',
+          published: true,
+          createdAt: new Date('2026-10-26T10:00:00.000Z'),
+        },
+        {
+          id: 'niral-ann-2',
+          title: 'Team Formation Notice: 2 to 4 Members Required',
+          body: 'All teams must have between 2 and 4 verified participants. Team leaders can invite teammates via email or share their unique invite code from the Team Workspace.',
+          priority: 'normal',
+          published: true,
+          createdAt: new Date('2026-10-25T14:30:00.000Z'),
+        },
+        {
+          id: 'niral-ann-3',
+          title: 'Event Venue & Physical Desk Registration at Sri Shakthi Institute',
+          body: 'NIRAL Hackathon 2026 will take place onsite at Sri Shakthi Institute of Engineering and Technology, Coimbatore on December 3–4, 2026. Keep your Registration ID ready for desk verification.',
+          priority: 'normal',
+          published: true,
+          createdAt: new Date('2026-10-24T09:00:00.000Z'),
+        },
+      ];
+      return officialSeed.map((item) => ({
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        read: readAnnouncements.includes(item.id),
+      }));
+    }
+
+    return dbAnnouncements.map((item) => ({
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      read: readAnnouncements.includes(item.id),
+    }));
+  }
+
+  async markAnnouncementRead(userId: string, announcementId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profile: true },
+    });
+    const profile = (user?.profile as Record<string, unknown> | null) ?? {};
+    const existing = Array.isArray(profile.readAnnouncements)
+      ? (profile.readAnnouncements as string[])
+      : [];
+
+    if (!existing.includes(announcementId)) {
+      const updated = [...existing, announcementId];
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          profile: {
+            ...profile,
+            readAnnouncements: updated,
+          },
+        },
+      });
+    }
+
+    return { success: true };
+  }
+
+  async markAllAnnouncementsRead(userId: string) {
+    const announcements = await this.prisma.announcement.findMany({
+      where: { published: true },
+      select: { id: true },
+    });
+    const defaultIds = ['niral-ann-1', 'niral-ann-2', 'niral-ann-3'];
+    const allIds = Array.from(
+      new Set([...announcements.map((a) => a.id), ...defaultIds]),
+    );
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profile: true },
+    });
+    const profile = (user?.profile as Record<string, unknown> | null) ?? {};
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        profile: {
+          ...profile,
+          readAnnouncements: allIds,
+        },
+      },
+    });
+
+    return { success: true };
+  }
+
   notificationsFeed(userId: string, query: NotificationsQueryDto) {
     return this.notifications.list(userId, query);
   }
+
 
   async tasks(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -151,7 +301,7 @@ export class DashboardService {
       },
       {
         id: `${event.id}:deadline`,
-        title: 'Final submission deadline',
+        title: 'Event ends',
         type: 'deadline',
         startsAt: event.endsAt,
       },
@@ -160,7 +310,7 @@ export class DashboardService {
 
   async activityFeed(userId: string) {
     return this.prisma.auditLog.findMany({
-      where: { OR: [{ userId }, { userId: null }] },
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       take: 40,
       select: {

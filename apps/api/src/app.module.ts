@@ -22,6 +22,7 @@ import { ProjectModule } from './project/project.module';
 import { SubmissionModule } from './submission/submission.module';
 import { JudgeModule } from './judge/judge.module';
 import { MailModule } from './mail/mail.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { MailModule } from './mail/mail.module';
     SubmissionModule,
     JudgeModule,
     MailModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

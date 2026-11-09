@@ -18,7 +18,6 @@ import {
   ResetPasswordDto,
   VerifyEmailDto,
 } from './dto/password.dto';
-import { Disable2FaDto, Enable2FaDto } from './dto/two-factor.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
@@ -72,6 +71,7 @@ export class AuthController {
     });
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('verify-email')
   verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto.token);
@@ -87,6 +87,12 @@ export class AuthController {
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Req() req: AuthRequest) {
+    return this.authService.logout(req.headers.authorization ?? '');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -108,28 +114,22 @@ export class AuthController {
     return this.authService.updateProfile(req.user.userId, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('2fa/setup')
-  setup2FA(@Req() req: AuthRequest) {
-    return this.authService.setup2FA(req.user.userId);
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('resend-verification')
+  resend(@Body() dto: ForgotPasswordDto) {
+    return this.authService.resendVerification(dto.email);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('confirm-transition')
+  transition(@Body() dto: VerifyEmailDto) {
+    return this.authService.completeTransition(dto.token);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('2fa/enable')
-  enable2FA(@Req() req: AuthRequest, @Body() dto: Enable2FaDto) {
-    return this.authService.enable2FA(req.user.userId, dto.code);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('2fa/disable')
-  disable2FA(@Req() req: AuthRequest, @Body() dto: Disable2FaDto) {
-    return this.authService.disable2FA(req.user.userId, dto.code);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('2fa/backup-codes')
-  regenerateBackupCodes(@Req() req: AuthRequest, @Body() dto: Enable2FaDto) {
-    return this.authService.regenerateBackupCodes(req.user.userId, dto.code);
+  @Post(['2fa/setup', '2fa/enable', '2fa/disable', '2fa/backup-codes'])
+  retiredAuthenticatorActions() {
+    return this.authService.obsoleteAuthenticatorAction();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

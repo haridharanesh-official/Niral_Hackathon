@@ -1,5 +1,2 @@
-import { VerifyEmailForm } from "@/components/auth/verify-email-form";
-
-export default function VerifyEmailPage() {
-  return <VerifyEmailForm />;
-}
+import { redirect } from 'next/navigation';
+export default function Page(){redirect('/verify-email')}

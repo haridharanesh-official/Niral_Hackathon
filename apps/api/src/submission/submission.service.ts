@@ -549,7 +549,7 @@ export class SubmissionService {
 
     const config = this.validation.getEventConfig(team.event?.settings);
     if (
-      config.showcaseVisibility === 'private' &&
+      config.showcaseVisibility !== 'public' ||
       !this.validation.isLocked(team.submission.status)
     ) {
       throw new NotFoundException('Showcase not yet published');

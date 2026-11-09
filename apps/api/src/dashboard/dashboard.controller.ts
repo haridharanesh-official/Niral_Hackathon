@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DashboardService } from './dashboard.service';
@@ -18,6 +28,21 @@ export class DashboardController {
   @Get('summary')
   summary(@Req() req: AuthRequest) {
     return this.dashboard.summary(req.user.userId);
+  }
+
+  @Get('announcements')
+  announcements(@Req() req: AuthRequest) {
+    return this.dashboard.announcements(req.user.userId);
+  }
+
+  @Post('announcements/:id/read')
+  markAnnouncementRead(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.dashboard.markAnnouncementRead(req.user.userId, id);
+  }
+
+  @Post('announcements/read-all')
+  markAllAnnouncementsRead(@Req() req: AuthRequest) {
+    return this.dashboard.markAllAnnouncementsRead(req.user.userId);
   }
 
   @Get('notifications')

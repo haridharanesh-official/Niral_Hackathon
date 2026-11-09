@@ -3,9 +3,11 @@ import type { Request } from 'express';
 import { Permission } from '@hackos/shared';
 import { TeamsService } from './teams.service';
 import {
+  CancelInvitationDto,
   CreateTeamDto,
   InviteMemberDto,
   JoinTeamDto,
+  RemoveMemberDto,
   RequestJoinDto,
   RespondJoinDto,
 } from './dto/team.dto';
@@ -31,6 +33,12 @@ export class TeamsController {
     return this.teamsService.listPublic(req.user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('invitations')
+  invitations(@Req() req: AuthRequest) {
+    return this.teamsService.getMyInvitations(req.user.userId);
+  }
+
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @RequirePermissions(Permission.TEAM_CREATE)
   @Post()
@@ -44,11 +52,30 @@ export class TeamsController {
     return this.teamsService.join(req.user.userId, dto.inviteCode);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('leave')
+  leave(@Req() req: AuthRequest) {
+    return this.teamsService.leaveTeam(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(Permission.TEAM_REMOVE_MEMBER)
+  @Post('remove-member')
+  removeMember(@Req() req: AuthRequest, @Body() dto: RemoveMemberDto) {
+    return this.teamsService.removeMember(req.user.userId, dto.memberId);
+  }
+
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @RequirePermissions(Permission.TEAM_INVITE)
   @Post('invite')
   invite(@Req() req: AuthRequest, @Body() dto: InviteMemberDto) {
     return this.teamsService.inviteMember(req.user.userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('cancel-invite')
+  cancelInvite(@Req() req: AuthRequest, @Body() dto: CancelInvitationDto) {
+    return this.teamsService.cancelInvitation(req.user.userId, dto.invitationId);
   }
 
   @UseGuards(JwtAuthGuard)

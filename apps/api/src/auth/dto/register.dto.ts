@@ -1,9 +1,34 @@
-import { IsEmail, IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsDefined, ValidateNested } from 'class-validator';
+import { StudentRegistrationDto } from './student-registration.dto';
+import {
+  IsEmail,
+  IsBoolean,
+  Equals,
+  IsOptional,
+  IsString,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class RegisterDto {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => StudentRegistrationDto)
+  student!: StudentRegistrationDto;
+  @IsBoolean()
+  @Equals(true)
+  accountPolicyAccepted!: boolean;
+
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsEmail()
   email!: string;
 
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString()
   @MinLength(2)
   @MaxLength(80)
