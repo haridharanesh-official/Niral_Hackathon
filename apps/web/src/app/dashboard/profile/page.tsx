@@ -22,8 +22,6 @@ import { PopButton } from '@/components/niral/pop-button';
 import { accountRequest } from '@/components/niral-auth/account-api';
 import styles from '@/components/dashboard/participant-portal.module.css';
 
-
-
 const SUGGESTED_SKILLS = [
   'Python',
   'TypeScript',
@@ -53,7 +51,10 @@ export default function ParticipantProfilePage() {
   const { data: session, update: updateSession } = useSession();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -73,9 +74,27 @@ export default function ParticipantProfilePage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    queueMicrotask(() => {
+      if (active) setLoading(true);
+    });
 
-    accountRequest<any>('profile')
+    accountRequest<{
+      name: string;
+      email: string;
+      bio?: string;
+      image?: string;
+      college?: string;
+      department?: string;
+      profile?: {
+        degree?: string;
+        yearOfStudy?: string;
+        phoneNumber?: string;
+        skillsList?: string[];
+        skills?: Record<string, string>;
+        interests?: string[];
+      };
+      notificationPrefs?: { teamAlerts?: boolean; announcementAlerts?: boolean };
+    }>('profile')
       .then((user) => {
         if (!active) return;
         setName(user.name ?? '');
@@ -100,11 +119,15 @@ export default function ParticipantProfilePage() {
 
         const prefs = user.notificationPrefs ?? {};
         if (typeof prefs.teamAlerts === 'boolean') setNotifyTeam(prefs.teamAlerts);
-        if (typeof prefs.announcementAlerts === 'boolean') setNotifyAnnounce(prefs.announcementAlerts);
+        if (typeof prefs.announcementAlerts === 'boolean')
+          setNotifyAnnounce(prefs.announcementAlerts);
       })
       .catch((err) => {
         if (active) {
-          setFeedback({ type: 'error', message: err.message ?? 'Failed to load profile' });
+          setFeedback({
+            type: 'error',
+            message: err instanceof Error ? err.message : 'Failed to load profile',
+          });
         }
       })
       .finally(() => {
@@ -171,10 +194,13 @@ export default function ParticipantProfilePage() {
       await accountRequest('profile', payload, 'PATCH');
       setFeedback({ type: 'success', message: 'Profile updated successfully!' });
       void updateSession();
-    } catch (err: any) {
+    } catch (err) {
       setFeedback({
         type: 'error',
-        message: err.message ?? 'Could not update profile. Please check your inputs.',
+        message:
+          err instanceof Error
+            ? err.message
+            : 'Could not update profile. Please check your inputs.',
       });
     } finally {
       setSaving(false);
@@ -190,7 +216,8 @@ export default function ParticipantProfilePage() {
           Participant Profile · <mark>Account &amp; Skills</mark>
         </h1>
         <p className={styles.portalSubtitle}>
-          Manage your personal details, academic background, technical skills, and notification preferences.
+          Manage your personal details, academic background, technical skills, and
+          notification preferences.
         </p>
       </div>
 
@@ -206,7 +233,11 @@ export default function ParticipantProfilePage() {
           role="alert"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {feedback.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+            {feedback.type === 'success' ? (
+              <CheckCircle2 size={20} />
+            ) : (
+              <AlertCircle size={20} />
+            )}
             <strong>{feedback.message}</strong>
           </div>
         </div>
@@ -217,7 +248,10 @@ export default function ParticipantProfilePage() {
           <p style={{ color: '#666', fontSize: 16 }}>Loading profile credentials…</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
+        >
           {/* Section 1: Personal Information */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
@@ -235,7 +269,14 @@ export default function ParticipantProfilePage() {
               }}
             >
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Full Name *
                 </label>
                 <input
@@ -257,7 +298,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Email Address (Verified)
                 </label>
                 <input
@@ -275,13 +323,22 @@ export default function ParticipantProfilePage() {
                     cursor: 'not-allowed',
                   }}
                 />
-                <small style={{ fontSize: 11, color: '#666', marginTop: 4, display: 'block' }}>
+                <small
+                  style={{ fontSize: 11, color: '#666', marginTop: 4, display: 'block' }}
+                >
                   Email is locked to your verified account credentials.
                 </small>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Contact Phone
                 </label>
                 <input
@@ -302,7 +359,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Avatar Image URL (Optional)
                 </label>
                 <input
@@ -323,7 +387,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Bio / Hacker Headline
                 </label>
                 <textarea
@@ -363,7 +434,14 @@ export default function ParticipantProfilePage() {
               }}
             >
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Institution / College Name *
                 </label>
                 <input
@@ -385,7 +463,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Department / Major *
                 </label>
                 <input
@@ -407,7 +492,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Degree Program
                 </label>
                 <select
@@ -433,7 +525,14 @@ export default function ParticipantProfilePage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 6,
+                  }}
+                >
                   Year of Study
                 </label>
                 <select
@@ -471,12 +570,26 @@ export default function ParticipantProfilePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {/* Skills Tags */}
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 8,
+                  }}
+                >
                   Your Technical Skills &amp; Proficiencies
                 </label>
 
                 {skills.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 8,
+                      marginBottom: 12,
+                    }}
+                  >
                     {skills.map((skill) => (
                       <span
                         key={skill}
@@ -512,7 +625,8 @@ export default function ParticipantProfilePage() {
                   </div>
                 ) : (
                   <p style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
-                    No skills added yet. Add your technologies below to help teammates find you.
+                    No skills added yet. Add your technologies below to help teammates
+                    find you.
                   </p>
                 )}
 
@@ -555,37 +669,59 @@ export default function ParticipantProfilePage() {
 
                 {/* Suggested skill chips */}
                 <div style={{ marginTop: 12 }}>
-                  <small style={{ fontSize: 12, color: '#777', display: 'block', marginBottom: 6 }}>
+                  <small
+                    style={{
+                      fontSize: 12,
+                      color: '#777',
+                      display: 'block',
+                      marginBottom: 6,
+                    }}
+                  >
                     Quick suggestions:
                   </small>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {SUGGESTED_SKILLS.filter((s) => !skills.includes(s)).slice(0, 8).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => addSkill(s)}
-                        style={{
-                          border: '1px dashed #666',
-                          background: '#fff',
-                          borderRadius: 6,
-                          padding: '3px 8px',
-                          fontSize: 11.5,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        + {s}
-                      </button>
-                    ))}
+                    {SUGGESTED_SKILLS.filter((s) => !skills.includes(s))
+                      .slice(0, 8)
+                      .map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => addSkill(s)}
+                          style={{
+                            border: '1px dashed #666',
+                            background: '#fff',
+                            borderRadius: 6,
+                            padding: '3px 8px',
+                            fontSize: 11.5,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          + {s}
+                        </button>
+                      ))}
                   </div>
                 </div>
               </div>
 
               {/* Challenge Track Interests */}
               <div style={{ borderTop: '1.5px solid #eee', paddingTop: 16 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    marginBottom: 8,
+                  }}
+                >
                   Preferred NIRAL Problem Tracks
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                    gap: 10,
+                  }}
+                >
                   {NIRAL_TRACKS.map((track) => {
                     const isSelected = selectedTracks.includes(track);
                     return (
@@ -609,7 +745,9 @@ export default function ParticipantProfilePage() {
                         }}
                       >
                         <span>{track}</span>
-                        {isSelected && <CheckCircle2 size={16} style={{ color: '#b76262' }} />}
+                        {isSelected && (
+                          <CheckCircle2 size={16} style={{ color: '#b76262' }} />
+                        )}
                       </button>
                     );
                   })}
@@ -635,7 +773,15 @@ export default function ParticipantProfilePage() {
                 </h2>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13.5 }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    fontSize: 13.5,
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={notifyTeam}
@@ -645,14 +791,24 @@ export default function ParticipantProfilePage() {
                   <span>Email alerts for team invitations &amp; join requests</span>
                 </label>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13.5 }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    fontSize: 13.5,
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={notifyAnnounce}
                     onChange={(e) => setNotifyAnnounce(e.target.checked)}
                     style={{ width: 18, height: 18, accentColor: '#fd9b9b' }}
                   />
-                  <span>Email alerts for official event bulletins &amp; schedule updates</span>
+                  <span>
+                    Email alerts for official event bulletins &amp; schedule updates
+                  </span>
                 </label>
               </div>
             </div>
@@ -665,8 +821,16 @@ export default function ParticipantProfilePage() {
                   Security &amp; Password Management
                 </h2>
               </div>
-              <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5, margin: '0 0 16px' }}>
-                Password updates use secure single-use email verification tokens hashed with SHA-256 at rest.
+              <p
+                style={{
+                  fontSize: 13,
+                  color: '#555',
+                  lineHeight: 1.5,
+                  margin: '0 0 16px',
+                }}
+              >
+                Password updates use secure single-use email verification tokens hashed
+                with SHA-256 at rest.
               </p>
               <Link
                 href="/forgot-password"

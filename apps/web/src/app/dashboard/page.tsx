@@ -34,7 +34,7 @@ type DashboardSummary = {
     xp: number;
     college?: string | null;
     department?: string | null;
-    profile?: Record<string, any> | null;
+    profile?: Record<string, unknown> | null;
     profileCompletedAt?: string | null;
   } | null;
   event?: {
@@ -57,7 +57,7 @@ type DashboardSummary = {
     status: string;
     mode: string;
     createdAt: string;
-    applicationData?: Record<string, any>;
+    applicationData?: Record<string, unknown>;
   } | null;
   teamOverview?: {
     id: string;
@@ -113,8 +113,12 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setData(null);
+    queueMicrotask(() => {
+      if (active) {
+        setLoading(true);
+        setData(null);
+      }
+    });
 
     accountRequest<DashboardSummary>('summary')
       .then((res) => {

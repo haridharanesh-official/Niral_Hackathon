@@ -106,7 +106,10 @@ export default function TeamDashboardPage() {
   const [discover, setDiscover] = useState<DiscoverTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'create' | 'join' | 'discover'>('create');
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   // Form states
   const [teamName, setTeamName] = useState('');
@@ -127,36 +130,46 @@ export default function TeamDashboardPage() {
   useEffect(() => {
     const invite = searchParams.get('invite');
     if (invite) {
-      setInviteCode(invite);
-      setTab('join');
+      queueMicrotask(() => {
+        setInviteCode(invite);
+        setTab('join');
+      });
     }
   }, [searchParams]);
 
   const userId = session?.user?.id;
   const isLeader = useMemo(() => {
     if (!team || !userId) return false;
-    return team.leaderId === userId || team.members.some((m) => m.role === 'LEADER' && m.user.id === userId);
+    return (
+      team.leaderId === userId ||
+      team.members.some((m) => m.role === 'LEADER' && m.user.id === userId)
+    );
   }, [team, userId]);
 
   async function loadTeamData() {
     setLoading(true);
     try {
       const [myTeamRes, discoverRes] = await Promise.all([
-        accountRequest<TeamData | null>('team').catch(() => null),
-        accountRequest<DiscoverTeam[]>('team-discover').catch(() => []),
+        accountRequest<TeamData | null>('team'),
+        accountRequest<DiscoverTeam[]>('team-discover'),
       ]);
       setTeam(myTeamRes && myTeamRes.id ? myTeamRes : null);
       setDiscover(Array.isArray(discoverRes) ? discoverRes : []);
       setFeedback(null);
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to load team data' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to load team data',
+      });
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadTeamData();
+    queueMicrotask(() => {
+      void loadTeamData();
+    });
   }, []);
 
   async function handleCreateTeam(e: React.FormEvent) {
@@ -164,7 +177,8 @@ export default function TeamDashboardPage() {
     if (description.trim().length < 50) {
       setFeedback({
         type: 'error',
-        message: 'Team pitch/description must be at least 50 characters to explain your project direction.',
+        message:
+          'Team pitch/description must be at least 50 characters to explain your project direction.',
       });
       return;
     }
@@ -180,10 +194,16 @@ export default function TeamDashboardPage() {
         recruitmentStatus,
       });
       setTeam(created);
-      setFeedback({ type: 'success', message: `Team "${created.name}" created successfully!` });
+      setFeedback({
+        type: 'success',
+        message: `Team "${created.name}" created successfully!`,
+      });
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to create team.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to create team.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -202,8 +222,11 @@ export default function TeamDashboardPage() {
       setTeam(joined);
       setFeedback({ type: 'success', message: `Welcome to ${joined.name}!` });
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to join team.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to join team.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -226,8 +249,11 @@ export default function TeamDashboardPage() {
       });
       setInviteEmail('');
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to send invitation.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to send invitation.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -239,8 +265,11 @@ export default function TeamDashboardPage() {
       await accountRequest('team-cancel-invite', { invitationId });
       setFeedback({ type: 'success', message: 'Invitation cancelled.' });
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to cancel invitation.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to cancel invitation.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -253,8 +282,11 @@ export default function TeamDashboardPage() {
       await accountRequest('team-remove-member', { memberId: memberUserId });
       setFeedback({ type: 'success', message: 'Member removed from team.' });
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to remove member.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to remove member.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -264,12 +296,18 @@ export default function TeamDashboardPage() {
     setBusyAction(true);
     setConfirmLeave(false);
     try {
-      const res: any = await accountRequest('team-leave', {});
-      setFeedback({ type: 'success', message: res.message ?? 'Successfully left the team.' });
+      const res = await accountRequest<{ message?: string }>('team-leave', {});
+      setFeedback({
+        type: 'success',
+        message: res.message ?? 'Successfully left the team.',
+      });
       setTeam(null);
       await loadTeamData();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: err.message ?? 'Failed to leave team.' });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to leave team.',
+      });
     } finally {
       setBusyAction(false);
     }
@@ -284,7 +322,10 @@ export default function TeamDashboardPage() {
 
   function copyInviteLink() {
     if (!team) return;
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://niralhackathon.dpdns.org';
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://niralhackathon.dpdns.org';
     const link = `${origin}/dashboard/team?invite=${team.inviteCode}`;
     void navigator.clipboard.writeText(link);
     setCopiedLink(true);
@@ -300,7 +341,8 @@ export default function TeamDashboardPage() {
           Squad Management · <mark>Form &amp; Collaborate</mark>
         </h1>
         <p className={styles.portalSubtitle}>
-          NIRAL Hackathon 2026 rules require teams of 2 to 4 members. Every participant can only belong to one team.
+          NIRAL Hackathon 2026 rules require teams of 2 to 4 members. Every participant
+          can only belong to one team.
         </p>
       </div>
 
@@ -316,7 +358,11 @@ export default function TeamDashboardPage() {
           role="alert"
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {feedback.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+            {feedback.type === 'success' ? (
+              <CheckCircle2 size={20} />
+            ) : (
+              <AlertCircle size={20} />
+            )}
             <strong>{feedback.message}</strong>
           </div>
         </div>
@@ -344,8 +390,17 @@ export default function TeamDashboardPage() {
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                  <h2 style={{ fontFamily: 'Space Grotesk', fontSize: 26, margin: 0 }}>{team.name}</h2>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginBottom: 6,
+                  }}
+                >
+                  <h2 style={{ fontFamily: 'Space Grotesk', fontSize: 26, margin: 0 }}>
+                    {team.name}
+                  </h2>
                   <span className={`${styles.badge} ${styles.badgeCoral}`}>
                     {team.members.length} / {team.maxMembers} Members
                   </span>
@@ -356,12 +411,20 @@ export default function TeamDashboardPage() {
                   )}
                 </div>
                 <span style={{ fontSize: 13, color: '#555' }}>
-                  Track: <strong>{team.theme || 'General Emerging Technologies'}</strong> · Visibility: {team.visibility} · Status: {team.recruitmentStatus}
+                  Track: <strong>{team.theme || 'General Emerging Technologies'}</strong>{' '}
+                  · Visibility: {team.visibility} · Status: {team.recruitmentStatus}
                 </span>
               </div>
 
               {/* Shareable Invite Code & Link */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  flexWrap: 'wrap',
+                }}
+              >
                 <button
                   type="button"
                   onClick={copyCode}
@@ -381,7 +444,9 @@ export default function TeamDashboardPage() {
                   title="Copy team code"
                 >
                   {copiedCode ? <Check size={15} /> : <Copy size={15} />}
-                  <span>Code: <code>{team.inviteCode}</code></span>
+                  <span>
+                    Code: <code>{team.inviteCode}</code>
+                  </span>
                 </button>
 
                 <button
@@ -409,7 +474,14 @@ export default function TeamDashboardPage() {
             </div>
 
             {team.description && (
-              <p style={{ fontSize: 14.5, color: '#333', lineHeight: 1.6, margin: '0 0 16px' }}>
+              <p
+                style={{
+                  fontSize: 14.5,
+                  color: '#333',
+                  lineHeight: 1.6,
+                  margin: '0 0 16px',
+                }}
+              >
                 {team.description}
               </p>
             )}
@@ -431,7 +503,8 @@ export default function TeamDashboardPage() {
               >
                 <AlertCircle size={16} />
                 <span>
-                  NIRAL Hackathon 2026 requires a minimum of <strong>2 members</strong> per squad to qualify for judging. Recruit at least 1 teammate.
+                  NIRAL Hackathon 2026 requires a minimum of <strong>2 members</strong>{' '}
+                  per squad to qualify for judging. Recruit at least 1 teammate.
                 </span>
               </div>
             )}
@@ -491,10 +564,13 @@ export default function TeamDashboardPage() {
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <strong style={{ fontSize: 14.5 }}>{member.user.name}</strong>
-                            {isCurrent && <span style={{ fontSize: 11, color: '#777' }}>(You)</span>}
+                            {isCurrent && (
+                              <span style={{ fontSize: 11, color: '#777' }}>(You)</span>
+                            )}
                           </div>
                           <span style={{ fontSize: 12, color: '#666', display: 'block' }}>
-                            {member.user.college || 'Institution registered'} · {member.user.department || 'Participant'}
+                            {member.user.college || 'Institution registered'} ·{' '}
+                            {member.user.department || 'Participant'}
                           </span>
                         </div>
                       </div>
@@ -535,7 +611,9 @@ export default function TeamDashboardPage() {
               </div>
 
               {/* Leave Team Button */}
-              <div style={{ marginTop: 24, borderTop: '1.5px solid #eee', paddingTop: 16 }}>
+              <div
+                style={{ marginTop: 24, borderTop: '1.5px solid #eee', paddingTop: 16 }}
+              >
                 <button
                   type="button"
                   onClick={() => setConfirmLeave(true)}
@@ -573,7 +651,8 @@ export default function TeamDashboardPage() {
                   </div>
 
                   <p style={{ fontSize: 13, color: '#555', margin: '0 0 14px' }}>
-                    Send an invitation token directly to a registered participant&apos;s email address.
+                    Send an invitation token directly to a registered participant&apos;s
+                    email address.
                   </p>
 
                   <form onSubmit={handleSendInvite} style={{ display: 'flex', gap: 10 }}>
@@ -601,7 +680,14 @@ export default function TeamDashboardPage() {
                     </PopButton>
                   </form>
                   {team.members.length >= team.maxMembers && (
-                    <small style={{ color: '#900', display: 'block', marginTop: 6, fontSize: 12 }}>
+                    <small
+                      style={{
+                        color: '#900',
+                        display: 'block',
+                        marginTop: 6,
+                        fontSize: 12,
+                      }}
+                    >
                       Your team has reached the maximum capacity of 4 members.
                     </small>
                   )}
@@ -634,7 +720,9 @@ export default function TeamDashboardPage() {
                         >
                           <div>
                             <strong>{inv.invitedEmail}</strong>
-                            <small style={{ display: 'block', color: '#777', fontSize: 11 }}>
+                            <small
+                              style={{ display: 'block', color: '#777', fontSize: 11 }}
+                            >
                               Expires:{' '}
                               {new Date(inv.expiresAt).toLocaleDateString('en-IN', {
                                 month: 'short',
@@ -663,7 +751,8 @@ export default function TeamDashboardPage() {
                     </div>
                   ) : (
                     <p style={{ fontSize: 13, color: '#666', margin: 0 }}>
-                      No active pending invitations. Share your invite code or invite teammates above.
+                      No active pending invitations. Share your invite code or invite
+                      teammates above.
                     </p>
                   )}
                 </div>
@@ -678,8 +767,9 @@ export default function TeamDashboardPage() {
                   </h3>
                 </div>
                 <p style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>
-                  You are a confirmed team member in <strong>{team.name}</strong>. Share your squad&apos;s invite code{' '}
-                  <code>{team.inviteCode}</code> with other members you wish to recruit.
+                  You are a confirmed team member in <strong>{team.name}</strong>. Share
+                  your squad&apos;s invite code <code>{team.inviteCode}</code> with other
+                  members you wish to recruit.
                 </p>
                 <div style={{ marginTop: 14 }}>
                   <PopButton cream onClick={copyInviteLink}>
@@ -710,10 +800,23 @@ export default function TeamDashboardPage() {
                 style={{ maxWidth: 480, width: '100%', padding: 28 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 style={{ fontFamily: 'Space Grotesk', fontSize: 22, margin: '0 0 12px' }}>
+                <h3
+                  style={{
+                    fontFamily: 'Space Grotesk',
+                    fontSize: 22,
+                    margin: '0 0 12px',
+                  }}
+                >
                   Leave Squad &quot;{team.name}&quot;?
                 </h3>
-                <p style={{ fontSize: 14, color: '#444', lineHeight: 1.6, margin: '0 0 20px' }}>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: '#444',
+                    lineHeight: 1.6,
+                    margin: '0 0 20px',
+                  }}
+                >
                   {isLeader && team.members.length > 1
                     ? 'As the team leader, leaving will automatically transfer squad leadership to the next member.'
                     : isLeader && team.members.length === 1
@@ -776,11 +879,25 @@ export default function TeamDashboardPage() {
                 style={{ maxWidth: 440, width: '100%', padding: 24 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 style={{ fontFamily: 'Space Grotesk', fontSize: 20, margin: '0 0 12px' }}>
+                <h3
+                  style={{
+                    fontFamily: 'Space Grotesk',
+                    fontSize: 20,
+                    margin: '0 0 12px',
+                  }}
+                >
                   Remove Member from Squad?
                 </h3>
-                <p style={{ fontSize: 13.5, color: '#444', lineHeight: 1.5, margin: '0 0 20px' }}>
-                  This member will be removed from your team roster and will need an invite code to rejoin.
+                <p
+                  style={{
+                    fontSize: 13.5,
+                    color: '#444',
+                    lineHeight: 1.5,
+                    margin: '0 0 20px',
+                  }}
+                >
+                  This member will be removed from your team roster and will need an
+                  invite code to rejoin.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                   <button
@@ -894,9 +1011,19 @@ export default function TeamDashboardPage() {
                 </h2>
               </div>
 
-              <form onSubmit={handleCreateTeam} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <form
+                onSubmit={handleCreateTeam}
+                style={{ display: 'flex', flexDirection: 'column', gap: 18 }}
+              >
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      marginBottom: 6,
+                    }}
+                  >
                     Team Name *
                   </label>
                   <input
@@ -915,13 +1042,27 @@ export default function TeamDashboardPage() {
                       boxShadow: '0 3px 0 #111',
                     }}
                   />
-                  <small style={{ color: '#666', fontSize: 11, display: 'block', marginTop: 4 }}>
+                  <small
+                    style={{
+                      color: '#666',
+                      fontSize: 11,
+                      display: 'block',
+                      marginTop: 4,
+                    }}
+                  >
                     Must be unique within the NIRAL 2026 hackathon.
                   </small>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      marginBottom: 6,
+                    }}
+                  >
                     Problem Track Alignment *
                   </label>
                   <select
@@ -946,7 +1087,14 @@ export default function TeamDashboardPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      marginBottom: 6,
+                    }}
+                  >
                     Team Pitch &amp; Project Vision * (Minimum 50 characters)
                   </label>
                   <textarea
@@ -966,22 +1114,51 @@ export default function TeamDashboardPage() {
                       resize: 'vertical',
                     }}
                   />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginTop: 4 }}>
-                    <span style={{ color: description.length < 50 ? '#900' : '#28a745', fontWeight: 600 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 11.5,
+                      marginTop: 4,
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: description.length < 50 ? '#900' : '#28a745',
+                        fontWeight: 600,
+                      }}
+                    >
                       {description.length} / 50 characters minimum
                     </span>
-                    <span style={{ color: '#666' }}>Helps organizers and prospective members understand your idea.</span>
+                    <span style={{ color: '#666' }}>
+                      Helps organizers and prospective members understand your idea.
+                    </span>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: 16,
+                  }}
+                >
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        marginBottom: 6,
+                      }}
+                    >
                       Visibility
                     </label>
                     <select
                       value={visibility}
-                      onChange={(e) => setVisibility(e.target.value as any)}
+                      onChange={(e) =>
+                        setVisibility(e.target.value === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC')
+                      }
                       style={{
                         width: '100%',
                         padding: '10px 14px',
@@ -998,12 +1175,23 @@ export default function TeamDashboardPage() {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        marginBottom: 6,
+                      }}
+                    >
                       Recruitment Status
                     </label>
                     <select
                       value={recruitmentStatus}
-                      onChange={(e) => setRecruitmentStatus(e.target.value as any)}
+                      onChange={(e) =>
+                        setRecruitmentStatus(
+                          e.target.value === 'CLOSED' ? 'CLOSED' : 'OPEN',
+                        )
+                      }
                       style={{
                         width: '100%',
                         padding: '10px 14px',
@@ -1020,9 +1208,16 @@ export default function TeamDashboardPage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: '2px solid #111', paddingTop: 18, marginTop: 8 }}>
-                  <PopButton type="submit" disabled={busyAction || description.length < 50}>
-                    {busyAction ? 'Creating Squad…' : 'Create Team & Generate Invite Code →'}
+                <div
+                  style={{ borderTop: '2px solid #111', paddingTop: 18, marginTop: 8 }}
+                >
+                  <PopButton
+                    type="submit"
+                    disabled={busyAction || description.length < 50}
+                  >
+                    {busyAction
+                      ? 'Creating Squad…'
+                      : 'Create Team & Generate Invite Code →'}
                   </PopButton>
                 </div>
               </form>
@@ -1039,13 +1234,31 @@ export default function TeamDashboardPage() {
                 </h2>
               </div>
 
-              <p style={{ fontSize: 14, color: '#444', lineHeight: 1.6, margin: '0 0 16px' }}>
-                Ask your team leader for their unique 6–10 character team invite code, or click the direct invite link they shared with you.
+              <p
+                style={{
+                  fontSize: 14,
+                  color: '#444',
+                  lineHeight: 1.6,
+                  margin: '0 0 16px',
+                }}
+              >
+                Ask your team leader for their unique 6–10 character team invite code, or
+                click the direct invite link they shared with you.
               </p>
 
-              <form onSubmit={handleJoinTeam} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <form
+                onSubmit={handleJoinTeam}
+                style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+              >
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      marginBottom: 6,
+                    }}
+                  >
                     Team Invite Code *
                   </label>
                   <input
@@ -1110,17 +1323,41 @@ export default function TeamDashboardPage() {
                       }}
                     >
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: 6,
+                          }}
+                        >
                           <strong style={{ fontSize: 16 }}>{disc.name}</strong>
-                          <span className={`${styles.badge} ${styles.badgeCoral}`} style={{ fontSize: 11 }}>
+                          <span
+                            className={`${styles.badge} ${styles.badgeCoral}`}
+                            style={{ fontSize: 11 }}
+                          >
                             {disc.members.length} / 4 Members
                           </span>
                         </div>
-                        <span style={{ fontSize: 12, color: '#777', display: 'block', marginBottom: 8 }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: '#777',
+                            display: 'block',
+                            marginBottom: 8,
+                          }}
+                        >
                           Track: {disc.theme || 'General'}
                         </span>
                         {disc.description && (
-                          <p style={{ fontSize: 13, color: '#444', lineHeight: 1.5, margin: '0 0 12px' }}>
+                          <p
+                            style={{
+                              fontSize: 13,
+                              color: '#444',
+                              lineHeight: 1.5,
+                              margin: '0 0 12px',
+                            }}
+                          >
                             {disc.description.length > 120
                               ? `${disc.description.slice(0, 120)}…`
                               : disc.description}
@@ -1128,7 +1365,15 @@ export default function TeamDashboardPage() {
                         )}
                       </div>
 
-                      <div style={{ borderTop: '1px solid #eee', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div
+                        style={{
+                          borderTop: '1px solid #eee',
+                          paddingTop: 10,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <span style={{ fontSize: 12, color: '#666' }}>
                           Lead by: {disc.members[0]?.user?.name ?? 'Lead Hacker'}
                         </span>
@@ -1152,9 +1397,12 @@ export default function TeamDashboardPage() {
               ) : (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
                   <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-                    No public squads are currently recruiting open members. Be the first to start a squad!
+                    No public squads are currently recruiting open members. Be the first
+                    to start a squad!
                   </p>
-                  <PopButton onClick={() => setTab('create')}>Create New Squad →</PopButton>
+                  <PopButton onClick={() => setTab('create')}>
+                    Create New Squad →
+                  </PopButton>
                 </div>
               )}
             </div>

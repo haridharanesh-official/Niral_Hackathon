@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Megaphone,
   Bell,
@@ -20,8 +20,6 @@ import { PopButton } from '@/components/niral/pop-button';
 import { accountRequest } from '@/components/niral-auth/account-api';
 import styles from '@/components/dashboard/participant-portal.module.css';
 
-
-
 interface Announcement {
   id: string;
   title: string;
@@ -35,55 +33,35 @@ interface Announcement {
 export default function ParticipantAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'unread' | 'urgent'>('all');
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await accountRequest<Announcement[]>('announcements');
       if (Array.isArray(data)) {
         setAnnouncements(data);
       }
-    } catch {
-      // Fallback fallback seed
-      setAnnouncements([
-        {
-          id: 'niral-ann-1',
-          title: 'Official NIRAL Hackathon 2026 Problem Tracks Live',
-          body: 'Problem tracks covering AI & Smart Automation, Healthcare & MedTech, Smart Agriculture, and Cyber Physical Systems are officially live. Align your squad around one of the challenges.',
-          priority: 'urgent',
-          published: true,
-          createdAt: new Date().toISOString(),
-          read: false,
-        },
-        {
-          id: 'niral-ann-2',
-          title: 'Team Formation Notice: 2 to 4 Members Required',
-          body: 'All teams must have between 2 and 4 verified participants. Team leaders can invite teammates via email or share their unique invite code from the Team Workspace.',
-          priority: 'normal',
-          published: true,
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          read: false,
-        },
-        {
-          id: 'niral-ann-3',
-          title: 'Event Venue & Physical Desk Registration at Sri Shakthi Institute',
-          body: 'NIRAL Hackathon 2026 will take place onsite at Sri Shakthi Institute of Engineering and Technology, Coimbatore on December 3–4, 2026. Keep your Registration ID ready for desk verification.',
-          priority: 'normal',
-          published: true,
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-          read: true,
-        },
-      ]);
+    } catch (cause) {
+      setAnnouncements([]);
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Announcements unavailable. Please retry.',
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+    queueMicrotask(() => {
+      void fetchAnnouncements();
+    });
+  }, [fetchAnnouncements]);
 
   const handleMarkRead = async (id: string) => {
     setActionInProgress(id);
@@ -93,10 +71,7 @@ export default function ParticipantAnnouncementsPage() {
         prev.map((a) => (a.id === id ? { ...a, read: true } : a)),
       );
     } catch {
-      // Mark locally on error as optimistic UI
-      setAnnouncements((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, read: true } : a)),
-      );
+      setError('Could not mark this announcement read. Please retry.');
     } finally {
       setActionInProgress(null);
     }
@@ -108,7 +83,7 @@ export default function ParticipantAnnouncementsPage() {
       await accountRequest('announcements-read-all', {}, 'POST');
       setAnnouncements((prev) => prev.map((a) => ({ ...a, read: true })));
     } catch {
-      setAnnouncements((prev) => prev.map((a) => ({ ...a, read: true })));
+      setError('Could not mark announcements read. Please retry.');
     } finally {
       setActionInProgress(null);
     }
@@ -139,6 +114,11 @@ export default function ParticipantAnnouncementsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      {error && (
+        <p role="alert" className={styles.notice}>
+          {error}
+        </p>
+      )}
       {/* Header Banner */}
       <div
         className={styles.card}
@@ -149,7 +129,15 @@ export default function ParticipantAnnouncementsPage() {
           gap: 16,
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: 16,
+          }}
+        >
           <div>
             <div className={styles.heroKicker}>
               <Megaphone size={14} color="#111" />
@@ -159,11 +147,14 @@ export default function ParticipantAnnouncementsPage() {
               NIRAL <mark>Announcements</mark> & Briefings
             </h1>
             <p className={styles.portalSubtitle}>
-              Stay synchronized with organizing committee notices, track updates, deadline alerts, and venue logistics for December 3–4, 2026.
+              Stay synchronized with organizing committee notices, track updates, deadline
+              alerts, and venue logistics for December 3–4, 2026.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}
+          >
             <button
               type="button"
               onClick={fetchAnnouncements}
@@ -272,15 +263,30 @@ export default function ParticipantAnnouncementsPage() {
               transition: 'all 0.15s ease',
             }}
           >
-            Urgent Briefings ({announcements.filter((a) => a.priority === 'urgent').length})
+            Urgent Briefings (
+            {announcements.filter((a) => a.priority === 'urgent').length})
           </button>
         </div>
       </div>
 
       {/* Main Grid: Announcements List (2 cols) + Resource Sidebar (1 col) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24, alignItems: 'start' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 24,
+          alignItems: 'start',
+        }}
+      >
         {/* Left Column: Announcements Stream */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, gridColumn: 'span 2' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+            gridColumn: 'span 2',
+          }}
+        >
           {loading && announcements.length === 0 ? (
             <div
               className={styles.card}
@@ -290,7 +296,11 @@ export default function ParticipantAnnouncementsPage() {
                 color: 'var(--niral-muted)',
               }}
             >
-              <RefreshCw size={28} className="animate-spin" style={{ margin: '0 auto 12px' }} />
+              <RefreshCw
+                size={28}
+                className="animate-spin"
+                style={{ margin: '0 auto 12px' }}
+              />
               <p style={{ fontWeight: 600 }}>Loading official announcements...</p>
             </div>
           ) : filteredAnnouncements.length === 0 ? (
@@ -303,7 +313,13 @@ export default function ParticipantAnnouncementsPage() {
               }}
             >
               <CheckCheck size={36} color="#155724" style={{ margin: '0 auto 12px' }} />
-              <h3 style={{ fontFamily: 'Space Grotesk, Arial, sans-serif', fontSize: 18, fontWeight: 700 }}>
+              <h3
+                style={{
+                  fontFamily: 'Space Grotesk, Arial, sans-serif',
+                  fontSize: 18,
+                  fontWeight: 700,
+                }}
+              >
                 {filter === 'unread' ? 'All caught up!' : 'No notices match this filter'}
               </h3>
               <p style={{ fontSize: 14, color: 'var(--niral-muted)', marginTop: 6 }}>
@@ -322,13 +338,28 @@ export default function ParticipantAnnouncementsPage() {
                     item.priority === 'urgent'
                       ? '6px solid #fd9b9b'
                       : !item.read
-                      ? '6px solid #111'
-                      : '2px solid var(--niral-border)',
+                        ? '6px solid #111'
+                        : '2px solid var(--niral-border)',
                   background: item.read ? '#fff' : '#fffdfa',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 16,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                    }}
+                  >
                     {item.priority === 'urgent' ? (
                       <span className={`${styles.badge} ${styles.badgeUrgent}`}>
                         <AlertTriangle size={12} />
@@ -360,7 +391,15 @@ export default function ParticipantAnnouncementsPage() {
                       </span>
                     )}
 
-                    <span style={{ fontSize: 12, color: 'var(--niral-muted)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: 'var(--niral-muted)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
                       <Clock size={12} />
                       {formatDate(item.createdAt)}
                     </span>
@@ -388,7 +427,15 @@ export default function ParticipantAnnouncementsPage() {
                       <span>Mark Read</span>
                     </button>
                   ) : (
-                    <span style={{ fontSize: 12, color: '#888', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: '#888',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
                       <CheckCheck size={13} color="#2b8a3e" />
                       <span>Read</span>
                     </span>
@@ -422,7 +469,15 @@ export default function ParticipantAnnouncementsPage() {
 
                 {/* Contextual links matching announcement theme */}
                 {item.title.toLowerCase().includes('track') ? (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px dashed #e0e0e0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                      paddingTop: 10,
+                      borderTop: '1px dashed #e0e0e0',
+                    }}
+                  >
                     <Link
                       href="/tracks"
                       style={{
@@ -440,7 +495,15 @@ export default function ParticipantAnnouncementsPage() {
                     </Link>
                   </div>
                 ) : item.title.toLowerCase().includes('team') ? (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px dashed #e0e0e0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                      paddingTop: 10,
+                      borderTop: '1px dashed #e0e0e0',
+                    }}
+                  >
                     <Link
                       href="/dashboard/team"
                       style={{
@@ -458,7 +521,15 @@ export default function ParticipantAnnouncementsPage() {
                     </Link>
                   </div>
                 ) : item.title.toLowerCase().includes('venue') ? (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', paddingTop: 10, borderTop: '1px dashed #e0e0e0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                      paddingTop: 10,
+                      borderTop: '1px dashed #e0e0e0',
+                    }}
+                  >
                     <Link
                       href="/schedule"
                       style={{
@@ -490,20 +561,33 @@ export default function ParticipantAnnouncementsPage() {
               Event Logistics
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14, fontSize: 13.5 }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+                marginTop: 14,
+                fontSize: 13.5,
+              }}
+            >
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <Calendar size={16} style={{ marginTop: 2, flexShrink: 0 }} />
                 <div>
                   <strong>Dates:</strong> December 3–4, 2026
-                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>30-hour offline hackathon</div>
+                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>
+                    30-hour offline hackathon
+                  </div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <MapPin size={16} style={{ marginTop: 2, flexShrink: 0 }} />
                 <div>
-                  <strong>Venue:</strong> Sri Shakthi Institute of Engineering and Technology
-                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>L&T By-Pass, Chinniyampalayam, Coimbatore</div>
+                  <strong>Venue:</strong> Sri Shakthi Institute of Engineering and
+                  Technology
+                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>
+                    L&T By-Pass, Chinniyampalayam, Coimbatore
+                  </div>
                 </div>
               </div>
 
@@ -511,7 +595,9 @@ export default function ParticipantAnnouncementsPage() {
                 <Layers size={16} style={{ marginTop: 2, flexShrink: 0 }} />
                 <div>
                   <strong>Team Rules:</strong> 2 to 4 members
-                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>All members must hold verified applications</div>
+                  <div style={{ color: 'var(--niral-muted)', fontSize: 12 }}>
+                    All members must hold verified applications
+                  </div>
                 </div>
               </div>
             </div>
@@ -524,7 +610,9 @@ export default function ParticipantAnnouncementsPage() {
               Official Handbooks
             </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}
+            >
               <Link
                 href="/rules"
                 target="_blank"
@@ -598,17 +686,34 @@ export default function ParticipantAnnouncementsPage() {
               border: '2px solid #111',
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--niral-muted)' }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                color: 'var(--niral-muted)',
+              }}
+            >
               Organizing Secretariat
             </div>
             <div style={{ fontSize: 14, fontWeight: 600, marginTop: 4 }}>
               IoT Club — SIET
             </div>
             <div style={{ fontSize: 13, color: 'var(--niral-muted)', marginTop: 4 }}>
-              Email: <a href="mailto:iotclub.siet@gmail.com" style={{ color: '#111', fontWeight: 600 }}>iotclub.siet@gmail.com</a>
+              Email:{' '}
+              <a
+                href="mailto:iotclub.siet@gmail.com"
+                style={{ color: '#111', fontWeight: 600 }}
+              >
+                iotclub.siet@gmail.com
+              </a>
             </div>
             <div style={{ fontSize: 13, color: 'var(--niral-muted)', marginTop: 2 }}>
-              Helpline: <a href="tel:+918508511975" style={{ color: '#111', fontWeight: 600 }}>+91 8508511975</a>
+              Helpline:{' '}
+              <a href="tel:+918508511975" style={{ color: '#111', fontWeight: 600 }}>
+                +91 8508511975
+              </a>
             </div>
           </div>
         </div>
