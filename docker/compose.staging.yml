@@ -75,7 +75,7 @@ services:
       postgres: {condition: service_healthy}
     networks: [private]
 networks:
-  private: {internal: true}
+  private: {driver: bridge}
 volumes:
   stage_pg:
   stage_redis:

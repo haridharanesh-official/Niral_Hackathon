@@ -71,7 +71,7 @@ databaseTests(
       // Real local capture and queue; no transport test double in this database suite.
       if (
         process.env.SMTP_HOST !== 'localhost' ||
-        process.env.SMTP_PORT !== '1025'
+        !['1025', '51025'].includes(process.env.SMTP_PORT ?? '')
       )
         throw new Error('Database integration requires local email capture.');
       mail = new MailService(new ConfigService(process.env));

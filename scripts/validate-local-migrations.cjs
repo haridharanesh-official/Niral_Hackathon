@@ -7,7 +7,7 @@ const prisma = path.join(path.dirname(require.resolve('prisma/package.json')), '
 const env = { ...process.env, DATABASE_URL: database.toString() };
 for (const args of [
   ['migrate', 'deploy', '--schema', 'apps/api/prisma/schema.prisma'],
-  ['migrate', 'diff', '--from-url', database.toString(), '--to-schema-datamodel', 'apps/api/prisma/schema.prisma', '--exit-code'],
+  ['migrate', 'diff', '--from-schema-datasource', 'apps/api/prisma/schema.prisma', '--to-schema-datamodel', 'apps/api/prisma/schema.prisma', '--exit-code'],
 ]) {
   const result = spawnSync(process.execPath, [prisma, ...args], { env, stdio: 'inherit' });
   if (result.status !== 0) process.exit(result.status || 1);
