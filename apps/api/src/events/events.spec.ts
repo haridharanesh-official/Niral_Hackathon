@@ -145,7 +145,7 @@ describe('EventsService & Event Configuration (Phase 1 Integration)', () => {
             userId: 'admin-user-id',
             action: 'EVENT_SETTINGS_UPDATED',
             resource: 'event',
-          }),
+          }) as unknown,
         }),
       );
       expect(result.tagline).toBe('New Verified Tagline');

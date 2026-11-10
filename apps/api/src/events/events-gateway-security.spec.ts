@@ -11,11 +11,11 @@ describe('Private socket delivery authorization', () => {
       rooms,
       data: { userId: id, sessionHash: hash, expiresAt, ready: true },
       emit: jest.fn(),
-      leave: jest.fn(async (room: string) => {
+      leave: jest.fn((room: string) => {
         rooms.delete(room);
       }),
       disconnect: jest.fn(),
-      join: jest.fn(async (room: string) => {
+      join: jest.fn((room: string) => {
         rooms.add(room);
       }),
     };
@@ -39,14 +39,15 @@ describe('Private socket delivery authorization', () => {
     const members = new Set(['sender', 'active']);
     const db = {
       session: {
-        findUnique: jest.fn(
-          async ({ where }: { where: { sessionToken: string } }) =>
-            sessions.get(where.sessionToken) ?? null,
+        findUnique: jest.fn(({ where }: { where: { sessionToken: string } }) =>
+          Promise.resolve(sessions.get(where.sessionToken) ?? null),
         ),
       },
       teamMember: {
-        findFirst: jest.fn(async ({ where }: { where: { userId?: string } }) =>
-          members.has(where.userId ?? '') ? { id: 'membership' } : null,
+        findFirst: jest.fn(({ where }: { where: { userId?: string } }) =>
+          Promise.resolve(
+            members.has(where.userId ?? '') ? { id: 'membership' } : null,
+          ),
         ),
       },
     };
@@ -54,8 +55,8 @@ describe('Private socket delivery authorization', () => {
     const broadcast = jest.fn();
     const server = {
       in: jest.fn((room: string) => ({
-        fetchSockets: jest.fn(async () =>
-          recipients.filter((s) => s.rooms.has(room)),
+        fetchSockets: jest.fn(() =>
+          Promise.resolve(recipients.filter((s) => s.rooms.has(room))),
         ),
       })),
       to: jest.fn(() => ({ emit: broadcast })),
@@ -136,9 +137,10 @@ describe('Private socket delivery authorization', () => {
     const t = fixture(),
       recipient = socket('active');
     t.recipients.push(recipient);
-    t.db.session.findUnique.mockImplementation(async ({ where }) => {
-      if (where.sessionToken === 'active') throw Error('unavailable');
-      return t.sessions.get(where.sessionToken) ?? null;
+    t.db.session.findUnique.mockImplementation(({ where }) => {
+      if (where.sessionToken === 'active')
+        return Promise.reject(Error('unavailable'));
+      return Promise.resolve(t.sessions.get(where.sessionToken) ?? null);
     });
     await t.gateway.handleChat(
       { room: 'team:test', message: 'secret' },

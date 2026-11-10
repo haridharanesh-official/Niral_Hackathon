@@ -46,7 +46,10 @@ export class DashboardController {
   }
 
   @Get('notifications')
-  notifications(@Req() req: AuthRequest, @Query() query: NotificationsQueryDto) {
+  notifications(
+    @Req() req: AuthRequest,
+    @Query() query: NotificationsQueryDto,
+  ) {
     return this.dashboard.notificationsFeed(req.user.userId, query);
   }
 

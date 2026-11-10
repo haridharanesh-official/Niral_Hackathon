@@ -26,17 +26,26 @@ export class MailService
     const url = this.config.get<string>('REDIS_URL');
     const key = this.config.get<string>('MAIL_QUEUE_KEY');
     if (!url || !key) {
-      this.logger.warn('Email queue configuration incomplete — fallback to direct delivery');
+      this.logger.warn(
+        'Email queue configuration incomplete — fallback to direct delivery',
+      );
       return;
     }
     try {
       this.queue = new EmailQueue(url, key, (payload) => this.deliver(payload));
       await Promise.race([
         this.queue.ready(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connection timed out')), 2500)),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Redis connection timed out')),
+            2500,
+          ),
+        ),
       ]);
     } catch (err) {
-      this.logger.warn(`Mail queue unavailable (${(err as Error).message}) — fallback to direct delivery`);
+      this.logger.warn(
+        `Mail queue unavailable (${(err as Error).message}) — fallback to direct delivery`,
+      );
       this.queue = undefined;
     }
   }

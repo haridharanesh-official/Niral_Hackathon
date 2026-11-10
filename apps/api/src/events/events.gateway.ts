@@ -131,12 +131,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             where: { teamId: room.slice(5), userId: socket.data.userId },
           }))
         ) {
-          await socket.leave(room);
+          socket.leave(room);
           continue;
         }
         socket.emit(event, payload);
       } catch {
-        await socket.leave(room);
+        socket.leave(room);
       }
     }
   }

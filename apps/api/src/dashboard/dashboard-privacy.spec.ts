@@ -247,7 +247,7 @@ databaseTests(
       for (const item of publicList) {
         for (const m of item.members) {
           // Public member views must NEVER expose participant emails
-          expect((m.user as any).email).toBeUndefined();
+          expect(m.user).not.toHaveProperty('email');
           expect(m.user.name).toBeDefined();
         }
       }

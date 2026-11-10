@@ -4,12 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { SubmissionStatus } from '@hackos/shared';
 import {
-  ComplianceDeclaration,
-  SubmissionStatus,
-} from '@hackos/shared';
-import {
-  ComplianceDeclaration as PrismaCompliance,
+  SubmissionStatus as PrismaSubmissionStatus,
   Prisma,
   UserRole,
 } from '@prisma/client';
@@ -34,7 +31,9 @@ const SUBMISSION_INCLUDE = {
   versions: { orderBy: { versionNumber: 'desc' as const }, take: 10 },
   team: {
     include: {
-      members: { include: { user: { select: { id: true, name: true, image: true } } } },
+      members: {
+        include: { user: { select: { id: true, name: true, image: true } } },
+      },
       leader: { select: { id: true, name: true, image: true } },
       event: true,
     },
@@ -81,7 +80,10 @@ export class SubmissionService {
     return submission;
   }
 
-  private assertEditable(submission: { status: string; lockedAt: Date | null }) {
+  private assertEditable(submission: {
+    status: string;
+    lockedAt: Date | null;
+  }) {
     if (this.validation.isLocked(submission.status)) {
       throw new BadRequestException(
         'Submission is locked and cannot be edited',
@@ -95,7 +97,9 @@ export class SubmissionService {
       include: SUBMISSION_INCLUDE,
     });
 
-    const config = this.validation.getEventConfig(submission.team.event?.settings);
+    const config = this.validation.getEventConfig(
+      submission.team.event?.settings,
+    );
     const report = this.validation.buildReport(submission, config);
     const status = this.validation.deriveStatus(submission, report);
 
@@ -116,8 +120,13 @@ export class SubmissionService {
     let submission = await this.getOrCreateSubmission(team.id, team.name);
     submission = await this.refreshValidation(submission.id);
 
-    const config = this.validation.getEventConfig(submission.team.event?.settings);
-    const report = submission.validationReport as Record<string, unknown> | null;
+    const config = this.validation.getEventConfig(
+      submission.team.event?.settings,
+    );
+    const report = submission.validationReport as Record<
+      string,
+      unknown
+    > | null;
     const deadline =
       config.submissionDeadline ?? submission.team.event?.endsAt?.toISOString();
 
@@ -184,7 +193,7 @@ export class SubmissionService {
         ...dto,
         lastSavedAt: new Date(),
         status:
-          submission.status === SubmissionStatus.DRAFT
+          submission.status === PrismaSubmissionStatus.DRAFT
             ? SubmissionStatus.IN_PROGRESS
             : submission.status,
       },
@@ -210,8 +219,12 @@ export class SubmissionService {
     const submission = await this.getOrCreateSubmission(team.id, team.name);
     this.assertEditable(submission);
 
-    const config = this.validation.getEventConfig(submission.team.event?.settings);
-    const requirement = config.requirements?.find((r) => r.key === dto.requirementKey);
+    const config = this.validation.getEventConfig(
+      submission.team.event?.settings,
+    );
+    const requirement = config.requirements?.find(
+      (r) => r.key === dto.requirementKey,
+    );
     const fileValidation = this.validation.validateFile(
       dto,
       requirement,
@@ -239,7 +252,11 @@ export class SubmissionService {
     return file;
   }
 
-  async updateDeliverable(userId: string, fileId: string, dto: UpdateDeliverableDto) {
+  async updateDeliverable(
+    userId: string,
+    fileId: string,
+    dto: UpdateDeliverableDto,
+  ) {
     const team = await this.resolveTeam(userId);
     const submission = await this.getOrCreateSubmission(team.id, team.name);
     this.assertEditable(submission);
@@ -250,9 +267,12 @@ export class SubmissionService {
     if (!existing) throw new NotFoundException('Deliverable not found');
 
     const merged = { ...existing, ...dto };
-    const config = this.validation.getEventConfig(submission.team.event?.settings);
+    const config = this.validation.getEventConfig(
+      submission.team.event?.settings,
+    );
     const requirement = config.requirements?.find(
-      (r) => r.key === (dto.requirementKey ?? existing.requirementKey ?? undefined),
+      (r) =>
+        r.key === (dto.requirementKey ?? existing.requirementKey ?? undefined),
     );
     const fileValidation = this.validation.validateFile(
       merged,
@@ -297,12 +317,12 @@ export class SubmissionService {
       where: {
         submissionId_declaration: {
           submissionId: submission.id,
-          declaration: dto.declaration as PrismaCompliance,
+          declaration: dto.declaration,
         },
       },
       create: {
         submissionId: submission.id,
-        declaration: dto.declaration as PrismaCompliance,
+        declaration: dto.declaration,
         accepted: dto.accepted,
         acceptedById: dto.accepted ? userId : null,
         acceptedAt: dto.accepted ? new Date() : null,
@@ -425,7 +445,9 @@ export class SubmissionService {
     const submission = await this.getOrCreateSubmission(team.id, team.name);
     this.assertEditable(submission);
 
-    const config = this.validation.getEventConfig(submission.team.event?.settings);
+    const config = this.validation.getEventConfig(
+      submission.team.event?.settings,
+    );
     const report = this.validation.buildReport(submission, config);
 
     if (!report.canSubmit) {
@@ -437,7 +459,8 @@ export class SubmissionService {
         },
       });
       throw new BadRequestException({
-        message: 'Validation failed — resolve all required items before submitting',
+        message:
+          'Validation failed — resolve all required items before submitting',
         validation: report,
       });
     }
@@ -519,7 +542,8 @@ export class SubmissionService {
       projectName: submission.title,
       teamName: submission.team.name,
       status: submission.status,
-      message: 'Your project has been successfully submitted and locked for review.',
+      message:
+        'Your project has been successfully submitted and locked for review.',
     };
   }
 
@@ -539,13 +563,16 @@ export class SubmissionService {
       where: { slug: teamSlug },
       include: {
         submission: { include: { files: true } },
-        members: { include: { user: { select: { id: true, name: true, image: true } } } },
+        members: {
+          include: { user: { select: { id: true, name: true, image: true } } },
+        },
         leader: { select: { id: true, name: true, image: true } },
         event: true,
       },
     });
 
-    if (!team?.submission) throw new NotFoundException('Showcase not available');
+    if (!team?.submission)
+      throw new NotFoundException('Showcase not available');
 
     const config = this.validation.getEventConfig(team.event?.settings);
     if (

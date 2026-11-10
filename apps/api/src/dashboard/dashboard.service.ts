@@ -52,7 +52,11 @@ export class DashboardService {
         }),
         this.teams.getMyTeam(userId),
         this.enrollment.myEnrollment(userId),
-        this.notifications.list(userId, { page: 1, pageSize: 8, status: 'all' }),
+        this.notifications.list(userId, {
+          page: 1,
+          pageSize: 8,
+          status: 'all',
+        }),
         this.enrollment.getActiveEvent(),
         this.announcements(userId),
       ]);
@@ -142,7 +146,8 @@ export class DashboardService {
         },
         {
           id: 'niral-ann-3',
-          title: 'Event Venue & Physical Desk Registration at Sri Shakthi Institute',
+          title:
+            'Event Venue & Physical Desk Registration at Sri Shakthi Institute',
           body: 'NIRAL Hackathon 2026 will take place onsite at Sri Shakthi Institute of Engineering and Technology, Coimbatore on December 3–4, 2026. Keep your Registration ID ready for desk verification.',
           priority: 'normal',
           published: true,
@@ -222,7 +227,6 @@ export class DashboardService {
     return this.notifications.list(userId, query);
   }
 
-
   async tasks(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -247,9 +251,15 @@ export class DashboardService {
       href: dto.href ?? '/dashboard',
       done: Boolean(dto.done),
     };
-    const next = idx >= 0 ? tasks.map((t, i) => (i === idx ? { ...t, ...dto } : t)) : [base, ...tasks];
+    const next =
+      idx >= 0
+        ? tasks.map((t, i) => (i === idx ? { ...t, ...dto } : t))
+        : [base, ...tasks];
     await this.persistProfileTasks(userId, user?.profile, next);
-    this.events.emitDashboardEvent('task.updated', userId, { id: dto.id, done: dto.done });
+    this.events.emitDashboardEvent('task.updated', userId, {
+      id: dto.id,
+      done: dto.done,
+    });
     return next;
   }
 
@@ -259,7 +269,8 @@ export class DashboardService {
       select: { profile: true },
     });
     const existing = (user?.profile as Record<string, unknown> | null) ?? {};
-    const dashboard = (existing.dashboard as Record<string, unknown> | null) ?? {};
+    const dashboard =
+      (existing.dashboard as Record<string, unknown> | null) ?? {};
     const widgetConfig = {
       ...(dashboard.widgetConfig as Record<string, unknown> | null),
       ...dto,
@@ -339,12 +350,19 @@ export class DashboardService {
 
   private readWidgetConfig(profile: unknown) {
     const p = (profile as Record<string, unknown> | null) ?? {};
-    return (p.dashboard as Record<string, unknown> | undefined)?.widgetConfig ?? null;
+    return (
+      (p.dashboard as Record<string, unknown> | undefined)?.widgetConfig ?? null
+    );
   }
 
-  private async persistProfileTasks(userId: string, profile: unknown, tasks: DashboardTask[]) {
+  private async persistProfileTasks(
+    userId: string,
+    profile: unknown,
+    tasks: DashboardTask[],
+  ) {
     const existing = (profile as Record<string, unknown> | null) ?? {};
-    const dashboard = (existing.dashboard as Record<string, unknown> | null) ?? {};
+    const dashboard =
+      (existing.dashboard as Record<string, unknown> | null) ?? {};
     await this.prisma.user.update({
       where: { id: userId },
       data: {

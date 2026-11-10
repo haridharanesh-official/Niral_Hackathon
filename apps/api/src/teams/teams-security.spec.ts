@@ -1,3 +1,5 @@
+import { validateSync } from 'class-validator';
+import { InviteMemberDto } from './dto/team.dto';
 import { TeamsService } from './teams.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -5,19 +7,38 @@ import { MailService } from '../mail/mail.service';
 import { escapeHtml } from '../payments/payment-rules';
 
 describe('Team invitation and discovery boundaries', () => {
+  it('rejects malformed invitation recipients before mail address parsing', () => {
+    for (const email of [
+      'not-an-email',
+      'a@example.test\r\nBcc: other@example.test',
+      'a@example.test,b@example.test',
+    ]) {
+      expect(
+        validateSync(
+          Object.assign(new InviteMemberDto(), { teamId: 'team', email }),
+        ).some((error) => error.property === 'email'),
+      ).toBe(true);
+    }
+    expect(
+      validateSync(
+        Object.assign(new InviteMemberDto(), {
+          teamId: 'team',
+          email: 'recipient@example.test',
+        }),
+      ),
+    ).toHaveLength(0);
+  });
   function fixture(name = 'NIRAL மாணவர்கள் & builders') {
     const db = {
       team: {
-        findUnique: jest
-          .fn()
-          .mockResolvedValue({
-            id: 'team',
-            name,
-            leaderId: 'leader',
-            eventId: 'event',
-            maxMembers: 4,
-            members: [],
-          }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'team',
+          name,
+          leaderId: 'leader',
+          eventId: 'event',
+          maxMembers: 4,
+          members: [],
+        }),
         findMany: jest.fn().mockResolvedValue([]),
       },
       teamInvitation: {
@@ -82,16 +103,14 @@ describe('Team invitation and discovery boundaries', () => {
             { members: { some: { userId: 'member' } } },
           ],
         },
-        select: expect.objectContaining({
-          name: true,
-          members: expect.any(Object),
-          leader: expect.any(Object),
-        }),
       }),
     );
     const args = t.db.team.findMany.mock.calls[0] as unknown as [
       { select: Record<string, unknown> },
     ];
+    expect(args[0].select.name).toBe(true);
+    expect(args[0].select.members).toBeDefined();
+    expect(args[0].select.leader).toBeDefined();
     expect(args[0].select).not.toHaveProperty('inviteCode');
     expect(args[0].select).not.toHaveProperty('billingLocked');
     expect(JSON.stringify(args[0].select)).not.toContain('email');

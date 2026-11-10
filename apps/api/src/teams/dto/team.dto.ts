@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsEmail,
   IsIn,
   IsOptional,
   IsString,
@@ -66,7 +67,7 @@ export class RespondJoinDto {
 }
 
 export class InviteMemberDto {
-  @IsString()
+  @IsEmail()
   teamId!: string;
 
   @IsString()
