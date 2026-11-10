@@ -81,8 +81,11 @@ export class GmailReconciliationService {
       );
     const url = new URL(redirect);
     if (
-      url.pathname !== '/admin/payments' || url.search || url.hash ||
-      url.username || url.password
+      url.pathname !== '/admin/payments' ||
+      url.search ||
+      url.hash ||
+      url.username ||
+      url.password
     )
       throw new ServiceUnavailableException(
         'OAuth redirect must be the exact /admin/payments callback without credentials, query or fragment.',
