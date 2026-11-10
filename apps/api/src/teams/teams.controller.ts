@@ -75,7 +75,10 @@ export class TeamsController {
   @UseGuards(JwtAuthGuard)
   @Post('cancel-invite')
   cancelInvite(@Req() req: AuthRequest, @Body() dto: CancelInvitationDto) {
-    return this.teamsService.cancelInvitation(req.user.userId, dto.invitationId);
+    return this.teamsService.cancelInvitation(
+      req.user.userId,
+      dto.invitationId,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -102,7 +105,7 @@ export class TeamsController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  list() {
-    return this.teamsService.list();
+  list(@Req() req: AuthRequest) {
+    return this.teamsService.list(req.user.userId);
   }
 }

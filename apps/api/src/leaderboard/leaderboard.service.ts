@@ -29,6 +29,7 @@ export class LeaderboardService {
 
     if (type === 'team') {
       const teams = await this.prisma.team.findMany({
+        where: { visibility: 'PUBLIC' },
         take: 20,
         include: {
           members: { include: { user: { select: { xp: true } } } },

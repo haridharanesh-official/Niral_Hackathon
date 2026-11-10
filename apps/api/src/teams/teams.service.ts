@@ -16,6 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTeamDto, InviteMemberDto, RequestJoinDto } from './dto/team.dto';
 import { AuditService } from '../audit/audit.service';
 import { MailService } from '../mail/mail.service';
+import { escapeHtml } from '../payments/payment-rules';
 
 const SAFE_TEAM_MEMBER_USER_SELECT = {
   id: true,
@@ -47,6 +48,34 @@ const SAFE_LEADER_SELECT = {
   college: true,
   department: true,
 } as const;
+
+// Discovery is not an invitation or private-workspace API. Never return secrets,
+// contact details, billing state, submissions or invitation records here.
+const DISCOVERY_TEAM_SELECT = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  theme: true,
+  logoUrl: true,
+  visibility: true,
+  recruitmentStatus: true,
+  status: true,
+  maxMembers: true,
+  createdAt: true,
+  eventId: true,
+  leaderId: true,
+  members: {
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      joinedAt: true,
+      user: { select: PUBLIC_TEAM_MEMBER_USER_SELECT },
+    },
+  },
+  leader: { select: PUBLIC_TEAM_MEMBER_USER_SELECT },
+} satisfies Prisma.TeamSelect;
 
 @Injectable()
 export class TeamsService {
@@ -238,7 +267,7 @@ export class TeamsService {
           to: dto.email.toLowerCase(),
           subject: `You're invited to join team ${team.name} for NIRAL Hackathon 2026`,
           eventType: 'team.invitation',
-          html: `<p>You have been invited to join team <strong>${team.name}</strong> for NIRAL Hackathon 2026.</p><p>Use this invitation token to join: <code>${token}</code></p>`,
+          html: `<p>You have been invited to join team <strong>${escapeHtml(team.name)}</strong> for NIRAL Hackathon 2026.</p><p>Use this invitation token to join: <code>${escapeHtml(token)}</code></p>`,
         })
         .catch(() => undefined);
     }
@@ -742,9 +771,7 @@ export class TeamsService {
 
   async getMyTeam(
     userId: string,
-    client: {
-      teamMember: { findFirst: (...args: any[]) => Promise<any> };
-    } = this.prisma,
+    client: Pick<Prisma.TransactionClient, 'teamMember'> = this.prisma,
   ) {
     const membership = await client.teamMember.findFirst({
       where: { userId },
@@ -802,14 +829,7 @@ export class TeamsService {
       },
       take: 50,
       orderBy: { createdAt: 'desc' },
-      include: {
-        members: {
-          include: {
-            user: { select: PUBLIC_TEAM_MEMBER_USER_SELECT },
-          },
-        },
-        leader: { select: SAFE_LEADER_SELECT },
-      },
+      select: DISCOVERY_TEAM_SELECT,
     });
 
     if (!userId)
@@ -842,18 +862,14 @@ export class TeamsService {
     });
   }
 
-  async list() {
+  async list(userId: string) {
     return this.prisma.team.findMany({
+      where: {
+        OR: [{ visibility: 'PUBLIC' }, { members: { some: { userId } } }],
+      },
       take: 50,
       orderBy: { createdAt: 'desc' },
-      include: {
-        members: {
-          include: {
-            user: { select: PUBLIC_TEAM_MEMBER_USER_SELECT },
-          },
-        },
-        leader: { select: SAFE_LEADER_SELECT },
-      },
+      select: DISCOVERY_TEAM_SELECT,
     });
   }
 }
