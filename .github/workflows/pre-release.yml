@@ -1,0 +1,87 @@
+name: NIRAL pre-release
+on:
+  pull_request:
+  push:
+    branches: [feature/niral-legal-pages-review]
+permissions:
+  contents: read
+concurrency:
+  group: pre-release-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: niral_ci
+          POSTGRES_PASSWORD: local_ci_only
+          POSTGRES_DB: niral_ci_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U niral_ci -d niral_ci_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      smtp:
+        image: mailhog/mailhog:v1.0.1
+        ports: ['1025:1025', '8025:8025']
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://niral_ci:local_ci_only@127.0.0.1:5432/niral_ci_test
+      NIRAL_TEST_DATABASE_URL: postgresql://niral_ci:local_ci_only@127.0.0.1:5432/niral_ci_test
+      REDIS_URL: redis://127.0.0.1:6379
+      JWT_SECRET: niral-ci-only-not-a-production-secret-000000000
+      AUTH_SECRET: niral-ci-only-not-a-production-secret-111111111
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      AUTH_URL: http://localhost:3000
+      API_URL: http://localhost:4100
+      EMAIL_PROVIDER: smtp
+      SMTP_HOST: localhost
+      SMTP_PORT: '1025'
+      EMAIL_FROM: test@niral.example.test
+      MAIL_QUEUE_ENABLED: 'true'
+      MAIL_QUEUE_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      GMAIL_RECONCILIATION_ENABLED: 'false'
+      UPI_RECONCILIATION_WORKER_ENABLED: 'false'
+      UPI_SYNTHETIC_MODE: 'false'
+      MANUAL_UPI_ENABLED: 'false'
+      FAMAPP_SANDBOX_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - name: Install exact lockfile
+        run: npm ci --no-fund --no-audit
+      - name: Generate client and shared package
+        run: |
+          npm exec --workspace=@hackos/api -- prisma generate
+          npm run build --workspace=@hackos/shared
+      - name: Secret scan
+        run: |
+          node scripts/check-committed-secrets.cjs
+          node scripts/test-site-origin.cjs
+      - name: Validate isolated migrations and schema drift
+        run: node scripts/validate-local-migrations.cjs
+      - name: Changed-file lint
+        run: node scripts/lint-changed.cjs origin/main
+      - name: Backend and security regression tests (no skipped DB suites)
+        run: |
+          mkdir -p tmp
+          npm test --workspace=@hackos/api -- --runInBand --testTimeout=30000 --json --outputFile=../../tmp/ci-api-tests.json
+          node -e "const r=require('./tmp/ci-api-tests.json');if(r.numFailedTests||r.numPendingTests||!r.numPassedTests)process.exit(1)"
+      - name: TypeScript
+        run: |
+          npm exec --workspace=@hackos/web -- next typegen
+          node node_modules/typescript/bin/tsc --noEmit --project apps/api/tsconfig.json
+          node node_modules/typescript/bin/tsc --noEmit --project apps/web/tsconfig.json
+      - name: Both production builds
+        env:
+          NEXT_PUBLIC_SITE_URL: https://staging.example.test
+          AUTH_URL: https://staging.example.test
+        run: npm run build

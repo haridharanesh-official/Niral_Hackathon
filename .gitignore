@@ -15,6 +15,7 @@ out
 .env
 .env.local
 .env.*.local
+.env.*
 client_secret_*.json
 credentials*.json
 !.env.example
