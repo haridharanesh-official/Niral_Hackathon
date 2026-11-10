@@ -1,6 +1,6 @@
 # NIRAL public legal pages — organizer review
 
-Updated: 8 November 2026. Document version: 0.1, review draft. Effective date: **not approved**.
+Audit follow-up: 9 November 2026; legal text last updated 8 November. Document version: 0.1, review draft. Effective date: **not approved**. [Phase 6](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md) records the current preview evidence and failed Turbopack print check; earlier successful browser results below are historical.
 
 ## Implemented routes and presentation
 
@@ -123,3 +123,5 @@ No API implementation, schema, financial history, credential or collection flags
 ## Production assessment
 
 **NO-GO.** The two legal pages are local review drafts, not approved operative policies. Production 404s, operator/grievance designation, age/guardian policy and enforcement, retention/deletion, processor review, payment/refund approvals, commercial account, Google ownership/scope verification and independent credit operations remain blockers. Real collections and Gmail polling stay disabled.
+
+> **9 November 2026 follow-up:** See [Phase 6 pre-release audit](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md). The new exact-commit Vercel preview serves both policy drafts with authorized HTTP200, homepage links and noindex; anonymous requests hit Vercel SSO, so public Google Branding readiness is not established. The current Turbopack browser run fails because the printed legal title is hidden by CSS specificity; the earlier87-check webpack result is historical. Sponsor collateral proposes participant-email sharing that requires separate privacy/publication approval. Operator, grievance, retention, under-18, commercial collection and final policy approvals remain pending. No legal text was approved or deployment protection disabled.

@@ -1,6 +1,6 @@
 # NIRAL Custom UPI System — Implementation and Validation
 
-Updated 8 November 2026. **Production: NO-GO. No public collection or deployment authorized/enabled.**
+Audit follow-up: 9 November 2026. **Production: NO-GO. No public collection or deployment authorized/enabled.** [Phase 6](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md) is the current release assessment, including the failed team-checkout browser journey and manual-evidence limitations.
 
 ## Current scope
 
@@ -96,3 +96,5 @@ Public `/privacy-policy` and `/terms-of-service` review drafts now explain the d
 See [the launch report](NIRAL_REGISTRATION_PAYMENTS_LAUNCH.md) for final counts and evidence. The baseline was 136 API tests/49 journey checks. The validation suite adds 21 template parser checks and database-backed Gmail/team cases. Financial and Google responses used in those tests are explicitly synthetic; registration, PostgreSQL, SMTP capture, NextAuth and browser interactions are real local integration checks.
 
 Production remains NO-GO until actual fee/tax/policy details, an authorized commercial account/provider permission, a permitted Gmail grant, authenticated original sender evidence, verified beneficiary binding and real independent receiving/outgoing procedures are validated. The owner approved the fixed-team pricing model, not an undisclosed fee amount. No production collection, deployment, credential change or push occurred.
+
+> **9 November 2026 audit update:** [Phase 6 assessment](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md) is the current release decision. Production collection remains hard-disabled; email match only creates candidate evidence. Independent credit/refund review is human statement attestation, not an authenticated bank API, and actual payer/refund-recipient ownership still needs operational proof. Current local payment browser run fails at team checkout after48 checks; do not reuse the older63 total as a new pass. Gmail credentials/grant/sender/beneficiary readiness remains unverified and polling disabled. Key rotation needs an encryption/HMAC history migration plan.

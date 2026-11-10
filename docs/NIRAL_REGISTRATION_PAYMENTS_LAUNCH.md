@@ -1,6 +1,6 @@
 # NIRAL Registration and Payments — Validation Report
 
-Updated 8 November 2026. **Production readiness: NO-GO. No public collection, deployment, push or production credential change was performed.**
+Latest audit: 9 November 2026. **Production readiness: NO-GO.** See [Phase 6 findings and current failed checks](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md) before using the earlier validation totals below. The feature commit was pushed on 9 November; this audit performed no merge, deployment, public collection or production credential change.
 
 ## Outcome
 
@@ -10,18 +10,18 @@ The owner supplied the FamApp credit-email body structure and confirmed one fixe
 
 ## Actual results
 
-| Check | Result | Evidence |
-| --- | --- | --- |
-| Full API suite | 160 passed, 14 suites, zero failed/skipped | tmp/upi-validation-api-final.json |
-| FamApp template parser | 21 passed, included in API total | famapp-parser.spec.ts |
-| Real HTTP/PostgreSQL/SMTP/NextAuth/browser journey | 63 passed, zero runtime errors | tmp/launch-http-qa/results.json |
-| Authentication browser regressions | 41 passed | tmp/auth-v3-qa/results.json |
-| Interactive artwork regressions | 52 passed, no unexpected console errors | tmp/core-v4-qa/results.json |
-| Registration model tests | 5 passed | scripts/test-auth-v3.cjs |
-| API Nest production build | Passed, exit 0 | Local build output |
-| Frontend Next.js webpack production build | Passed, exit 0; TypeScript and all 54 pages generated | Local build output |
-| Payment/frontend scoped lint | Zero errors/warnings | tmp/upi-validation-api-lint.json; tmp/upi-validation-web-lint.json |
-| Live Gmail configuration preflight | BLOCKED: readyForOAuth=false | tmp/gmail-validation-preflight.json |
+| Check                                              | Result                                                | Evidence                                                           |
+| -------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------ |
+| Full API suite                                     | 160 passed, 14 suites, zero failed/skipped            | tmp/upi-validation-api-final.json                                  |
+| FamApp template parser                             | 21 passed, included in API total                      | famapp-parser.spec.ts                                              |
+| Real HTTP/PostgreSQL/SMTP/NextAuth/browser journey | 63 passed, zero runtime errors                        | tmp/launch-http-qa/results.json                                    |
+| Authentication browser regressions                 | 41 passed                                             | tmp/auth-v3-qa/results.json                                        |
+| Interactive artwork regressions                    | 52 passed, no unexpected console errors               | tmp/core-v4-qa/results.json                                        |
+| Registration model tests                           | 5 passed                                              | scripts/test-auth-v3.cjs                                           |
+| API Nest production build                          | Passed, exit 0                                        | Local build output                                                 |
+| Frontend Next.js webpack production build          | Passed, exit 0; TypeScript and all 54 pages generated | Local build output                                                 |
+| Payment/frontend scoped lint                       | Zero errors/warnings                                  | tmp/upi-validation-api-lint.json; tmp/upi-validation-web-lint.json |
+| Live Gmail configuration preflight                 | BLOCKED: readyForOAuth=false                          | tmp/gmail-validation-preflight.json                                |
 
 The previous 136 API/49 journey baseline was inspected and rerun with added coverage. Tests include missing/duplicate UTRs, changed amounts, wrong beneficiaries, spoofed/invalid authentication, repeated Gmail messages/provider references, conflicting HTML/text, delayed alerts, revoked grants, role/ownership denial, transactional rollback, independent statement review, receipts and refund audit trails.
 
@@ -85,3 +85,5 @@ Executed follow-up results: 160 API tests / 14 suites, 63 actual local registrat
 7. Obtain explicit organizer deployment/release authorization. Development flags are not a production release mechanism.
 
 The local preview is restored after checks with collection and Gmail polling disabled. Nothing was deployed.
+
+> **Latest assessment — 9 November 2026:** [Phase 6 pre-release audit](NIRAL_PHASE_6_PRE_RELEASE_AUDIT.md) supersedes earlier green totals for release decisions. Backend160 tests, builds, TypeScript, auth41 and artwork52 pass, but current changed-file lint fails (API168 errors/31 warnings; web24/20), legal print fails under Turbopack, and the payment journey fails after48 checks at team checkout. npm audit reports46 affected package entries (6critical/18high). Exact-commit Vercel preview is READY and policies return200 through authorized access, but anonymous access redirects to SSO; backend runtime reports event API unconfigured and authentication URLs point at production. **Production NO-GO.** No merge/deployment, live collection or Gmail polling authorized by this audit.
