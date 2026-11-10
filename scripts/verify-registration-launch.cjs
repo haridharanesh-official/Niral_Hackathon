@@ -366,6 +366,14 @@ async function main() {
   }
   const page = await loginPage(a);
   check('real NextAuth session opens the participant dashboard');
+  await page.route('**/api/payments/me', route => route.fulfill({status: 503, contentType: 'application/json', body: JSON.stringify({message: 'Synthetic temporary payment service outage.'})}));
+  await page.goto('http://localhost:3000/dashboard/payments/' + order.id);
+  await page.getByRole('button', {name: 'Retry loading payment records'}).waitFor();
+  check('payment load failure offers retry without a false ownership denial', !(await page.locator('body').innerText()).includes('No payment record belongs') && !(await page.locator('body').innerText()).includes('No matching enrollment belongs'));
+  await page.unroute('**/api/payments/me');
+  await page.getByRole('button', {name: 'Retry loading payment records'}).click();
+  await page.getByRole('heading', {name: 'Check your payment status.'}).waitFor();
+  check('payment records recover after the temporary service outage');
   await page.goto(`http://localhost:3000/dashboard/payments/${order.id}`);
   await page.getByRole('heading', { name: 'Check your payment status.' }).waitFor();
   check(

@@ -34,6 +34,7 @@ export function ParticipantPayments({
       feeCurrencySnapshot: string;
       paymentPolicySnapshot?: PaymentRecord['policySnapshot'];
     } | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const lock = useRef(false);
   const generation = useRef(0);
   const { data: session } = useSession();
@@ -44,6 +45,7 @@ export function ParticipantPayments({
       return;
     }
     const requestGeneration = ++generation.current;
+    setLoading(true);
     setError('');
     try {
       const [orders, profile, application] = await Promise.all([
@@ -52,6 +54,7 @@ export function ParticipantPayments({
         accountRequest<{ enrollment: typeof enrollment }>('application'),
       ]);
       if (requestGeneration !== generation.current) return;
+      setLoadFailed(false);
       setRecords(orders);
       setIdentity(profile.name);
       setEnrollment(application.enrollment);
@@ -67,6 +70,7 @@ export function ParticipantPayments({
         );
     } catch (e) {
       if (requestGeneration !== generation.current) return;
+      setLoadFailed(true);
       setRecords([]);
       setActive(null);
       setEnrollment(null);
@@ -187,11 +191,14 @@ export function ParticipantPayments({
       </p>
       {loading || loadedOwner !== session?.user.id ? (
         <p role="status">Loading your records…</p>
+      ) : loadFailed ? (
+        <div>
+          <p role="status">Payment records could not be loaded. Retry after the service recovers.</p>
+          <PopButton type="button" onClick={() => void load()}>Retry loading payment records</PopButton>
+        </div>
       ) : (
         <>
-          {error ? (
-            <p role="status">Payment records could not be loaded. Retry after the service recovers.</p>
-          ) : enrollmentId && enrollment?.id !== enrollmentId ? (
+          {enrollmentId && enrollment?.id !== enrollmentId ? (
             <p className={styles.notice}>
               No matching enrollment belongs to this account.
             </p>
