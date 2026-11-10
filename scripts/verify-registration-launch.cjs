@@ -14,10 +14,14 @@ if (
   !database.pathname.endsWith('_test')
 )
   throw Error('Dedicated local *_test database required.');
-if (process.env.SMTP_HOST !== 'localhost' || !['1025', '51025'].includes(process.env.SMTP_PORT))
+if (
+  process.env.SMTP_HOST !== 'localhost' ||
+  !['1025', '51025'].includes(process.env.SMTP_PORT)
+)
   throw Error('Local SMTP capture required.');
 const captureOrigin = process.env.MAIL_CAPTURE_URL || 'http://localhost:8025';
-if (!['http://localhost:8025', 'http://localhost:58025'].includes(captureOrigin)) throw Error('Local-only SMTP capture origin required');
+if (!['http://localhost:8025', 'http://localhost:58025'].includes(captureOrigin))
+  throw Error('Local-only SMTP capture origin required');
 const db = new PrismaClient({ datasources: { db: { url: database.toString() } } });
 const upiQa = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../tmp/upi-local-qa.json'), 'utf8'),
@@ -37,10 +41,13 @@ const check = (name, condition = true) => {
 // Respect the unchanged 8-login/minute IP budget across direct and browser calls.
 const loginAttempts = [];
 async function reserveLoginAttempt() {
-  while (loginAttempts.length && loginAttempts[0] <= Date.now() - 61_000) loginAttempts.shift();
+  while (loginAttempts.length && loginAttempts[0] <= Date.now() - 61_000)
+    loginAttempts.shift();
   if (loginAttempts.length >= 8) {
     console.log('QA pacing login attempts to respect the real IP limit');
-    await new Promise(resolve => setTimeout(resolve, Math.max(1, 61_000 - (Date.now() - loginAttempts[0]))));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.max(1, 61_000 - (Date.now() - loginAttempts[0]))),
+    );
     return reserveLoginAttempt();
   }
   loginAttempts.push(Date.now());
@@ -59,9 +66,7 @@ async function request(route, body, bearer, method) {
   return { status: response.status, data: await response.json().catch(() => ({})) };
 }
 async function tokenFromCapture(email, subject, purpose) {
-  const list = await (
-    await fetch(captureOrigin + '/api/v2/messages?limit=300')
-  ).json();
+  const list = await (await fetch(captureOrigin + '/api/v2/messages?limit=300')).json();
   const message = list.items.find(
     (m) =>
       m.Content.Headers.Subject?.[0] === subject &&
@@ -176,6 +181,30 @@ async function main() {
   );
   const a = await account('a'),
     b = await account('b');
+  // Explicit staging-only role fixtures; self-registration never assigns roles.
+  const source = await db.user.findUniqueOrThrow({ where: { id: a.id } });
+  for (const role of ['TEAM_LEADER', 'VOLUNTEER', 'JUDGE']) {
+    const roleUser = await db.user.create({
+      data: {
+        name: 'SYNTHETIC ROLE FIXTURE',
+        email: marker + '-' + role.toLowerCase() + '@example.test',
+        passwordHash: source.passwordHash,
+        role,
+        emailVerified: new Date(),
+        accountStatus: 'ACTIVE',
+      },
+    });
+    users.push(roleUser.id);
+    const login = await request('/auth/login', { email: roleUser.email, password });
+    check(
+      'synthetic ' + role + ' authenticates with its server-assigned role',
+      login.status === 201 && login.data.user.role === role,
+    );
+    check(
+      role + ' cannot access Master reconciliation',
+      (await request('/master/upi', undefined, login.data.accessToken)).status === 403,
+    );
+  }
   check(
     'two real student accounts, captured verification emails, single-use verification and login',
   );
@@ -368,13 +397,25 @@ async function main() {
   }
   const page = await loginPage(a);
   check('real NextAuth session opens the participant dashboard');
-  await page.route('**/api/payments/me', route => route.fulfill({status: 503, contentType: 'application/json', body: JSON.stringify({message: 'Synthetic temporary payment service outage.'})}));
+  await page.route('**/api/payments/me', (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Synthetic temporary payment service outage.' }),
+    }),
+  );
   await page.goto('http://localhost:3000/dashboard/payments/' + order.id);
-  await page.getByRole('button', {name: 'Retry loading payment records'}).waitFor();
-  check('payment load failure offers retry without a false ownership denial', !(await page.locator('body').innerText()).includes('No payment record belongs') && !(await page.locator('body').innerText()).includes('No matching enrollment belongs'));
+  await page.getByRole('button', { name: 'Retry loading payment records' }).waitFor();
+  check(
+    'payment load failure offers retry without a false ownership denial',
+    !(await page.locator('body').innerText()).includes('No payment record belongs') &&
+      !(await page.locator('body').innerText()).includes(
+        'No matching enrollment belongs',
+      ),
+  );
   await page.unroute('**/api/payments/me');
-  await page.getByRole('button', {name: 'Retry loading payment records'}).click();
-  await page.getByRole('heading', {name: 'Check your payment status.'}).waitFor();
+  await page.getByRole('button', { name: 'Retry loading payment records' }).click();
+  await page.getByRole('heading', { name: 'Check your payment status.' }).waitFor();
   check('payment records recover after the temporary service outage');
   await page.goto(`http://localhost:3000/dashboard/payments/${order.id}`);
   await page.getByRole('heading', { name: 'Check your payment status.' }).waitFor();
