@@ -1,13 +1,15 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
+import { siteOrigin } from '@/lib/site-origin';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://niralhackathon.dpdns.org";
+const siteUrl = siteOrigin();
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/dashboard/", "/admin/", "/api/auth/"],
+      userAgent: '*',
+      ...(process.env.VERCEL_ENV === 'preview'
+        ? { disallow: '/' }
+        : { allow: '/', disallow: ['/dashboard/', '/admin/', '/api/auth/'] }),
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

@@ -1,3 +1,4 @@
+import { siteOrigin } from './site-origin';
 // Server-only origin normalization. Callers append /api exactly once.
 export function apiOrigin() {
   const raw =
@@ -16,10 +17,7 @@ export function apiOrigin() {
         ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
     )
       return null;
-    const web =
-      process.env.AUTH_URL ??
-      process.env.NEXTAUTH_URL ??
-      process.env.NEXT_PUBLIC_SITE_URL;
+    const web = siteOrigin();
     if (web && new URL(web).origin === url.origin) return null;
     return url.origin;
   } catch {

@@ -2,6 +2,13 @@ import NextAuth, { CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import type { UserRole } from '@hackos/shared';
 import { apiOrigin } from '@/lib/api-origin';
+import { siteOrigin } from '@/lib/site-origin';
+// Shared production env entries must never move a preview's cookies/callbacks
+// onto the production host. Vercel supplies this immutable deployment identity.
+if (process.env.VERCEL_ENV === 'preview') {
+  process.env.AUTH_URL = siteOrigin();
+  process.env.NEXTAUTH_URL = siteOrigin();
+}
 const apiUrl = apiOrigin();
 class AccountSignInError extends CredentialsSignin {
   constructor(code: string) {

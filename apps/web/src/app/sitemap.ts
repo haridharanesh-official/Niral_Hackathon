@@ -1,6 +1,7 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
+import { siteOrigin } from '@/lib/site-origin';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://niralhackathon.dpdns.org";
+const siteUrl = siteOrigin();
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     { path: '/privacy-policy', priority: 0.5, changeFrequency: 'monthly' as const },

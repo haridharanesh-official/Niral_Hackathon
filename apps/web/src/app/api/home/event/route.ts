@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const apiUrl = apiOrigin();
 
-  let authoritativeEvent: any = null;
+  type PublicEvent = { id: string; name: string; startsAt: string; endsAt: string; status: string; registrationPaymentMode: string; registrationEnabled: boolean; logoUrl?: string; publicDescription?: string; description?: string; tagline?: string; venueName?: string; registrationStartsAt?: string; registrationEndsAt?: string; maxCapacity?: number; prizePool?: number; hasExactTimes?: boolean; timezone?: string };
+  let authoritativeEvent: PublicEvent | null = null;
 
   try {
     if (!apiUrl) throw Error('The event API is not configured.');
@@ -67,6 +68,7 @@ export async function GET() {
   const starts = new Date(fallback.startsAt).getTime();
   return NextResponse.json({
     ...fallback,
+    dataSource: 'local-fallback',
     registrationStatus: 'closed',
     serverNow: new Date(now).toISOString(),
     countdownMs: Math.max(0, starts - now),
