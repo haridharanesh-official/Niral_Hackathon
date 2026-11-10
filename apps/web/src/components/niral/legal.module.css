@@ -189,7 +189,7 @@
   :global(body):has(.document) {
     background: white !important;
   }
-  :global(body):has(.document) :global(header),
+  :global(body):has(.document) :global(header):not(.heading),
   :global(body):has(.document) :global(footer),
   :global(body):has(.document) :global(a[href='#niral-main']) {
     display: none !important;

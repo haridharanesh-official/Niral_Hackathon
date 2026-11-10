@@ -3,7 +3,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const base = 'http://localhost:3000';
+const base = process.env.LEGAL_TEST_URL || 'http://localhost:3000';
+const expectedOrigin = new URL(process.env.EXPECTED_SITE_ORIGIN || 'https://niralhackathon.dpdns.org').origin;
 const output = path.resolve(__dirname, '../output/playwright/legal-pages');
 fs.mkdirSync(output, { recursive: true });
 const checks = [],
@@ -49,7 +50,7 @@ const check = (name, value) => {
             (await page.getByText('Pending approval', { exact: true }).isVisible()),
         );
         await page.addScriptTag({
-          path: path.resolve(__dirname, '../apps/web/node_modules/axe-core/axe.min.js'),
+          path: require.resolve('axe-core/axe.min.js'),
         });
         const axe = await page.evaluate(() =>
           window.axe.run(document, {
@@ -102,9 +103,9 @@ const check = (name, value) => {
         await page.getByRole('navigation', { name: `${title} contents` }).isVisible(),
       );
       check(
-        `${route}: canonical uses official HTTPS domain`,
+        `${route}: canonical matches configured deployment origin`,
         (await page.locator('link[rel="canonical"]').getAttribute('href')) ===
-          `https://niralhackathon.dpdns.org/${route}`,
+          `${expectedOrigin}/${route}`,
       );
       check(
         `${route}: reduced motion disables document animation`,

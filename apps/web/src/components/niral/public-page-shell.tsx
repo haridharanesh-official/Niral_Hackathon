@@ -30,8 +30,8 @@ export const navItems = [
 
 export function Logo() {
   return (
-    <Link href="/" className={styles.logo} aria-label="NIRAL Hackathon 2026 home">
-      <span>N</span>
+    <Link href="/" className={styles.logo} title="NIRAL Hackathon 2026 home">
+      <span aria-hidden="true">N</span>
       <div>
         <strong>NIRAL</strong>
         <small>HACKATHON 2026</small>
