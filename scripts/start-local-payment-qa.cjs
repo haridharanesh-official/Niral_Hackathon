@@ -12,6 +12,10 @@ if (process.env.SMTP_HOST !== 'localhost' || process.env.SMTP_PORT !== '1025')
 const synthetic = process.argv.includes('--synthetic-upi');
 Object.assign(process.env, {
   DATABASE_URL: url.toString(),
+  EMAIL_PROVIDER: 'smtp',
+  MAIL_QUEUE_ENABLED: 'false',
+  SMTP_USER: '',
+  SMTP_PASS: '',
   API_PORT: '4100',
   NODE_ENV: 'development',
   WEB_URL: 'http://localhost:3000',

@@ -32,7 +32,19 @@ const check = (name, condition = true) => {
   checks.push(name);
   console.log('PASS', name);
 };
+// Respect the unchanged 8-login/minute IP budget across direct and browser calls.
+const loginAttempts = [];
+async function reserveLoginAttempt() {
+  while (loginAttempts.length && loginAttempts[0] <= Date.now() - 61_000) loginAttempts.shift();
+  if (loginAttempts.length >= 8) {
+    console.log('QA pacing login attempts to respect the real IP limit');
+    await new Promise(resolve => setTimeout(resolve, Math.max(1, 61_000 - (Date.now() - loginAttempts[0]))));
+    return reserveLoginAttempt();
+  }
+  loginAttempts.push(Date.now());
+}
 async function request(route, body, bearer, method) {
+  if (route === '/auth/login') await reserveLoginAttempt();
   const response = await fetch(base + route, {
     method: method ?? (body === undefined ? 'GET' : 'POST'),
     headers: {
@@ -336,6 +348,7 @@ async function main() {
   async function loginPage(user) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     page.setDefaultNavigationTimeout(120000);
+    page.setDefaultTimeout(120000);
     page.on('pageerror', (error) => {
       errors.push(error.message);
       console.log('BROWSERERROR', error.message);
@@ -343,6 +356,7 @@ async function main() {
     await page.goto('http://localhost:3000/login');
     await page.getByLabel('Email address', { exact: true }).fill(user.email);
     await page.getByLabel('Password', { exact: true }).fill(password);
+    await reserveLoginAttempt();
     await page.getByRole('button', { name: /Sign In →/ }).click();
     await page.waitForURL((url) =>
       ['/dashboard', '/master', '/admin'].includes(url.pathname),

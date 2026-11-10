@@ -189,7 +189,9 @@ export function ParticipantPayments({
         <p role="status">Loading your records…</p>
       ) : (
         <>
-          {enrollmentId && enrollment?.id !== enrollmentId ? (
+          {error ? (
+            <p role="status">Payment records could not be loaded. Retry after the service recovers.</p>
+          ) : enrollmentId && enrollment?.id !== enrollmentId ? (
             <p className={styles.notice}>
               No matching enrollment belongs to this account.
             </p>

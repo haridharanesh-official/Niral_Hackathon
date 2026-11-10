@@ -1,7 +1,8 @@
+import { SessionReadThrottlerGuard } from './auth/guards/session-read-throttler.guard';
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -59,7 +60,7 @@ import { PaymentsModule } from './payments/payments.module';
   controllers: [AppController],
   providers: [
     AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: SessionReadThrottlerGuard },
     { provide: APP_INTERCEPTOR, useClass: ApiVersionInterceptor },
   ],
 })

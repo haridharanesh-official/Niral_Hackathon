@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { getSession, signIn } from 'next-auth/react';
+import { getSession, signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { validatePasswordPolicy } from '@hackos/shared';
 import { PopButton } from '@/components/niral/pop-button';
@@ -22,6 +22,7 @@ const roleDestinations: Record<string, string> = {
   VISITOR: '/',
 };
 export function LoginExperience() {
+  const { status: sessionStatus } = useSession();
   const [email, setEmail] = useState(''),
     [password, setPassword] = useState(''),
     [busy, setBusy] = useState(false),
@@ -45,7 +46,7 @@ export function LoginExperience() {
   }, []);
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (lock.current) return;
+    if (lock.current || sessionStatus === 'loading') return;
     const next = {
       email: emailError(email),
       password: password ? '' : 'Enter your password.',
@@ -145,7 +146,7 @@ export function LoginExperience() {
             {message}
           </p>
         )}
-        <PopButton className={styles.submit} type="submit" disabled={busy}>
+        <PopButton className={styles.submit} type="submit" disabled={busy || sessionStatus === 'loading'}>
           {busy ? 'Signing in…' : 'Sign In →'}
         </PopButton>
       </form>
