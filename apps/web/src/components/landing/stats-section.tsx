@@ -54,7 +54,7 @@ export function StatsSection() {
       id: "format",
       label: "Event Format",
       value: "Hybrid / Onsite",
-      badge: "36 Hours",
+      badge: "24 Hours",
       icon: Package,
       iconBg: "bg-purple-500/10 text-purple-500",
       info: "Onsite hardware labs with online submission and telemetry support",
@@ -62,7 +62,7 @@ export function StatsSection() {
     {
       id: "duration",
       label: "Sprint Duration",
-      value: "36 Hours",
+      value: "24 Hours",
       badge: "Non-stop",
       icon: Clock,
       iconBg: "bg-rose-500/10 text-rose-500",

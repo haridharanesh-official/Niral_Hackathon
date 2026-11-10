@@ -93,7 +93,7 @@ export function ProblemStatementsSection() {
 
               <div className="mt-4 pt-3 border-t border-[var(--card-border)] flex items-center justify-between text-[11px] text-[var(--muted)]">
                 <span>Kit Manifest: TBA</span>
-                <span>Rubric: 36h Sprint</span>
+                <span>Rubric: 24h Sprint</span>
               </div>
             </motion.div>
           ))}

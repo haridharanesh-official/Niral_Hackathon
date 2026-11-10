@@ -13,7 +13,7 @@ export function AboutSection() {
 
   const aboutPillars = [
     {
-      title: "36-Hour Sprint",
+      title: "24-Hour Sprint",
       subtitle: "Continuous building, debugging, and live hardware prototyping on-site.",
       badge: "Format",
     },
@@ -53,7 +53,7 @@ export function AboutSection() {
             </h2>
             <p className="text-sm leading-relaxed text-[var(--muted)]">
               {event?.description ||
-                "NIRAL Hackathon 2026 is a flagship hackathon hosted by the IoT Club at Sri Shakthi Institute of Engineering and Technology. Over 36 intensive hours, teams converge on campus to tackle critical real-world challenges in industrial automation, healthcare, precision agriculture, smart cities, and edge AI."}
+                "NIRAL Hackathon 2026 is a flagship hackathon hosted by the IoT Club at Sri Shakthi Institute of Engineering and Technology. Over 24 intensive hours, teams converge on campus to tackle critical real-world challenges in industrial automation, healthcare, precision agriculture, smart cities, and edge AI."}
             </p>
             <p className="text-sm leading-relaxed text-[var(--muted)]">
               Participants receive hands-on mentoring from industry experts, access to testing hardware components, and evaluation under a transparent, objective rubric.

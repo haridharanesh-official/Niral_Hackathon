@@ -554,7 +554,7 @@ export default function DashboardOverviewPage() {
               </dd>
 
               <dt style={{ fontWeight: 700, color: '#666' }}>Format</dt>
-              <dd style={{ margin: 0 }}>36-Hour Continuous Onsite Hackathon</dd>
+              <dd style={{ margin: 0 }}>24-Hour Continuous Onsite Hackathon</dd>
 
               <dt style={{ fontWeight: 700, color: '#666' }}>Official Email</dt>
               <dd style={{ margin: 0 }}>

@@ -28,7 +28,7 @@ export function LoginWelcomePanel() {
   const secs = Math.floor((diff % 60_000) / 1000);
 
   const highlights = [
-    { label: 'Duration', value: '36 Hours', icon: Clock },
+    { label: 'Duration', value: '24 Hours', icon: Clock },
     { label: 'Format', value: 'In-Person', icon: MapPin },
     { label: 'Innovation Tracks', value: '6 Themes', icon: Sparkles },
     { label: 'Event Date', value: 'Dec 3–4, 2026', icon: CalendarDays },

@@ -73,7 +73,7 @@ export function HeroSubtitle() {
       className="mt-4 font-sans text-base sm:text-lg text-[var(--muted)] max-w-2xl leading-relaxed"
     >
       {content?.event?.description ||
-        "Join India's premier 36-hour IoT and embedded innovation hackathon. Build tangible hardware, deploy intelligent edge models, and collaborate with top student and industry engineers."}
+        "Join India's premier 24-hour IoT and embedded innovation hackathon. Build tangible hardware, deploy intelligent edge models, and collaborate with top student and industry engineers."}
     </motion.p>
   );
 }

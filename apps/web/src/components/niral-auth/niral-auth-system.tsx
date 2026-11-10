@@ -186,7 +186,7 @@ export function NiralAuthIllustration() {
             <Sparkles size={14} />
             <strong>Hardware + AI Hub</strong>
           </div>
-          <span>36h Non-stop Innovation Prototype</span>
+          <span>24h Non-stop Innovation Prototype</span>
         </div>
       </div>
 
@@ -591,7 +591,7 @@ export function NiralAuthLayout({
               </div>
               <div className={styles.eventMetaText}>
                 <strong>DECEMBER 3–4, 2026</strong>
-                <span>Verified Event Dates · 36 Hours</span>
+                <span>Verified Event Dates · 24 Hours</span>
               </div>
             </div>
 
