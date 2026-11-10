@@ -1,4 +1,11 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Reset Password', robots: { index: false, follow: false } };
 import { ResetExperience } from '@/components/niral-auth/auth-forms';
-export default function Page() { return <ResetExperience/>; }
+
+export const metadata: Metadata = {
+  title: 'Reset Password · NIRAL 2026',
+  robots: { index: false, follow: false },
+};
+
+export default function ResetPasswordPage() {
+  return <ResetExperience />;
+}

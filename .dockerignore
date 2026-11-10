@@ -1,0 +1,15 @@
+.git
+**/node_modules
+**/.next
+**/dist
+**/.env
+**/.env.*
+tmp
+output
+project
+**/*.log
+**/*.pem
+**/coverage
+**/.vercel
+**/.codex
+**/.agents

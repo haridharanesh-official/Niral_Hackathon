@@ -1,0 +1,81 @@
+name: niral-staging
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: niral_stage
+      POSTGRES_PASSWORD: ${STAGING_DB_PASSWORD:?Run scripts/init-staging.cjs first}
+      POSTGRES_DB: niral_staging_test
+    ports: ['127.0.0.1:55432:5432']
+    volumes: [stage_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U niral_stage -d niral_staging_test']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [private]
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    ports: ['127.0.0.1:56379:6379']
+    volumes: [stage_redis:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [private]
+  mail:
+    image: mailhog/mailhog:v1.0.1
+    ports: ['127.0.0.1:51025:1025', '127.0.0.1:58025:8025']
+    networks: [private]
+    # Mail capture only; no outbound relay or Gmail credentials.
+  api:
+    profiles: [app]
+    build: {context: .., dockerfile: apps/api/Dockerfile}
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://niral_stage:${STAGING_DB_PASSWORD}@postgres:5432/niral_staging_test?connect_timeout=3&pool_timeout=3
+      REDIS_URL: redis://redis:6379
+      API_PORT: '4100'
+      CORS_ORIGIN: http://localhost:3000
+      WEB_URL: http://localhost:3000
+      JWT_SECRET: ${STAGING_JWT_SECRET:?Run staging init}
+      MAIL_QUEUE_KEY: ${STAGING_MAIL_KEY:?Run staging init}
+      EMAIL_PROVIDER: smtp
+      EMAIL_FROM: staging@niral.example.test
+      SMTP_HOST: mail
+      SMTP_PORT: '1025'
+      MAIL_QUEUE_ENABLED: 'true'
+      MANUAL_UPI_ENABLED: 'false'
+      FAMAPP_SANDBOX_ENABLED: 'false'
+      FAMAPP_PERSONAL_TEST_AUTHORIZED: 'false'
+      UPI_SYNTHETIC_MODE: 'false'
+      GMAIL_RECONCILIATION_ENABLED: 'false'
+      UPI_RECONCILIATION_WORKER_ENABLED: 'false'
+      PAYMENT_WORKER_ENABLED: 'false'
+    ports: ['127.0.0.1:4100:4100']
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      mail: {condition: service_started}
+    networks: [private]
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:4100/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+  migrate:
+    profiles: [tools]
+    build: {context: .., dockerfile: apps/api/Dockerfile}
+    environment:
+      DATABASE_URL: postgresql://niral_stage:${STAGING_DB_PASSWORD}@postgres:5432/niral_staging_test
+    command: ['node', '/app/node_modules/prisma/build/index.js', 'migrate', 'deploy']
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [private]
+networks:
+  private: {internal: true}
+volumes:
+  stage_pg:
+  stage_redis:

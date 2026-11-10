@@ -9,17 +9,29 @@ export class HealthService {
     private readonly redis: RedisService,
   ) {}
 
-  async check() {
-    let database: 'up' | 'down' = 'down';
-
+  private async bounded<T>(operation: Promise<T>, fallback: T): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
-      database = 'up';
-    } catch {
-      database = 'down';
+      return await Promise.race([
+        operation.catch(() => fallback),
+        new Promise<T>((resolve) => {
+          timer = setTimeout(() => resolve(fallback), 2000);
+          timer.unref();
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
     }
+  }
 
-    const cache = await this.redis.ping();
+  async check() {
+    const [database, cache] = await Promise.all([
+      this.bounded<'up' | 'down'>(
+        this.prisma.$queryRaw`SELECT 1`.then(() => 'up' as const),
+        'down',
+      ),
+      this.bounded<'up' | 'down' | 'disabled'>(this.redis.ping(), 'down'),
+    ]);
 
     return {
       status: database === 'up' && cache === 'up' ? 'ok' : 'degraded',

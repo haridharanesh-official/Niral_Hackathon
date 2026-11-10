@@ -1,4 +1,11 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Verify Email', robots: { index: false, follow: false } };
 import { VerifyExperience } from '@/components/niral-auth/auth-forms';
-export default function Page() { return <VerifyExperience/>; }
+
+export const metadata: Metadata = {
+  title: 'Verify Email · NIRAL 2026',
+  robots: { index: false, follow: false },
+};
+
+export default function VerifyEmailPage() {
+  return <VerifyExperience />;
+}

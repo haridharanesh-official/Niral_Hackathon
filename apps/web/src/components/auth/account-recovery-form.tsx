@@ -1,141 +1,177 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { LoginNav } from "@/components/auth/login/login-nav";
-
-const schema = z.object({
-  fullName: z.string().min(2, "Name is required").max(80),
-  registeredEmail: z.string().email("Enter the email on your account"),
-  alternateContact: z.string().min(5, "Provide a phone or alternate email"),
-  reason: z.string().min(20, "Please describe the issue (20+ characters)").max(1000),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const RECOVERY_LOG_KEY = "hackos.recovery.attempts";
+import Link from 'next/link';
+import { useState, type FormEvent } from 'react';
+import {
+  NiralAuthLayout,
+  NiralAuthCard,
+  NiralTextField,
+  NiralFormAlert,
+  NiralSuccessState,
+} from '@/components/niral-auth/niral-auth-system';
+import { PopButton } from '@/components/niral/pop-button';
+import { accountRequest } from '@/components/niral-auth/account-api';
+import styles from '@/components/niral-auth/niral-auth.module.css';
 
 export function AccountRecoveryForm() {
-  const [submitted, setSubmitted] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-  });
+  const [fullName, setFullName] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [alternateContact, setAlternateContact] = useState('');
+  const [reason, setReason] = useState('');
 
-  const onSubmit = handleSubmit(async (values) => {
-    const entry = {
-      ...values,
-      at: new Date().toISOString(),
-      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
-    };
-    try {
-      const prev = JSON.parse(localStorage.getItem(RECOVERY_LOG_KEY) ?? "[]") as unknown[];
-      localStorage.setItem(
-        RECOVERY_LOG_KEY,
-        JSON.stringify([entry, ...prev].slice(0, 20)),
-      );
-    } catch {
-      /* ignore */
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  function validate() {
+    const errs: Record<string, string> = {};
+    if (!fullName.trim() || fullName.trim().length < 2) {
+      errs.fullName = 'Enter your full name (at least 2 characters).';
     }
-    // Simulated support ticket — org verifies identity offline
-    await new Promise((r) => setTimeout(r, 600));
-    setSubmitted(true);
-  });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registeredEmail.trim())) {
+      errs.registeredEmail = 'Enter a valid registered email address.';
+    }
+    if (!alternateContact.trim() || alternateContact.trim().length < 5) {
+      errs.alternateContact = 'Provide an alternate email or active phone number.';
+    }
+    if (!reason.trim() || reason.trim().length < 10) {
+      errs.reason = 'Please explain the issue you are experiencing (at least 10 characters).';
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setServerError('');
+    if (!validate() || busy) return;
+
+    setBusy(true);
+    try {
+      const response = await accountRequest<{ success: boolean; message: string }>(
+        'account-recovery',
+        {
+          fullName: fullName.trim(),
+          email: registeredEmail.trim().toLowerCase(),
+          alternateContact: alternateContact.trim(),
+          reason: reason.trim(),
+        },
+      );
+
+      setSuccessMessage(
+        response.message ||
+          'Your recovery ticket has been submitted to NIRAL support. Our team will verify your identity and contact you.',
+      );
+    } catch (err) {
+      setServerError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to submit recovery request right now. Please try again later.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-0 circuit-grid opacity-40" />
-      <LoginNav />
-      <div className="relative z-10 mx-auto max-w-lg px-6 py-12">
-        <div className="glass glow-ring rounded-3xl p-6 sm:p-8">
-          <h1 className="font-display text-2xl font-bold text-white">
-            Account recovery
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            Can&apos;t access your email? Submit a recovery request. Organizers
-            will verify your identity using alternate methods and contact you.
-            All attempts are logged for audit.
-          </p>
+    <NiralAuthLayout
+      actionType="register"
+      kicker="NIRAL 2026 · PARTICIPANT SUPPORT"
+      headlineTitle="Need help accessing"
+      headlineHighlight="your account?"
+      description="If you lost access to your registered email or cannot sign in, submit an account recovery ticket. Our organizing team will verify your identity."
+    >
+      <NiralAuthCard
+        eyebrow="SUPPORT &amp; RECOVERY"
+        title="Account Recovery"
+        subtitle="Submit a verified recovery request to the NIRAL 2026 organizing committee."
+      >
+        {successMessage ? (
+          <NiralSuccessState
+            title="Recovery Ticket Received"
+            message={successMessage}
+            primaryAction={{
+              label: 'Return to Sign In →',
+              href: '/login',
+            }}
+            secondaryAction={{
+              label: 'Contact Support Directly',
+              href: '/contact',
+            }}
+          />
+        ) : (
+          <form className={styles.form} noValidate onSubmit={handleSubmit}>
+            <NiralFormAlert message={serverError} variant="error" />
 
-          {submitted ? (
-            <div className="mt-6 space-y-4">
-              <p
-                className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100"
-                role="status"
-              >
-                Recovery request received. Support will respond within 1–2
-                business days. Keep your alternate contact reachable.
-              </p>
-              <Link href="/login" className="text-sm text-sky-300 hover:underline">
-                Return to login
-              </Link>
+            <NiralTextField
+              label="Full name"
+              placeholder="e.g. Aditi Sharma"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              error={errors.fullName}
+            />
+
+            <NiralTextField
+              label="Registered email address (inaccessible)"
+              type="email"
+              placeholder="you@example.com"
+              value={registeredEmail}
+              onChange={(e) => setRegisteredEmail(e.target.value)}
+              required
+              error={errors.registeredEmail}
+            />
+
+            <NiralTextField
+              label="Alternate contact (phone or accessible email)"
+              placeholder="+91 98765 43210 or alternate@example.com"
+              value={alternateContact}
+              onChange={(e) => setAlternateContact(e.target.value)}
+              required
+              error={errors.alternateContact}
+            />
+
+            <div className={styles.fieldGroup}>
+              <label htmlFor="recovery-reason" className={styles.label}>
+                <span>
+                  Description of issue <span className={styles.requiredAsterisk}>*</span>
+                </span>
+              </label>
+              <textarea
+                id="recovery-reason"
+                className={`${styles.textarea} ${errors.reason ? styles.inputInvalid : ''}`}
+                rows={4}
+                placeholder="Explain why you cannot access your account (e.g. phone lost, college email blocked, typo in registration email)..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                required
+                aria-required="true"
+                aria-invalid={!!errors.reason}
+                aria-describedby={errors.reason ? 'reason-error' : undefined}
+              />
+              {errors.reason && (
+                <span id="reason-error" className={styles.fieldError} role="alert">
+                  {errors.reason}
+                </span>
+              )}
             </div>
-          ) : (
-            <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
-              <label className="block space-y-1.5 text-sm">
-                <span className="text-muted">Full name</span>
-                <input className="field-input" {...register("fullName")} />
-                {errors.fullName ? (
-                  <span className="text-xs text-rose-300">
-                    {errors.fullName.message}
-                  </span>
-                ) : null}
-              </label>
-              <label className="block space-y-1.5 text-sm">
-                <span className="text-muted">Registered email (inaccessible)</span>
-                <input
-                  type="email"
-                  className="field-input"
-                  {...register("registeredEmail")}
-                />
-                {errors.registeredEmail ? (
-                  <span className="text-xs text-rose-300">
-                    {errors.registeredEmail.message}
-                  </span>
-                ) : null}
-              </label>
-              <label className="block space-y-1.5 text-sm">
-                <span className="text-muted">Alternate phone or email</span>
-                <input className="field-input" {...register("alternateContact")} />
-                {errors.alternateContact ? (
-                  <span className="text-xs text-rose-300">
-                    {errors.alternateContact.message}
-                  </span>
-                ) : null}
-              </label>
-              <label className="block space-y-1.5 text-sm">
-                <span className="text-muted">What happened?</span>
-                <textarea
-                  className="field-input min-h-28"
-                  {...register("reason")}
-                />
-                {errors.reason ? (
-                  <span className="text-xs text-rose-300">
-                    {errors.reason.message}
-                  </span>
-                ) : null}
-              </label>
-              <Button type="submit" className="cta-primary w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting…" : "Submit recovery request"}
-              </Button>
-            </form>
-          )}
 
-          <p className="mt-6 text-center text-sm text-muted">
-            Still have email access?{" "}
-            <Link href="/forgot-password" className="text-sky-300 hover:underline">
-              Reset password
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+            <PopButton
+              type="submit"
+              className={styles.authSubmitButton}
+              disabled={busy}
+            >
+              {busy ? 'Submitting ticket…' : 'Submit Recovery Ticket →'}
+            </PopButton>
+
+            <div className={styles.cardFooterLinks}>
+              <span>Remembered your password?</span>
+              <Link href="/login">Return to Sign In</Link>
+            </div>
+          </form>
+        )}
+      </NiralAuthCard>
+    </NiralAuthLayout>
   );
 }

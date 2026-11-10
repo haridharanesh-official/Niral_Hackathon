@@ -17,6 +17,7 @@ import {
   ForgotPasswordDto,
   ResetPasswordDto,
   VerifyEmailDto,
+  AccountRecoveryDto,
 } from './dto/password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -87,6 +88,12 @@ export class AuthController {
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post('account-recovery')
+  accountRecovery(@Body() dto: AccountRecoveryDto, @Req() req: Request) {
+    return this.authService.accountRecovery(dto, req.ip);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
-require('dotenv').config({ quiet: true });
+require('dotenv').config({ path: process.env.NIRAL_QA_ENV_FILE || '.env', quiet: true });
 const { PrismaClient } = require('@prisma/client');
 const base = 'http://localhost:4100/api';
 const output = path.resolve(__dirname, '../tmp/launch-http-qa');
@@ -14,8 +14,10 @@ if (
   !database.pathname.endsWith('_test')
 )
   throw Error('Dedicated local *_test database required.');
-if (process.env.SMTP_HOST !== 'localhost' || process.env.SMTP_PORT !== '1025')
+if (process.env.SMTP_HOST !== 'localhost' || !['1025', '51025'].includes(process.env.SMTP_PORT))
   throw Error('Local SMTP capture required.');
+const captureOrigin = process.env.MAIL_CAPTURE_URL || 'http://localhost:8025';
+if (!['http://localhost:8025', 'http://localhost:58025'].includes(captureOrigin)) throw Error('Local-only SMTP capture origin required');
 const db = new PrismaClient({ datasources: { db: { url: database.toString() } } });
 const upiQa = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../tmp/upi-local-qa.json'), 'utf8'),
@@ -58,7 +60,7 @@ async function request(route, body, bearer, method) {
 }
 async function tokenFromCapture(email, subject, purpose) {
   const list = await (
-    await fetch('http://localhost:8025/api/v2/messages?limit=300')
+    await fetch(captureOrigin + '/api/v2/messages?limit=300')
   ).json();
   const message = list.items.find(
     (m) =>

@@ -3,11 +3,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID, randomBytes } = require('node:crypto');
 const root = path.resolve(__dirname, '..');
-require('dotenv').config({ path: path.join(root, '.env'), quiet: true });
+require('dotenv').config({ path: path.resolve(process.env.NIRAL_QA_ENV_FILE || path.join(root, '.env')), quiet: true });
 const url = new URL(process.env.NIRAL_TEST_DATABASE_URL || 'http://invalid');
 if (!['localhost', '127.0.0.1'].includes(url.hostname) || !url.pathname.endsWith('_test'))
   throw Error('Dedicated local *_test database required.');
-if (process.env.SMTP_HOST !== 'localhost' || process.env.SMTP_PORT !== '1025')
+if (process.env.SMTP_HOST !== 'localhost' || !['1025', '51025'].includes(process.env.SMTP_PORT))
   throw Error('Local SMTP capture required.');
 const synthetic = process.argv.includes('--synthetic-upi');
 Object.assign(process.env, {

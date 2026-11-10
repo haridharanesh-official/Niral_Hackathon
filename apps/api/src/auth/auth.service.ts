@@ -24,6 +24,7 @@ import { AccountStatus, Prisma, User, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { AccountRecoveryDto } from './dto/password.dto';
 import { AuditService } from '../audit/audit.service';
 import { SessionDeviceMeta, SessionService } from '../session/session.service';
 
@@ -381,6 +382,55 @@ export class AuthService {
     return {
       message:
         'If an eligible account exists, recovery has been requested. Check your inbox or try again later.',
+    };
+  }
+
+  async accountRecovery(dto: AccountRecoveryDto, ip?: string) {
+    const normalizedEmail = dto.email.trim().toLowerCase();
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    await this.audit.record({
+      userId: user?.id ?? null,
+      action: 'ACCOUNT_RECOVERY_REQUEST',
+      resource: 'auth',
+      ip,
+      metadata: {
+        fullName: dto.fullName.trim(),
+        email: normalizedEmail,
+        alternateContact: dto.alternateContact.trim(),
+        reasonSnippet: dto.reason.trim().slice(0, 150),
+        userExists: !!user,
+      },
+    });
+
+    try {
+      await this.mail.send({
+        to: 'iotclub.siet@gmail.com',
+        subject: `[NIRAL 2026] Account Recovery Ticket: ${dto.fullName.trim()}`,
+        eventType: 'account.recovery',
+        html: `
+          <h2>NIRAL 2026 Account Recovery Request</h2>
+          <p>A participant has submitted an account recovery request:</p>
+          <ul>
+            <li><strong>Full Name:</strong> ${dto.fullName.trim()}</li>
+            <li><strong>Registered Email:</strong> ${normalizedEmail}</li>
+            <li><strong>Alternate Contact:</strong> ${dto.alternateContact.trim()}</li>
+            <li><strong>Account Exists:</strong> ${user ? 'Yes' : 'No'}</li>
+            <li><strong>Description:</strong> ${dto.reason.trim()}</li>
+          </ul>
+          <p>Timestamp: ${new Date().toISOString()}</p>
+        `,
+      });
+    } catch {
+      // Mail delivery error does not block the recovery confirmation
+    }
+
+    return {
+      success: true,
+      message:
+        'Your recovery ticket has been submitted to the NIRAL organizing team. We will review your account and reach out via your alternate contact within 1–2 business days.',
     };
   }
 

@@ -10,6 +10,7 @@ const publicActions: Record<string, string> = {
   'forgot-password': 'auth/forgot-password',
   'reset-password': 'auth/reset-password',
   'confirm-transition': 'auth/confirm-transition',
+  'account-recovery': 'auth/account-recovery',
 };
 
 const NO_CACHE_HEADERS = {

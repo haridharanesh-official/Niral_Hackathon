@@ -6,7 +6,12 @@ import { HealthService } from './health.service';
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
-  @Get()
+  @Get('live')
+  live() {
+    return { status: 'ok', service: 'niral-api' };
+  }
+
+  @Get(['', 'ready'])
   async check(@Res({ passthrough: true }) response: Response) {
     const health = await this.healthService.check();
     if (health.status !== 'ok') response.status(503);
