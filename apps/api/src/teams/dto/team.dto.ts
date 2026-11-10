@@ -67,10 +67,10 @@ export class RespondJoinDto {
 }
 
 export class InviteMemberDto {
-  @IsEmail()
+  @IsString()
   teamId!: string;
 
-  @IsString()
+  @IsEmail()
   @MinLength(3)
   @MaxLength(254)
   email!: string;
